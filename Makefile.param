@@ -1,52 +1,6 @@
 # Makefile.param 
-# Only global variable should be defined here.
-# All the variables must be used as "export" and "?=".
-# Otherwise, there will be some errors, when Makefile.param is nested.
-
-# use HIARCH indicate chip, use libc to choose cross compiler.
-export HIARCH?=hi3516cv300
-export LIBC?=uclibc
-
-# Whether open -g 
-#export HIGDB?=y
-export HIGDB?=n
-
-export MPILIBTAIL?=a
 
 
-# FPGA board or not
-export FPGA?=n
-
-# cpu type single/big-little
-ifeq ($(HIARCH),$(filter $(HIARCH), hi3519 hi3519v101 hi3516av200))
-export CPU_TYPE?=big-little
-else
-export CPU_TYPE?=
-endif
-
-ifeq ($(HIARCH),hi3516cv300)
-	export HICHIP?=0x3516C300
-	export ARCH_DIR?=hi3516cv300
-	export EXTDRVVER?=hi3516cv300
-	export INTERDRVVER?=hi3516cv300
-endif
-
-# Whether support the debug information. HI_DEBUG or HI_RELEASE
-export HIDBG?=HI_RELEASE
-
-ifeq ($(HIDBG),HI_DEBUG)
-	DBG_FLAG=1
-else
-	DBG_FLAG=0
-endif
-
-ifeq ($(FPGA),y)
-	export HI_FPGA:=HI_FPGA
-	export EXTDRV:=drv/extdrv/$(EXTDRVVER)
-else
-	export HI_FPGA:=HI_XXXX
-	export EXTDRV:=drv/extdrv/$(EXTDRVVER)
-endif
 
 ############################# 工程主要路径 #############################
 #顶层路径
@@ -66,11 +20,10 @@ export REL_INC := $(btmPath)/include
 #海思Lib库路径
 export REL_LIB := $(btmPath)/lib
 
-#海思ko路径
-export REL_KO  := $(btmPath)/ko
+
 
 ############################### 编译环境 ############################
-export cross = arm-hisiv500-linux-
+export cross = arm-linux-gnueabi-
 #export cross = arm-linux-gnueabi-
 export cc = $(cross)gcc
 export cxx = $(cross)g++
