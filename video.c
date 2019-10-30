@@ -31,7 +31,7 @@ int main()
 	struct v4l2_capability cap;
 	ioctl(fd, VIDIOC_QUERYCAP, &cap);
 	printf("TK---------->>>>>Driver Name:%s\nCard Name:%s\nBus info:%s\n", cap.driver, cap.card, cap.bus_info);
-	
+
 	printf("Driver Name : %s\nCard Name : %s\nBus info : %s\nDriver Version : %u.%u.%u\n", cap.driver, cap.card, cap.bus_info, (cap.version >> 16) & 0XFF, (cap.version >> 8) & 0XFF, cap.version & 0XFF);
 	//////
 	struct v4l2_fmtdesc fmtdesc;
@@ -45,14 +45,16 @@ int main()
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	ioctl(fd, VIDIOC_G_FMT, &fmt);
 	printf("get fmt.fmt.width is %d\nfmt.fmt.pix.height is %d\nfmt.fmt.pix.colorspace is %d\n", fmt.fmt.pix.width, fmt.fmt.pix.height, fmt.fmt.pix.colorspace);
-	
+
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width = WIDTH_INIT;
 	fmt.fmt.pix.height = HEIGTH_INIT;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB565;
 	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
-	ioctl(fd, VIDIOC_S_FMT, &fmt);
-	
+	if (-1 == ioctl(fd, VIDIOC_S_FMT, &fmt)) {
+		printf("VIDIOC_S_FMT set error \n");
+	}
+
 	//////
 	struct v4l2_requestbuffers req;
 	req.count = 4;
@@ -88,7 +90,6 @@ int main()
 			exit(-1);
 		}
 		buffers[n_buffers].length = buf.length;
-		printf("6666\n");
 		buffers[n_buffers].start = mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf.m.offset);
 		if (MAP_FAILED == buffers[n_buffers].start) {
 			printf("TK--------__>>>>>error 2\n");
@@ -97,21 +98,18 @@ int main()
 		}
 	}
 	////
-	/*readp(fd);*/
 	unsigned int i;
 	enum v4l2_buf_type type;
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < 3; i++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
 		buf.index = i;
-		printf("7777\n");
 		if (-1 == ioctl(fd, VIDIOC_QBUF, &buf)) {
-			printf("VIDIOC_QBUF set error = %d \n" , i);
+			printf("VIDIOC_QBUF set error = %d \n", i);
 		}
 	}
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	printf("8888\n");
 
 	if (-1 == ioctl(fd, VIDIOC_STREAMON, &type)) {
 		printf("VIDIOC_STREAMON set error \n");
@@ -122,25 +120,24 @@ int main()
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
+		printf("buff id = %d \n", buf.index);
 		if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf)) {
 			printf("VIDIOC_DQBUF set error \n");
 		}
 
-		if (p == 15)
-		{
-			char path[20];
-			snprintf(path, sizeof(path), "./yuyv%d", buf.index);
-			int fdyuyv = open(path, O_WRONLY | O_CREAT, 00700);
-			printf("TK--------->>>>fdyuyv is %d\n", fdyuyv);
-			printf("11111\n");
-			int resultyuyv = write(fdyuyv, buffers[buf.index].start, WIDTH_INIT * HEIGTH_INIT * 2);
-			printf("TK--------->>>resultyuyv is %d\n", resultyuyv);
-			close(fdyuyv);
-		}
+
+		char path[20];
+		snprintf(path, sizeof(path), "./yuyv%d", p);
+		int fdyuyv = open(path, O_WRONLY | O_CREAT, 00700);
+		printf("TK--------->>>>fdyuyv is %d\n", fdyuyv);
+		int resultyuyv = write(fdyuyv, buffers[buf.index].start, WIDTH_INIT * HEIGTH_INIT * 2);
+		printf("TK--------->>>resultyuyv is %d\n", resultyuyv);
+		close(fdyuyv);
+
 
 		if (-1 == ioctl(fd, VIDIOC_QBUF, &buf))
-			printf("VIDIOC_QBUF error in %d\n" , p);
-	}		
+			printf("VIDIOC_QBUF error in %d\n", p);
+	}
 	////
 	close(fd);
 	return 0;
