@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <linux/videodev2.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/ioctl.h>
 
 #define UXGA_WIDTH (1600)
 #define UXGA_HEIGHT (1200)
