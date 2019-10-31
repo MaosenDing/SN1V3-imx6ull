@@ -1,4 +1,4 @@
-#ifndef _err_handle_h____
+﻿#ifndef _err_handle_h____
 #define _err_handle_h____
 
 #ifdef __cplusplus

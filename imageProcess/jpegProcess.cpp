@@ -2,7 +2,7 @@
 #include "SN1V2_com.h"
 #include <memory>
 #include "jpeglib.h"
-#include "errHandle.h"
+#include "errHandle/errHandle.h"
 using namespace std;
 
 ERR_STA SaveGRAYJpg(char * fName, IMAGEDATA & regImg)

@@ -7,26 +7,28 @@ add_definitions(-mcpu=arm926ej-s -mno-unaligned-access -fno-aggressive-loop-opti
 
 PROJECT(PROJECT_ONE)
 
-link_directories("${PROJECT_SOURCE_DIR}/jpeg")
-include_directories("errHandle")
-add_executable(main video.cpp)
+include_directories(${PROJECT_SOURCE_DIR})
 
 #添加链接
 #libjpeg.so
-
+link_directories("${PROJECT_SOURCE_DIR}/jpeg")
 include_directories("jpeg")
-target_link_libraries(main -ljpeg)
-
-
 
 #SN1头文件
 include_directories("com_inc")
 
+#glog
+link_directories("${PROJECT_SOURCE_DIR}/glog")
+include_directories("glog")
+
 #imageProcess
-add_subdirectory(imageProcess 1)
+add_subdirectory(imageProcess)
 
 #errHandle
-add_subdirectory(errHandle 2)
+add_subdirectory(errHandle)
 
 
- 
+
+add_executable(main video.cpp)
+target_link_libraries(main -ljpeg)
+target_link_libraries(main -lglog)
