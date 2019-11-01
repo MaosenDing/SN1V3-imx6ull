@@ -1,4 +1,4 @@
-#ifndef __SN1V2_COM____h__
+ï»¿#ifndef __SN1V2_COM____h__
 #define __SN1V2_COM____h__
 
 #include "SN1V2_error.h"
@@ -9,32 +9,32 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 	/*
-	Í¼Ïñ½á¹¹Ìå
+	å›¾åƒç»“æ„ä½“
 	*/
 	enum IMAGE_TYPE {
-		IT_NULL = 0,//Î´³õÊ¼»¯»òÆäËû×´Ì¬
+		IT_NULL = 0,//æœªåˆå§‹åŒ–æˆ–å…¶ä»–çŠ¶æ€
 		IT_JPG = 1,
 		IT_BMP = 2,
 		IT_RGB565 = 3,
 		IT_RGB888 = 4,
 		IT_YUV422 = 5,
 		IT_YUV444 = 6,
-		IT_GRAY_ONE_BYTE = 7,//»Ò¶È»¯
-		IT_BIN_ONE_BYTE = 8,//¶şÖµ»¯
+		IT_GRAY_ONE_BYTE = 7,//ç°åº¦åŒ–
+		IT_BIN_ONE_BYTE = 8,//äºŒå€¼åŒ–
 	};
 
 
 	struct IMAGEDATA{
 		IMAGE_TYPE itype;
-		//Í¼Ïñ±ß½ç
+		//å›¾åƒè¾¹ç•Œ
 		int left;
 		int right;
 		int top;
 		int bottom;
-		//Ã¿¸öÏñËØµãËùÕ¼¿Õ¼ä´óĞ¡ -1±íÊ¾jpgÑ¹Ëõ 0±íÊ¾Î´³õÊ¼»¯
+		//æ¯ä¸ªåƒç´ ç‚¹æ‰€å ç©ºé—´å¤§å° -1è¡¨ç¤ºjpgå‹ç¼© 0è¡¨ç¤ºæœªåˆå§‹åŒ–
 		int byte_per_pix;
 
-		//char *Image_data;//Í¼ÏñÊı¾İ
+		//char *Image_data;//å›¾åƒæ•°æ®
 		std::shared_ptr<std::vector<uint8_t> > Image_data;
 
 
@@ -46,9 +46,9 @@
 		ERR_STA clone(int x, int y,int width,int height, std::shared_ptr<IMAGEDATA> & outPoint);
 		IMAGEDATA & operator = (IMAGEDATA &);
 		
-		//²»×öÈÎºÎĞ£Ñé£¬³¬³ö·¶Î§ ĞĞÎªÎ´¶¨Òå
-		//Ö»Ê¹ÓÃÓÚ1×Ö½ÚÍ¼Ïñ
-		//Ê¹ÓÃÇëÇ°È·±£·ÖÅäÄÚ´æºÍÊ¹ÓÃ·¶Î§
+		//ä¸åšä»»ä½•æ ¡éªŒï¼Œè¶…å‡ºèŒƒå›´ è¡Œä¸ºæœªå®šä¹‰
+		//åªä½¿ç”¨äº1å­—èŠ‚å›¾åƒ
+		//ä½¿ç”¨è¯·å‰ç¡®ä¿åˆ†é…å†…å­˜å’Œä½¿ç”¨èŒƒå›´
 		inline unsigned char & at(int x, int y)
 		{
 			return Image_data->at(x + y*right);
@@ -62,74 +62,74 @@
 	bool checkImageType(IMAGE_TYPE test);
 	bool checkImageType(IMAGEDATA & img);
 
-	//¹Ì¶¨·Ö¸î
+	//å›ºå®šåˆ†å‰²
 	ERR_STA RTF(char * filePath, char fdelimiter, std::vector<int>& frange, std::vector <std::string> & outVector);
-	//Ğ´Èë
+	//å†™å…¥
 	ERR_STA WTF(char * filePath, char fdelimiter, char wtype, std::string & fdata);
 
-	//±£´æÎÄ¼ş
+	//ä¿å­˜æ–‡ä»¶
 	ERR_STA saveBin(char * filePath, char * data, unsigned long dataSize);
 	ERR_STA saveBin(char * filePath, std::vector<uint8_t> & vdata);
 	ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData);
 	ERR_STA saveCsv(char * filePath, std::vector<uint8_t> & vdata, int lineWidth);
-	//ÔØÈëÎÄ¼ş
+	//è½½å…¥æ–‡ä»¶
 	ERR_STA loadFile(char *fname, std::string & refVect);
 	ERR_STA loadFile(char *fname, std::vector<uint8_t> & refVect);
 	ERR_STA loadFileC(char *fname, char ** refVect, int * outsize);
-	//rgb565 ×ª»»
+	//rgb565 è½¬æ¢
 	bool RGB565binaryzation(char * srcdata, char *dst, size_t pixCount);
 	bool RGB565binaryzation(std::vector<uint8_t> & srcdata, std::vector <uint8_t> &dst);
 	
-	//»Ò¶È»¯ ÎŞ±ß½ç¼ì²â
+	//ç°åº¦åŒ– æ— è¾¹ç•Œæ£€æµ‹
 	void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount);
 	ERR_STA RGB565GRAY(unsigned char * LoadImg, int inputSize, std::shared_ptr<std::vector<uint8_t> > & outdata);
-	//¶şÖµ»¯Í¼Ïñ
+	//äºŒå€¼åŒ–å›¾åƒ
 	ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & outImage);
 	ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth);
-	//»ñÈ¡¶şÖµ»¯ÁÁÇø±ß½ç
+	//è·å–äºŒå€¼åŒ–äº®åŒºè¾¹ç•Œ
 	ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right);
-	//»ñÈ¡×î´óÁ¬Í¨ÇøÓò
+	//è·å–æœ€å¤§è¿é€šåŒºåŸŸ
 	ERR_STA RegImg(IMAGEDATA & inImage, int & pixCnt);
 
 
 
 
-	//½âÎöÊ±¼ä×Ö·û´®
+	//è§£ææ—¶é—´å­—ç¬¦ä¸²
 	ERR_STA ResTime(const std::string & sString, const std::string & tType, tm & outTime);
 	
-	//Õë¶Ô "yyyy-MM-dd hh:mm:ss"
+	//é’ˆå¯¹ "yyyy-MM-dd hh:mm:ss"
 	ERR_STA regTmType_1(const std::string & ppp, tm & rtm);
 
-	//»ñÈ¡Ê±¼ä
+	//è·å–æ—¶é—´
 	ERR_STA GetTim(std::string & outString);
 	ERR_STA GetTim(tm & reftm);
-	//ÉèÖÃÊ±¼ä
+	//è®¾ç½®æ—¶é—´
 	ERR_STA SetTim(std::string & outString);
 	ERR_STA SetTim(tm & reftm);
-	//Ê±¼äÑÓÊ±
+	//æ—¶é—´å»¶æ—¶
 	ERR_STA TimDelayUntil(std::string &sTim);
 	ERR_STA TimDelayUntil(time_t tUntil);
 
 	ERR_STA TimDelay(time_t inSec);
 
-	//Ê±¼ä×ª»» tm->outTim
+	//æ—¶é—´è½¬æ¢ tm->outTim
 	ERR_STA mktime(const tm& inTm, time_t & outTim);
 
-	//É¨ÃèÅäÖÃÎÄ±¾
+	//æ‰«æé…ç½®æ–‡æœ¬
 	ERR_STA SDS(const char * fileName);
-	//»ñÈ¡ÅäÖÃÊı¾İ
+	//è·å–é…ç½®æ•°æ®
 	ERR_STA SDG(const char *, std::string & outData);
 	ERR_STA SDG(const char * inkey, float & outfloat);
 	ERR_STA SDG(const char * inkey, int & outfloat);
 	ERR_STA SDG(const char * inkey, unsigned int & outfloat);
 	ERR_STA SDG(const char * inkey, bool & outbool);
 	ERR_STA getConf(const char * configName, SN1_CFG * cfg,int flag = 1);
-	//±£´æjpgÍ¼Ïñ¸ñÊ½
+	//ä¿å­˜jpgå›¾åƒæ ¼å¼
 	ERR_STA SaveGRAYJpg(char * fName, IMAGEDATA & regImg);
 	ERR_STA SaveRGB565Jpg(char * fName, IMAGEDATA & regImg);
 	ERR_STA SaveRGB565Jpg(char * fName, unsigned char * rgb565, int width, int heigth);
 
-	//Êä³öÍ¼Ïñ¹ı³Ìµ÷ÊÔĞÅÏ¢
+	//è¾“å‡ºå›¾åƒè¿‡ç¨‹è°ƒè¯•ä¿¡æ¯
 #define COUT_IMAGE_DEBUG_INFO 0
 
 
@@ -147,7 +147,7 @@
 		time_t TableTimeGetImg;
 	};
 
-	//´¦ÀíRGBÍ¼Ïñ
+	//å¤„ç†RGBå›¾åƒ
 	ERR_STA ImageProcessRGB(const char *saveName, unsigned char * LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer);
 
 
@@ -200,20 +200,20 @@
 	};
 
 
-	//ÔØÈëÊ±¼ä±í
+	//è½½å…¥æ—¶é—´è¡¨
 	int load_table(char * filename, std::vector<unsigned int> & outTable , scanf_type intype = type_with_underline);
 	ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable);
-	//Ê±¼ä±í²Ã¼ô
+	//æ—¶é—´è¡¨è£å‰ª
 	//void rm_past_tm(std::vector<unsigned int> &table);
 
 #define USING_DUMMY_CAP_SRC 1
 
-	//×ª»»rgbÎÄ¼ş
+	//è½¬æ¢rgbæ–‡ä»¶
 	ERR_STA ImageTestRGBFile(const char * fName, const char * srcPath, const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer, const char * jpgName = nullptr);
 
 	std::shared_ptr<std::vector<std::string> > getAllFileName(char * path, const char * postfix = ".jpg.rgb565");
 
-	//ÔËÓª±í¼ÆËã
+	//è¿è¥è¡¨è®¡ç®—
 	ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, int StartAngle, \
 		double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double (&EPEs)[8]
 		, std::vector<timTableSet> & rts
@@ -222,20 +222,20 @@
 	ERR_STA SHG(int Year, int Month, int Day, char fdir[], int HelioAdjTime, int HelioPreTime, int StartAngle, \
 		double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double (&EPEs)[8]);
 
-	//±£´æÔËÓª±í
+	//ä¿å­˜è¿è¥è¡¨
 	ERR_STA save_timTableSet(char * fdir, int year, int mon, int day, std::vector<timTableSet> & rts);
-	//ĞŞÕıÅÄÉãÊı¾İ
+	//ä¿®æ­£æ‹æ‘„æ•°æ®
 
 	enum res_filter_mode {
-		//Õı³£ ²»´¦Àí
+		//æ­£å¸¸ ä¸å¤„ç†
 		res_filter_normal = 0,
-		//½»»»x y
+		//äº¤æ¢x y
 		res_filter_exchange,
-		//½»»»x y²¢ÇÒ·­×ª x y
+		//äº¤æ¢x yå¹¶ä¸”ç¿»è½¬ x y
 		res_filter_exchange_then_reserve_x,
 		res_filter_exchange_then_reserve_y,
 		res_filter_exchange_then_reserve_x_y,
-		//²»½»»» µ«ÊÇ·­×ª x y
+		//ä¸äº¤æ¢ ä½†æ˜¯ç¿»è½¬ x y
 		res_filter_noexchange_reserve_x,
 		res_filter_noexchange_reserve_y,
 		res_filter_noexchange_reserve_x_y,
@@ -244,14 +244,14 @@
 
 	ERR_STA res_filter(const char * resName,const SN1_CFG * const pcfg ,double (&exta) [6] ,res_filter_mode mod = res_filter_normal);
 
-	//»ñÈ¡Ä³ÌìÎó²î
+	//è·å–æŸå¤©è¯¯å·®
 	std::shared_ptr< std::vector <CREOBJ>> initCre(const char * creName);
 	bool ChkTodayCre(std::vector<CREOBJ> & creDataGrp);
 	CREOBJ GetNewCre(std::vector<CREOBJ> & creDataGrp);
 	ERR_STA CalCre(const char * resName, CREOBJ & creData, const double SPS, const double SFL);
 	ERR_STA save_cre(const char * creName, std::vector <CREOBJ> & creGrp, const int PID);
 	//bool getLastErrConfig(const char * creName, CREOBJ & creObj);
-	//¼ÆËãÎó²î±í
+	//è®¡ç®—è¯¯å·®è¡¨
 	extern "C" char * CRE(const char *path, double sps, double sfl, double pep[8]);
 
 	//ipc

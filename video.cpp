@@ -1,4 +1,4 @@
-#include <fcntl.h>
+﻿#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <linux/videodev2.h>
@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
-
+#include "SN1V2_com.h"
 #define UXGA_WIDTH (1600)
 #define UXGA_HEIGHT (1200)
 
@@ -20,7 +20,6 @@
 #define WIDTH_INIT UXGA_WIDTH
 #define HEIGTH_INIT UXGA_HEIGHT
 #endif
-
 
 int main()
 {
@@ -115,7 +114,8 @@ int main()
 		printf("VIDIOC_STREAMON set error \n");
 	}
 	////
-
+	
+	
 	for (int p = 0; p < 20; p++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -124,20 +124,22 @@ int main()
 		if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf)) {
 			printf("VIDIOC_DQBUF set error \n");
 		}
-
-
 		char path[20];
-		snprintf(path, sizeof(path), "./yuyv%d", p);
-		int fdyuyv = open(path, O_WRONLY | O_CREAT, 00700);
-		printf("TK--------->>>>fdyuyv is %d\n", fdyuyv);
-		int resultyuyv = write(fdyuyv, buffers[buf.index].start, WIDTH_INIT * HEIGTH_INIT * 2);
-		printf("TK--------->>>resultyuyv is %d\n", resultyuyv);
-		close(fdyuyv);
+		snprintf(path, sizeof(path), "test%d.jpg", p);
 
+		SaveRGB565Jpg(path, (unsigned char *)buffers[buf.index].start, WIDTH_INIT, HEIGTH_INIT);
+
+		//int fdyuyv = open(path, O_WRONLY | O_CREAT, 00700);
+		//printf("TK--------->>>>fdyuyv is %d\n", fdyuyv);
+		//int resultyuyv = write(fdyuyv, buffers[buf.index].start, WIDTH_INIT * HEIGTH_INIT * 2);
+		//printf("TK--------->>>resultyuyv is %d\n", resultyuyv);
+		//close(fdyuyv);
 
 		if (-1 == ioctl(fd, VIDIOC_QBUF, &buf))
 			printf("VIDIOC_QBUF error in %d\n", p);
 	}
+
+
 	////
 	close(fd);
 	return 0;

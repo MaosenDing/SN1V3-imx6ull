@@ -1,6 +1,6 @@
 ﻿
 
 
-add_library(errHandle MODULE errHandle.cpp)
+add_library(errHandle STATIC errHandle.cpp)
 
 

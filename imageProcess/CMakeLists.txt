@@ -1,6 +1,6 @@
 ﻿
 
 
-add_library(imageprocess MODULE jpegProcess.cpp)
+add_library(imageProcess STATIC jpegProcess.cpp)
 
 

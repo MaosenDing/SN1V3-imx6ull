@@ -11,24 +11,30 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 #添加链接
 #libjpeg.so
-link_directories("${PROJECT_SOURCE_DIR}/jpeg")
-include_directories("jpeg")
 
+include_directories("jpeg")
+link_directories("${PROJECT_SOURCE_DIR}/jpeg")
 #SN1头文件
 include_directories("com_inc")
-
 #glog
-link_directories("${PROJECT_SOURCE_DIR}/glog")
 include_directories("glog")
+link_directories("${PROJECT_SOURCE_DIR}/glog")
+
+
+
+
+
+#主目录编译文件
+add_executable(main video.cpp)
 
 #imageProcess
 add_subdirectory(imageProcess)
-
+target_link_libraries(main imageProcess)
 #errHandle
 add_subdirectory(errHandle)
+target_link_libraries(main errHandle)
 
-
-
-add_executable(main video.cpp)
-target_link_libraries(main -ljpeg)
+#添加外部动态链接库 必须放后面 不然链接不过
 target_link_libraries(main -lglog)
+target_link_libraries(main -ljpeg)
+
