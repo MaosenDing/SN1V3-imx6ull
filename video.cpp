@@ -116,7 +116,7 @@ int main()
 	////
 	
 	
-	for (int p = 0; p < 20; p++) {
+	for (int p = 0; p < 1; p++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;

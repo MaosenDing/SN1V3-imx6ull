@@ -1,9 +1,11 @@
 ﻿cmake_minimum_required(VERSION 3.0)
 SET(CMAKE_C_COMPILER arm-linux-gnueabi-gcc)
 SET(CMAKE_CXX_COMPILER arm-linux-gnueabi-g++)
-add_compile_options(-std=c++11)
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(-mcpu=arm926ej-s -mno-unaligned-access -fno-aggressive-loop-optimizations -fno-omit-frame-pointer -mapcs -rdynamic)
+add_definitions(-Wall)
 
 PROJECT(PROJECT_ONE)
 
