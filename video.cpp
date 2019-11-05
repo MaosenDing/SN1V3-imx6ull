@@ -21,6 +21,47 @@
 #define HEIGTH_INIT UXGA_HEIGHT
 #endif
 
+#if 0
+#include <vector>
+#include <algorithm>
+using namespace std;
+struct test_x {
+	int x;
+	int y;
+	double val;
+};
+
+bool testp_sort(test_x & x, test_x & y)
+{
+	return x.val < y.val;
+}
+
+void testpri()
+{
+	vector<test_x> testp;
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 16; y++) {
+			double val = (1 + x) * (1 + y / 16.0f);
+			test_x tmp;
+			tmp.x = x;
+			tmp.y = y;
+			tmp.val = val;
+			testp.push_back(tmp);
+		}
+	}
+
+	sort(testp.begin(), testp.end(), testp_sort);
+
+	for (auto & p : testp) {
+		if ((int)(p.val * 10000.0f) % 10000 == 0)
+		{
+			printf("	{%d,%d,%0.0lf},\n", p.x, p.y, p.val);
+		}		
+	}
+}
+
+#endif
+
 int main()
 {
 	//////
@@ -114,8 +155,31 @@ int main()
 		printf("VIDIOC_STREAMON set error \n");
 	}
 	////
-	
-	
+	struct v4l2_control  Setting;
+
+	Setting.id = V4L2_CID_EXPOSURE_AUTO;
+	Setting.value = V4L2_EXPOSURE_MANUAL;
+	int ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
+
+
+	Setting.id = V4L2_CID_AUTOGAIN;
+	Setting.value = 0;
+	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
+
+
+	Setting.id = V4L2_CID_GAIN;
+	Setting.value = 1;
+	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
+	printf("V4L2_CID_GAIN ret = %d \n", ret);
+
+
+	Setting.id = V4L2_CID_EXPOSURE;
+	Setting.value = 500;
+	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
+	printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
+
+
+
 	for (int p = 0; p < 1; p++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -123,23 +187,16 @@ int main()
 		printf("buff id = %d \n", buf.index);
 		if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf)) {
 			printf("VIDIOC_DQBUF set error \n");
+			continue;
 		}
 		char path[20];
 		snprintf(path, sizeof(path), "test%d.jpg", p);
 
 		SaveRGB565Jpg(path, (unsigned char *)buffers[buf.index].start, WIDTH_INIT, HEIGTH_INIT);
 
-		//int fdyuyv = open(path, O_WRONLY | O_CREAT, 00700);
-		//printf("TK--------->>>>fdyuyv is %d\n", fdyuyv);
-		//int resultyuyv = write(fdyuyv, buffers[buf.index].start, WIDTH_INIT * HEIGTH_INIT * 2);
-		//printf("TK--------->>>resultyuyv is %d\n", resultyuyv);
-		//close(fdyuyv);
-
 		if (-1 == ioctl(fd, VIDIOC_QBUF, &buf))
 			printf("VIDIOC_QBUF error in %d\n", p);
 	}
-
-
 	////
 	close(fd);
 	return 0;
