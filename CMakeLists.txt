@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 SET(CMAKE_C_COMPILER arm-linux-gnueabi-gcc)
 SET(CMAKE_CXX_COMPILER arm-linux-gnueabi-g++)
 
@@ -27,7 +27,7 @@ link_directories("${PROJECT_SOURCE_DIR}/glog")
 
 
 #主目录编译文件
-add_executable(main video.cpp)
+add_executable(main aim.cpp)
 
 #imageProcess
 add_subdirectory(imageProcess)
@@ -35,6 +35,10 @@ target_link_libraries(main imageProcess)
 #errHandle
 add_subdirectory(errHandle)
 target_link_libraries(main errHandle)
+#errHandle
+add_subdirectory(sensor)
+target_link_libraries(main sensor)
+
 
 #添加外部动态链接库 必须放后面 不然链接不过
 target_link_libraries(main -lglog)
