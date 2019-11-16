@@ -7,6 +7,9 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include "SN1V2_com.h"
+#include <iostream>
+
+using namespace std;
 #define UXGA_WIDTH (1600)
 #define UXGA_HEIGHT (1200)
 
@@ -21,51 +24,15 @@
 #define HEIGTH_INIT UXGA_HEIGHT
 #endif
 
-#if 0
-#include <vector>
-#include <algorithm>
-using namespace std;
-struct test_x {
-	int x;
-	int y;
-	double val;
+struct buffer {
+	void *start;
+	unsigned int length;
 };
+buffer buffers[3];
 
-bool testp_sort(test_x & x, test_x & y)
+int init_cap(const char * videoName)
 {
-	return x.val < y.val;
-}
-
-void testpri()
-{
-	vector<test_x> testp;
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			double val = (1 + x) * (1 + y / 16.0f);
-			test_x tmp;
-			tmp.x = x;
-			tmp.y = y;
-			tmp.val = val;
-			testp.push_back(tmp);
-		}
-	}
-
-	sort(testp.begin(), testp.end(), testp_sort);
-
-	for (auto & p : testp) {
-		if ((int)(p.val * 10000.0f) % 10000 == 0)
-		{
-			printf("	{%d,%d,%0.0lf},\n", p.x, p.y, p.val);
-		}		
-	}
-}
-
-#endif
-
-int main()
-{
-	//////
-	int fd = open("/dev/video0", O_RDWR);
+	int fd = open(videoName, O_RDWR);
 	printf("TK------->>>fd is %d\n", fd);
 	//////
 	struct v4l2_capability cap;
@@ -75,7 +42,8 @@ int main()
 	printf("Driver Name : %s\nCard Name : %s\nBus info : %s\nDriver Version : %u.%u.%u\n", cap.driver, cap.card, cap.bus_info, (cap.version >> 16) & 0XFF, (cap.version >> 8) & 0XFF, cap.version & 0XFF);
 	//////
 	struct v4l2_fmtdesc fmtdesc;
-	fmtdesc.index = 0; fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	fmtdesc.index = 0; 
+	fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	while (ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1) {
 		printf("TK-------->>>>>fmtdesc.description is %s\n", fmtdesc.description);
 		fmtdesc.index++;
@@ -97,7 +65,7 @@ int main()
 
 	//////
 	struct v4l2_requestbuffers req;
-	req.count = 4;
+	req.count = 3;
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_MMAP;
 	if (-1 == ioctl(fd, VIDIOC_REQBUFS, &req)) {
@@ -108,14 +76,6 @@ int main()
 		printf("Insufficient buffer memory \n");
 		exit(EXIT_FAILURE);
 	}
-
-
-	struct buffer {
-		void *start;
-		unsigned int length;
-	}*buffers;
-	buffers = (struct buffer*)calloc(req.count, sizeof(*buffers));
-
 
 	unsigned int n_buffers = 0;
 	for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
@@ -154,7 +114,13 @@ int main()
 	if (-1 == ioctl(fd, VIDIOC_STREAMON, &type)) {
 		printf("VIDIOC_STREAMON set error \n");
 	}
-	////
+
+	return fd;
+}
+
+
+void set_gain_expose(int fd, int gain, int expose)
+{
 	struct v4l2_control  Setting;
 
 	Setting.id = V4L2_CID_EXPOSURE_AUTO;
@@ -168,34 +134,87 @@ int main()
 
 
 	Setting.id = V4L2_CID_GAIN;
-	Setting.value = 10;
+	Setting.value = gain;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
 	printf("V4L2_CID_GAIN ret = %d \n", ret);
 
 
 	Setting.id = V4L2_CID_EXPOSURE;
-	Setting.value = 1000;
+	Setting.value = expose;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
 	printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
+}
 
 
+struct CAP_FRAME {
+	unsigned char * startAddr;
+	unsigned int length;
+	unsigned int width;
+	unsigned int heigth;
 
-	for (int p = 0; p < 1; p++) {
-		struct v4l2_buffer buf;
-		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		buf.memory = V4L2_MEMORY_MMAP;
-		printf("buff id = %d \n", buf.index);
-		if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf)) {
-			printf("VIDIOC_DQBUF set error \n");
-			continue;
+	struct v4l2_buffer buf;
+	int useFlag = 0;
+	int fd;
+};
+
+void cap_deinit(CAP_FRAME * pcap)
+{
+	if (pcap) {
+		if (pcap->useFlag) {
+			if (-1 == ioctl(pcap->fd, VIDIOC_QBUF, &pcap->buf))
+				printf("VIDIOC_QBUF error\n");
 		}
-		char path[20];
-		snprintf(path, sizeof(path), "test%d.jpg", p);
+		delete pcap;
+		printf("del \n");
+	}
+}
 
-		SaveRGB565Jpg(path, (unsigned char *)buffers[buf.index].start, WIDTH_INIT, HEIGTH_INIT);
 
-		if (-1 == ioctl(fd, VIDIOC_QBUF, &buf))
-			printf("VIDIOC_QBUF error in %d\n", p);
+
+shared_ptr< CAP_FRAME> get_one_frame(int fd)
+{
+	shared_ptr< CAP_FRAME> ret(new CAP_FRAME, cap_deinit);
+	
+	struct v4l2_buffer &buf = ret->buf;
+	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buf.memory = V4L2_MEMORY_MMAP;
+
+	if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf)) {
+		printf("VIDIOC_DQBUF set error \n");
+		return ret;
+	}
+
+	ret->fd = fd;
+	ret->heigth = HEIGTH_INIT;
+	ret->width = WIDTH_INIT;
+	ret->startAddr = (unsigned char*)buffers[buf.index].start;
+	ret->length = buf.length;
+	ret->useFlag = 1;
+
+	return ret;
+}
+
+
+
+
+int main()
+{
+	int fd = init_cap("/dev/video0");
+
+	if (fd < 0) {
+		cerr << "set video error" << endl;
+		return -1;
+	}
+	set_gain_expose(fd, 10, 1000);
+
+	for (int i = 0; i < 10; i++) {
+		shared_ptr< CAP_FRAME> fram = get_one_frame(fd);
+
+		if (fram && fram->useFlag) {
+			char path[20];
+			snprintf(path, sizeof(path), "test%d.jpg", i);
+			SaveRGB565Jpg(path, fram->startAddr, fram->width, fram->heigth);
+		}
 	}
 	////
 	close(fd);

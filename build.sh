@@ -1,6 +1,6 @@
 #! /bin/bash
 
-build="_build"
+build="tmp"
 mkdir ${build}
 cd ${build}
 cmake ..
