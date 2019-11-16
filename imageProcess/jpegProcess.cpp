@@ -1,7 +1,7 @@
-﻿#include <iostream>
+#include <iostream>
 #include "SN1V2_com.h"
 #include <memory>
-#include "jpeglib.h"
+#include "jpgInc/jpeglib.h"
 #include "errHandle/errHandle.h"
 using namespace std;
 
