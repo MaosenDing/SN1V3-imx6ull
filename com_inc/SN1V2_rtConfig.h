@@ -6,49 +6,51 @@
 extern "C" {
 #endif
 	typedef struct {
-		int   thres;//»Ò¶ÈãĞÖµ
-		float   thresPer;//»Ò¶ÈãĞÖµ°Ù·Ö±È
-		float   Lon;//¾­¶È
-		float   lati;//Î³¶È
-		float   qualityThres;//Ô²¶ÈãĞÖµ
-		float   SSA;//³õÊ¼½Ç¶È
-		float   SHT;//¶¨ÈÕ¾µµ÷½ÚÖÜÆÚ
-		float   SPT;//¶¨ÈÕ¾µµ÷½ÚÇ°ÖÃÊ±¼ä
-		float   TDT;//½Ç¶È
+		int   thres;//ç°åº¦é˜ˆå€¼
+		float   thresPer;//ç°åº¦é˜ˆå€¼ç™¾åˆ†æ¯”
+		float   Lon;//ç»åº¦
+		float   lati;//çº¬åº¦
+		float   qualityThres;//åœ†åº¦é˜ˆå€¼
+		float   SSA;//åˆå§‹è§’åº¦
+		float   SHT;//å®šæ—¥é•œè°ƒèŠ‚å‘¨æœŸ
+		float   SPT;//å®šæ—¥é•œè°ƒèŠ‚å‰ç½®æ—¶é—´
+		float   TDT;//è§’åº¦
 		float   SCH;//
 		float   TEE;//
 		float   TEP;
 		float   TET;
-		float   SFL;//½¹¾à
-		float   SPS;//ÏñÔª´óĞ¡
-		int SID;//Éè±¸ID
-		int FLAG_SAVE_ORG;//Ô­Ê¼Í¼ÏñÊÇ·ñ±£´æ
-		int FLAG_SAVE_BIN;//¶ş½øÖÆÍ¼ÏñÊÇ·ñ±£´æ
-		int IMG_WIDTH;//Í¼Ïñ¿í¶È
-		int IMG_HEIGTH;//Í¼Ïñ¸ß¶È
-		unsigned int gain;//ÔöÒæ
-		unsigned int expo;//ÆØ¹â
+		float   SFL;//ç„¦è·
+		float   SPS;//åƒå…ƒå¤§å°
+		int SID;//è®¾å¤‡ID
+		int FLAG_SAVE_ORG;//åŸå§‹å›¾åƒæ˜¯å¦ä¿å­˜
+		int FLAG_SAVE_BIN;//äºŒè¿›åˆ¶å›¾åƒæ˜¯å¦ä¿å­˜
+		int IMG_WIDTH;//å›¾åƒå®½åº¦
+		int IMG_HEIGTH;//å›¾åƒé«˜åº¦
+		unsigned int gain;//å¢ç›Š
+		unsigned int expo;//æ›å…‰
 
-		int isHorisFlip; //Ë®Æ½·­×ª
-		int isVeriFlip;//ÊúÖ±·­×ª
+		int isHorisFlip; //æ°´å¹³ç¿»è½¬
+		int isVeriFlip;//ç«–ç›´ç¿»è½¬
 
-		unsigned int MinCntGrp;//×îĞ¡ÏñËØÍÅ
-		unsigned int SaveTimeTable;//±£´æÔËÓª±í
-		unsigned int CleanLastDate;//Çå³şÉÏ´ÎÊı¾İ
+		unsigned int MinCntGrp;//æœ€å°åƒç´ å›¢
+		unsigned int SaveTimeTable;//ä¿å­˜è¿è¥è¡¨
+		unsigned int CleanLastDate;//æ¸…æ¥šä¸Šæ¬¡æ•°æ®
 
-		float bfnoon_thres;//ÉÏÎçÊıÁ¿ãĞÖµ°Ù·Ö±È
-		float afnoon_thres;//ÏÂÎçÊıÁ¿ãĞÖµ°Ù·Ö±È
+		float bfnoon_thres;//ä¸Šåˆæ•°é‡é˜ˆå€¼ç™¾åˆ†æ¯”
+		float afnoon_thres;//ä¸‹åˆæ•°é‡é˜ˆå€¼ç™¾åˆ†æ¯”
 
-		int bf_size;//ÉÏÎçÔ¤²É¼¯×ÜÊı
-		int af_size;//ÏÂÎçÔ¤²É¼¯×ÜÊı
+		int bf_size;//ä¸Šåˆé¢„é‡‡é›†æ€»æ•°
+		int af_size;//ä¸‹åˆé¢„é‡‡é›†æ€»æ•°
 
-		int max_reserve_time;//×î³¤±£ÁôÊ±¼ä
+		int max_reserve_time;//æœ€é•¿ä¿ç•™æ—¶é—´
 
-		int IsSaveCre;//Éú³ÉCRE ÕıÊ½Îª1 Ä³Ğ©²âÊÔÎª0
+		int IsSaveCre;//ç”ŸæˆCRE æ­£å¼ä¸º1 æŸäº›æµ‹è¯•ä¸º0
 
-		//Ê±¼ä±íµÄÆôÊ¾½áÊøĞ¡Ê±ÏŞÖÆ 0~24 -1±íÊ¾²»ÊÜÏŞÖÆ
+		//æ—¶é—´è¡¨çš„å¯ç¤ºç»“æŸå°æ—¶é™åˆ¶ 0~24 -1è¡¨ç¤ºä¸å—é™åˆ¶
 		int limitHourBeforeNoon;
 		int limitHourAfterNoon;
+
+		char ForceSavePath[30];//å¼ºåˆ¶ä¿å­˜è·¯å¾„
 
 	}SN1_CFG;
 

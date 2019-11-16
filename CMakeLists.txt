@@ -35,11 +35,18 @@ target_link_libraries(main imageProcess)
 #errHandle
 add_subdirectory(errHandle)
 target_link_libraries(main errHandle)
-#errHandle
+#sensor
 add_subdirectory(sensor)
 target_link_libraries(main sensor)
-
-
+#CRE
+add_subdirectory(CRE)
+target_link_libraries(main CRE)
+#text
+add_subdirectory(text)
+target_link_libraries(main text)
+#text
+add_subdirectory(datapro)
+target_link_libraries(main datapro)
 #添加外部动态链接库 必须放后面 不然链接不过
 target_link_libraries(main -lglog)
 target_link_libraries(main -ljpeg)
