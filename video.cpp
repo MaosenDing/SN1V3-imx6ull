@@ -1,4 +1,4 @@
-﻿#include <fcntl.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <linux/videodev2.h>
@@ -168,13 +168,13 @@ int main()
 
 
 	Setting.id = V4L2_CID_GAIN;
-	Setting.value = 1;
+	Setting.value = 10;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
 	printf("V4L2_CID_GAIN ret = %d \n", ret);
 
 
 	Setting.id = V4L2_CID_EXPOSURE;
-	Setting.value = 500;
+	Setting.value = 1000;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
 	printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
 
