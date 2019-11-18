@@ -44,9 +44,24 @@ target_link_libraries(main CRE)
 #text
 add_subdirectory(text)
 target_link_libraries(main text)
-#text
+#datapro
 add_subdirectory(datapro)
 target_link_libraries(main datapro)
+#timework
+add_subdirectory(timework)
+target_link_libraries(main timework)
+
+
+target_link_libraries(main imageProcess)
+target_link_libraries(main errHandle)
+target_link_libraries(main sensor)
+target_link_libraries(main CRE)
+target_link_libraries(main text)
+target_link_libraries(main datapro)
+target_link_libraries(main timework)
+
+
+
 #添加外部动态链接库 必须放后面 不然链接不过
 target_link_libraries(main -lglog)
 target_link_libraries(main -ljpeg)

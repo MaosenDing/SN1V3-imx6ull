@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 #include "SN1V2_com.h"
 #include <iostream>
+#include <video.h>
 
 using namespace std;
 #define UXGA_WIDTH (1600)
@@ -146,16 +147,7 @@ void set_gain_expose(int fd, int gain, int expose)
 }
 
 
-struct CAP_FRAME {
-	unsigned char * startAddr;
-	unsigned int length;
-	unsigned int width;
-	unsigned int heigth;
 
-	struct v4l2_buffer buf;
-	int useFlag = 0;
-	int fd;
-};
 
 void cap_deinit(CAP_FRAME * pcap)
 {
