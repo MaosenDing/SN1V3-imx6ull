@@ -89,7 +89,11 @@ static int capOnce(int argc, char * argv[])
 
 		fprintf(stdout, "gain is %d , expo is %d\n", cfg.gain, cfg.expo);
 
-		system("mkdir -p capOnce");
+		int sysret = system("mkdir -p capOnce");
+
+		if (sysret < 0) {
+			return sysret;
+		}
 
 		//get shard memory
 		//key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
@@ -104,11 +108,10 @@ static int capOnce(int argc, char * argv[])
 			cfg.FLAG_SAVE_BIN = 1;
 			cfg.FLAG_SAVE_ORG = 1;
 		}
-
 		capWork dw(capOnce, cfg, nullptr, testCSC);
 		dw.test_for_cap_once = 1;
 
-		sleep(5);
+		//sleep(5);
 
 		timTableSet ts;
 		ts.tt = time(0);

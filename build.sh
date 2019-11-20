@@ -5,7 +5,11 @@ mkdir ${build}
 cd ${build}
 cmake ..
 make -j8
-cp main /nucroot
+
+workPath="/nucroot"
+
+cp ../workscript/* ${workPath}
+cp main ${workPath}
 
 
 
