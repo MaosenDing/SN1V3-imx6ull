@@ -7,38 +7,62 @@
 #include <sys/types.h>
 #include <fstream>
 #include <sys/prctl.h>
+#include <execinfo.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
+using namespace std;
+
+const char * FileFailOut = "Log dump.txt";
+static int FileFailOutfd = -1;
+static int errorFlag = 0;
 static void SigHandle(const char * data, int insize)
 {
-	//std::fstream fs("glog_dump.log", std::ios::app);
-	//fs.write(data, insize);
-	//fs.close();
-	//LOG(ERROR) << data;
-	char pname[64];
-	prctl(PR_GET_NAME, pname);
+	write(FileFailOutfd, data, insize);
 
-	LOG(ERROR)<< "-------------segment fault-------------";
-	LOG(ERROR) <<"thread :" << pname;
-	LOG(ERROR).write(data, insize);
+	if (errorFlag == 0) {
+		errorFlag = 1;
+		const int MAX_CALLSTACK_DEPTH = 32;
+		void *traceback[MAX_CALLSTACK_DEPTH];
+		char **stackinfo_string;
+		int depth = backtrace(traceback, MAX_CALLSTACK_DEPTH);
+		backtrace_symbols_fd(traceback, depth, FileFailOutfd);
+	}
 }
+
+
+static void myerrorInit(void)
+{
+	FileFailOutfd = open(FileFailOut, O_APPEND | O_WRONLY | O_CREAT, 0666);
+	if (FileFailOutfd < 0) {
+		cout << "open error " << endl;
+		perror("111");
+	}
+}
+
+
 
 
 int logInit(const char * LogName, const char * SavePath, int setLevel)
 {
-	//´´½¨logÎÄ¼þ¼Ð
+	//åˆ›å»ºlogæ–‡ä»¶å¤¹
 	mkdir(SavePath, 0777);
-	//log³õÊ¼»¯
+	//logåˆå§‹åŒ–
 	google::InitGoogleLogging(LogName);
 
-	FLAGS_colorlogtostderr = true;//ÉèÖÃÊä³öµ½ÆÁÄ»µÄÈÕÖ¾ÏÔÊ¾ÏàÓ¦ÑÕÉ«
+	FLAGS_colorlogtostderr = true;//è®¾ç½®è¾“å‡ºåˆ°å±å¹•çš„æ—¥å¿—æ˜¾ç¤ºç›¸åº”é¢œè‰²
 
-								  //FLAGS_servitysinglelog = true;// ÓÃÀ´°´ÕÕµÈ¼¶Çø·ÖlogÎÄ¼þ
-	FLAGS_logbufsecs = 0;//»º³åÈÕÖ¾Êä³ö£¬Ä¬ÈÏÎª30Ãë£¬´Ë´¦¸ÄÎªÁ¢¼´Êä³ö
-	FLAGS_max_log_size = 1; //×î´óÈÕÖ¾´óÐ¡Îª 100MB
-	FLAGS_stop_logging_if_full_disk = true;//µ±´ÅÅÌ±»Ð´ÂúÊ±£¬Í£Ö¹ÈÕÖ¾Êä³ö
-	google::SetStderrLogging(google::GLOG_INFO); //ÉèÖÃ¼¶±ð ¸ßÓÚ google::INFO µÄÈÕÖ¾Í¬Ê±Êä³öµ½ÆÁÄ»
+								  //FLAGS_servitysinglelog = true;// ç”¨æ¥æŒ‰ç…§ç­‰çº§åŒºåˆ†logæ–‡ä»¶
+	FLAGS_logbufsecs = 0;//ç¼“å†²æ—¥å¿—è¾“å‡ºï¼Œé»˜è®¤ä¸º30ç§’ï¼Œæ­¤å¤„æ”¹ä¸ºç«‹å³è¾“å‡º
+	FLAGS_max_log_size = 1; //æœ€å¤§æ—¥å¿—å¤§å°ä¸º 100MB
+	FLAGS_stop_logging_if_full_disk = true;//å½“ç£ç›˜è¢«å†™æ»¡æ—¶ï¼Œåœæ­¢æ—¥å¿—è¾“å‡º
+	google::SetStderrLogging(google::GLOG_INFO); //è®¾ç½®çº§åˆ« é«˜äºŽ google::INFO çš„æ—¥å¿—åŒæ—¶è¾“å‡ºåˆ°å±å¹•
+	myerrorInit();
 	google::InstallFailureSignalHandler();
 	google::InstallFailureWriter(&SigHandle);
-	//ÈÕÖ¾Ãû³ÆºÍÊä³öµØÖ·
+	//æ—¥å¿—åç§°å’Œè¾“å‡ºåœ°å€
 	char Info[50] = { 0 };
 	char Warn[50] = { 0 };
 	char Error[50] = { 0 };

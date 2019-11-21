@@ -10,7 +10,7 @@ workPath="/nucroot"
 
 cp ../workscript/* ${workPath}
 cp main ${workPath}
-
+arm-linux-gnueabi-strip ${workPath}/main
 
 
 

@@ -65,6 +65,32 @@ int cppReg(int argc, char * argv[])
 	return -1;
 }
 
+
+
+static int coredump_sub(int * p, int num)
+{
+	*p = num;
+	return 0;
+}
+
+
+static int coredump(int argc, char * argv[])
+{
+	cout << "core dump test" << endl;
+
+	if (argc >= 2) {
+		logInit("once", "./aim", google::GLOG_ERROR);
+		
+		SN1V2_ERR_LOG("test error");
+
+		coredump_sub(0, 0);
+	}
+	return 0;
+}
+
+
+
+
 static int capOnce(int argc, char * argv[])
 {
 	cout << "table generate" << endl;
@@ -125,6 +151,7 @@ MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
 	{ "capOnce" ,capOnce},
+	{"coredump",coredump},
 };
 
 
