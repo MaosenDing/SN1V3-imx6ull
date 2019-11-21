@@ -146,12 +146,68 @@ static int capOnce(int argc, char * argv[])
 	return 0;
 }
 
+int creSaveTest(int argc, char * argv[])
+{
+	TimeInterval ppp2("cre:");
+	cout << "test cre" << endl;
+	if (argc >= 8) {
+		int year, mon, day, SID;
+		double sfl, sps;
+		year = atoi(argv[2]);
+		mon = atoi(argv[3]);
+		day = atoi(argv[4]);
+		sps = atof(argv[5]);
+		sfl = atof(argv[6]);
+		SID = atoi(argv[7]);
+		fprintf(stdout, "%d-%d-%d,%lf,%lf,id = %d\n", year, mon, day, sfl, sps, SID);
+
+		char buff[64];
+		snprintf(buff, 64, "date %d.%d.%d-%d:%d", year, mon, day, 9, 58);
+
+		system(buff);
+
+		CREOBJ credata;
+		for (auto & p : credata.errData) {
+			p = 0;
+		}
+		const char * creName = "PES.sn";
+		const char * resName = "sr.txt";
+
+		shared_ptr< vector< CREOBJ >> creDataGrp = make_shared<vector<CREOBJ>>();
+		CREOBJ  creData = GetNewCre(*creDataGrp);
+		SN1_CFG cfg;
+
+		int err;
+		int ret;
+
+		char configName[] = "SCG.txt";
+		if ((err = getConf(configName, &cfg)) != err_ok)
+			return err;
+
+
+		if ((ret = res_filter(resName, &cfg, creData.extra)) != err_ok) {
+			SN1V2_ERR_LOG("filter ret = %d\n", ret);
+			//保存数据
+		} else 	if ((ret = CalCre(resName, creData, cfg.SPS, cfg.SFL)) == err_ok) {
+			//添加成功的cre数据
+			creDataGrp->push_back(creData);
+			//导出文本
+			save_cre(creName, *creDataGrp, cfg.SID);
+		} else {
+			SN1V2_WARN_LOG("CalCre ret = %d\n", ret);
+		}
+	} else {
+		cout << "err par" << endl;
+	}
+	return 0;
+}
 
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
 	{ "capOnce" ,capOnce},
 	{"coredump",coredump},
+	{ "CREsave" ,creSaveTest},
 };
 
 

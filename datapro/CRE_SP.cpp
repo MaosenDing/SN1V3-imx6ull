@@ -5,7 +5,7 @@
 #include <regex>
 #include <algorithm>
 #include <time_interval.h>
-//#include <JDcomhead.h>
+#include "JDcomhead.h"
 
 
 #include <string.h>
@@ -82,7 +82,7 @@ ERR_STA CalCre(const char * resName, CREOBJ & creData, const double SPS, const d
 	}
 	return err_ok;
 }
-#if 0 
+
 ERR_STA save_cre(const char * creName, std::vector <CREOBJ> & creGrp, const int PID)
 {
 	std::sort(creGrp.begin(), creGrp.end(), _creData);
@@ -119,7 +119,8 @@ ERR_STA save_cre(const char * creName, std::vector <CREOBJ> & creGrp, const int 
 	}
 	return err_ok;
 }
-#endif
+
+
 static shared_ptr< vector< CREOBJ>> getLastErrConfig(const char * creName)
 {
 	ERR_STA err;

@@ -24,8 +24,8 @@ include_directories("com_inc")
 include_directories("glog")
 link_directories("${PROJECT_SOURCE_DIR}/glog")
 
-
-
+#通用lib
+include_directories("${PROJECT_SOURCE_DIR}/comlib")
 
 
 #主目录编译文件
@@ -63,6 +63,8 @@ target_link_libraries(main datapro)
 target_link_libraries(main timework)
 
 
+add_subdirectory(comlib)
+target_link_libraries(main comlib)
 
 #添加外部动态链接库 必须放后面 不然链接不过
 target_link_libraries(main -lglog)
