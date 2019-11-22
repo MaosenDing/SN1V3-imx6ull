@@ -202,7 +202,7 @@ int creSaveTest(int argc, char * argv[])
 	return 0;
 }
 
-int ipchange(const char * srName);
+int ipchange(const char * inFileName, const char * outFileName)
 
 
 int ipchange_pp(int argc, char * argv[])
@@ -210,7 +210,7 @@ int ipchange_pp(int argc, char * argv[])
 	cout << "ipchange" << endl;
 
 	cout << "name " << argv[2] << endl;
-	ipchange(argv[2]);
+	ipchange(argv[2],"test.txt");
 	return 0;
 }
 
