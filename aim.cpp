@@ -202,12 +202,26 @@ int creSaveTest(int argc, char * argv[])
 	return 0;
 }
 
+int ipchange(const char * srName);
+
+
+int ipchange_pp(int argc, char * argv[])
+{
+	cout << "ipchange" << endl;
+
+	cout << "name " << argv[2] << endl;
+	ipchange(argv[2]);
+	return 0;
+}
+
+
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
 	{ "capOnce" ,capOnce},
 	{"coredump",coredump},
 	{ "CREsave" ,creSaveTest},
+	{"ip",ipchange_pp},
 };
 
 
