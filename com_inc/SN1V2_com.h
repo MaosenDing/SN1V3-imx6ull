@@ -1,4 +1,4 @@
-﻿#ifndef __SN1V2_COM____h__
+#ifndef __SN1V2_COM____h__
 #define __SN1V2_COM____h__
 
 #include "SN1V2_error.h"
@@ -257,5 +257,27 @@
 	//ipc
 	key_t getKey(const char *path, int num);
 	void * getSHM(key_t key, int sz);
+
+
+
+	ERR_STA GetTableSet(char * fName, CREOBJ & creDate
+		, const int year, const int mon, const int day
+		, const float Lon, const float lati
+		, std::vector<timTableSet> &timeset
+		, const float SSA
+		, const float SHT
+		, const float SPT
+		, const float TDT
+		, const float SCH
+		, const float TEE
+		, const float TEP
+		, const float TET
+		, const unsigned int SaveTimeTable
+	);
+
+	void RmTimeTableForTimeNotSuit(std::vector <timTableSet> & timeset, int LimitBeforeNoon, int LimitAfterNoon);
+
+	void shm_set_dayFlag(bool flag);
+
 #endif
 

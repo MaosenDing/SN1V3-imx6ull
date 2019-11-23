@@ -6,6 +6,8 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include "errHandle/errHandle.h"
 #include "time_interval.h"
@@ -356,8 +358,8 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 
 		if ((err = loadFile(filename, loadbin)) == err_ok)
 		{
-			//Æ¥Åä 2018-5-14 15:14:13,-1.1,-2.2,-3.3,-4.4,-5.5
-			//Æ¥ÅäÄêÔÂÈÕ£¬µ«²»Ê¹ÓÃ Ò²²»¶ÔÆäÕıÈ·ĞÔ×öÅĞ¶Ï
+			//åŒ¹é… 2018-5-14 15:14:13,-1.1,-2.2,-3.3,-4.4,-5.5
+			//åŒ¹é…å¹´æœˆæ—¥ï¼Œä½†ä¸ä½¿ç”¨ ä¹Ÿä¸å¯¹å…¶æ­£ç¡®æ€§åšåˆ¤æ–­
 			regex reg("\\d{4}-\\d{1,2}-\\d{1,2} (\\d{1,2}):(\\d{1,2}):(\\d{1,2})((?:,-?\\d*(?:.\\d+)?){5})");
 			smatch match;
 
@@ -375,7 +377,7 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 						cout << match[i] << endl;
 					}
 					cout << "----------------------------" << endl;
-/* µäĞÍÖµ
+/* å…¸å‹å€¼
 size = 5
 2018 - 05 - 14 05:14 : 50, 106.213, 80.263, -0.275194, 0.946397, 0.169119
 05
@@ -752,13 +754,111 @@ int dummyLongTimeCapTest(setWork & test, int period)
 
 
 
+ERR_STA GetTableSet(char * fName, CREOBJ & creDate
+	, const int year, const int mon, const int day
+	, const float Lon, const float lati
+	, vector<timTableSet> &timeset
+	, const float SSA
+	, const float SHT
+	, const float SPT
+	, const float TDT
+	, const float SCH
+	, const float TEE
+	, const float TEP
+	, const float TET
+	, const unsigned int SaveTimeTable
+)
+{
+	ERR_STA err;
+	bool rebuildFlag = false;
+
+	//vector	<timTableSet> timeset;
+
+	struct stat stbuff;
+	if ((stat(fName, &stbuff) == -1) ||
+		(stbuff.st_size < 20000)) {
+		//rebuild table
+		cout << "create table" << endl;;
+		TimeInterval p("create table:");
+
+		err = SHG(year, mon, day
+			, SHT, SPT, SSA, Lon, lati, TEE, TEP, TET
+			, TDT, SCH
+			, creDate.errData
+			, timeset);
+		//err = SHG(year, mon, day
+		//	, 3, 0, 5, Lon, lati, 1400, 1, 32
+		//	, 0, 0
+		//	, errConf
+		//	, timeset);
+		if (err != err_ok)
+			return err;
+
+		rebuildFlag = true;
+	} else {//scanf table
+		cout << "scanf table" << endl;;
+		TimeInterval ppp("scanf table:");
+
+		if ((err = load_table(fName, timeset)) != err_ok)
+			return err;
+	}
+
+	{
+		cout << "make table" << endl;
+		TimeInterval ppp("make table:");
+
+		for (auto &p : timeset) {
+			p.tt = (p.tm_hour * 3600 + p.tm_min * 60 + p.tm_sec);
+		}
+
+		if ((rebuildFlag == true) && (SaveTimeTable > 0)) {
+			if ((err = save_timTableSet(fName, year, mon, day, timeset)) != err_ok)
+				return err;
+		}
+		cout << "size=" << timeset.size() << endl;
+		return err_ok;
+	}
+	return err_UNKNOWN;
+}
 
 
 
 
 
+void RmTimeTableForTimeNotSuit(vector <timTableSet> & timeset, int LimitBeforeNoon, int LimitAfterNoon)
+{
+	SN1V2_WARN_LOG("org timeset = %d\n", timeset.size());
+
+#define SP_BEFORE_NOON -1
+#define SP_AFTER_NOON 30
+
+	if ((LimitBeforeNoon >= 24) || (LimitBeforeNoon < 0)) {
+		LimitBeforeNoon = SP_BEFORE_NOON;
+	}
 
 
+	if ((LimitAfterNoon >= 24) || (LimitAfterNoon < 0)) {
+		LimitAfterNoon = SP_AFTER_NOON;
+	}
+
+	if ((LimitBeforeNoon == SP_BEFORE_NOON) && (LimitAfterNoon == SP_AFTER_NOON)) {
+		SN1V2_WARN_LOG("fixed null\n");
+		return;
+	}
+
+
+	vector <timTableSet> tmpset;
+
+
+	for (auto &p : timeset) {
+		if ((p.tm_hour >= LimitBeforeNoon) && (p.tm_hour < LimitAfterNoon)) {
+			tmpset.push_back(p);
+		}
+	}
+	timeset.swap(tmpset);
+
+	SN1V2_WARN_LOG("fixed timeset = %d\n", timeset.size());
+}
 
 
 

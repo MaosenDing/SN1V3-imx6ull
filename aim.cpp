@@ -202,7 +202,7 @@ int creSaveTest(int argc, char * argv[])
 	return 0;
 }
 
-int ipchange(const char * inFileName, const char * outFileName)
+int ipchange(const char * inFileName, const char * outFileName);
 
 
 int ipchange_pp(int argc, char * argv[])
@@ -214,6 +214,152 @@ int ipchange_pp(int argc, char * argv[])
 	return 0;
 }
 
+int tableGenerate2(int argc, char * argv[])
+{
+	cout << "table generate" << endl;
+#if 0
+	bool NoMdcFlag = checkNoMdc(argc, argv);
+#else
+	bool NoMdcFlag = false;
+#endif
+	if (argc >= 3) {
+		int ret;
+		ERR_STA err;
+
+		char * configName = argv[2];
+
+		cout << "ConfName = " << configName << endl;
+
+		SN1_CFG cfg;
+		if ((err = getConf(configName, &cfg)) != err_ok)
+			return err;
+
+		logInit("aim", "./aim", google::GLOG_ERROR);
+
+		my_cap_init(cfg.gain, cfg.expo, cfg.isHorisFlip, cfg.isVeriFlip);
+		time_t now = time(0);
+		tm t2;
+
+		localtime_r(&now, &t2);
+		{
+#if 0
+			char buff[64];
+			sprintf(buff, "tim = %d,%d,%d,%d,%d,%d", t2.tm_year + 1900, t2.tm_mon + 1, t2.tm_mday, t2.tm_hour, t2.tm_min, t2.tm_sec);
+			cerr << buff << endl;
+			cout << buff << endl;
+#endif
+		}
+
+		const int year = t2.tm_year + 1900;
+		const int mon = t2.tm_mon + 1;
+		const int day = t2.tm_mday;
+
+		//创建拍摄暂存目录
+		char storPath[24];
+		sprintf(storPath, "%04d_%02d_%02d", year, mon, day);
+		mkdir(storPath, 0777);
+
+		//照片存储目录
+
+		char photoPath[24];
+		if (strlen(cfg.ForceSavePath)) {
+			SN1V2_ERR_LOG("force save jpeg in %s\n", cfg.ForceSavePath);
+			cfg.FLAG_SAVE_BIN = 1;
+			cfg.FLAG_SAVE_ORG = 1;
+
+			sprintf(photoPath, "%s/%04d_%02d_%02d", cfg.ForceSavePath, year, mon, day);
+			mkdir(photoPath, 0777);
+		} else {
+			strcpy(photoPath, storPath);
+		}
+
+		//获取cre
+		const char * crePath = "PES.sn";
+		auto creDataGrp = initCre(crePath);
+		if (false == ChkTodayCre(*creDataGrp)) {
+			CREOBJ  creData = GetNewCre(*creDataGrp);
+
+			vector	<timTableSet> timeset;
+			char TableName[64];
+			sprintf(TableName, "%s/sh.txt", storPath);
+#if 0
+			cout << "TableName = " << TableName << endl;
+#endif
+
+			//获取时间表
+			if ((ret = GetTableSet(TableName, creData
+				, year, mon, day, cfg.Lon, cfg.lati, timeset
+				, cfg.SSA, cfg.SHT, cfg.SPT, cfg.TDT, cfg.SCH, cfg.TEE, cfg.TEP, cfg.TET
+				, cfg.SaveTimeTable
+			)) != err_ok)
+				return ret;
+			//get shard memory
+			key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
+
+			SN1_SHM * psn1 = nullptr;
+			if (NoMdcFlag == false) {
+				psn1 = (SN1_SHM *)getSHM(key, sizeof(SN1_SHM));
+				cfg.SID = psn1->mdc_id_num;
+			}
+			//修剪时间表
+			RmTimeTableForTimeNotSuit(timeset, cfg.limitHourBeforeNoon, cfg.limitHourAfterNoon);
+
+			char resName[64];
+			snprintf(resName, 64, "%s/sr.txt", storPath);
+			//get plan cap
+			cfg.bf_size = 0;
+			cfg.af_size = 0;
+			for (auto & p : timeset) {
+				if (p.tm_hour < 12)
+					cfg.bf_size++;
+				else
+					cfg.af_size++;
+			}
+			//拍摄
+			capWork dw(photoPath, cfg, psn1, resName);
+			__attribute__((unused)) int sz = timTableWorkWithReserveTime(timeset, dw, cfg.max_reserve_time);
+
+			//过滤res数据
+
+			if (cfg.IsSaveCre == 0) {
+				SN1V2_ERR_LOG("debug : not generate CRE process\n");
+			} else
+				if ((ret = res_filter(resName, &cfg, creData.extra)) != err_ok) {
+					SN1V2_ERR_LOG("filter ret = %d\n", ret);
+					//保存数据
+				} else 	if ((ret = CalCre(resName, creData, cfg.SPS, cfg.SFL)) == err_ok) {
+					//添加成功的cre数据
+					creDataGrp->push_back(creData);
+					//导出文本
+					save_cre(crePath, *creDataGrp, cfg.SID);
+				} else {
+					SN1V2_WARN_LOG("CalCre ret = %d\n", ret);
+				}
+		}
+
+		if (cfg.CleanLastDate != 0) {
+			char _rmpath[20];
+#if 0
+			sprintf(_rmpath, "rm %s -rf\n", storPath);
+			SN1V2_INF_LOG("rm %s -rf\n", storPath);
+			system(_rmpath);
+#else
+			sprintf(_rmpath, "rm 20* -rf");
+			SN1V2_INF_LOG("rm 20* -rf\n");
+			system(_rmpath);
+
+			sprintf(_rmpath, "rm 19* -rf");
+			SN1V2_INF_LOG("rm 19* -rf\n");
+			system(_rmpath);
+#endif
+		}
+		SN1V2_INF_LOG("set work finished\n");
+		if (NoMdcFlag == false) {
+			shm_set_dayFlag(true);
+		}
+	}
+	return 0;
+}
 
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
