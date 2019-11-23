@@ -202,11 +202,10 @@ int creSaveTest(int argc, char * argv[])
 	return 0;
 }
 
-int ipchange(const char * inFileName, const char * outFileName);
-
 
 int ipchange_pp(int argc, char * argv[])
 {
+	int ipchange(const char * inFileName, const char * outFileName);
 	cout << "ipchange" << endl;
 
 	cout << "name " << argv[2] << endl;
@@ -214,14 +213,25 @@ int ipchange_pp(int argc, char * argv[])
 	return 0;
 }
 
+
+bool checkNoMdc(int argc, char * argv[])
+{
+	for (int i = 0; i < argc; i++) {
+		if (!strcmp("-nomdc", argv[i])) {
+			printf("run without mdc\n");
+			return true;
+		}
+	}
+	return false;
+}
+
+
 int tableGenerate2(int argc, char * argv[])
 {
 	cout << "table generate" << endl;
-#if 0
+
 	bool NoMdcFlag = checkNoMdc(argc, argv);
-#else
-	bool NoMdcFlag = false;
-#endif
+
 	if (argc >= 3) {
 		int ret;
 		ERR_STA err;
@@ -368,6 +378,7 @@ MAIN_CMD cmd_group[] = {
 	{"coredump",coredump},
 	{ "CREsave" ,creSaveTest},
 	{"ip",ipchange_pp},
+	{ "tableGen2" ,tableGenerate2 },
 };
 
 
