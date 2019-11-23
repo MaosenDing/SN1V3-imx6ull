@@ -34,6 +34,9 @@ if [ $1 == "led2" ]; then
 	ionum=198
 fi
 
+if [ $1 == "ir" ]; then
+	ionum=36
+fi
 
 if [ ${ionum} != "" ] ; then
 	ctrlIO $ionum $2

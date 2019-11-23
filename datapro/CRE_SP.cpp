@@ -9,7 +9,7 @@
 
 
 #include <string.h>
-
+#include <math.h>
 using namespace std;
 
 static shared_ptr< vector< CREOBJ>> Get_CRE(std::string & loadbin);
