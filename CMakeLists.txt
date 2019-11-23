@@ -5,7 +5,7 @@ include(compiler.cmake)
 set(useShared 1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-add_definitions(-mcpu=arm926ej-s -mno-unaligned-access -fno-aggressive-loop-optimizations -fno-omit-frame-pointer -mapcs -rdynamic -lrt -lm)
+add_definitions(-mcpu=arm926ej-s -mno-unaligned-access -fno-aggressive-loop-optimizations -fno-omit-frame-pointer -mapcs -rdynamic)
 add_definitions("-O2")
 add_definitions("-g3")
 add_definitions(-Wall)
@@ -73,18 +73,17 @@ target_link_libraries(main comlib)
 #添加外部动态链接库 必须放后面 不然链接不过
 target_link_libraries(main -lglog)
 target_link_libraries(main -ljpeg)
-target_link_libraries(main -lm)
+
 
 #install main
 INSTALL(TARGETS main
        RUNTIME DESTINATION bin
 )
 #install scripts
-INSTALL(DIRECTORY workscript/ DESTINATION bin
-        PATTERN "workscript/*"
-		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-        GROUP_EXECUTE GROUP_READ
-		)
+add_subdirectory(workscript)
+
+
+
 
 
 
