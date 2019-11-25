@@ -184,7 +184,7 @@ CREOBJ GetNewCre(vector<CREOBJ> & creDataGrp)
 #include <string.h>
 static shared_ptr< vector< CREOBJ>> Get_CRE(std::string & loadbin)
 {
-	regex reg("\\d{4}-\\d{1,2}-\\d{1,2}(?:(?:,-?\\d*(?:.\\d+)?){14}),SN1_(\\d+),\\d+");
+	regex reg("\\d{4}-\\d{1,2}-\\d{1,2}(?:(?:,-?\\d*(?:\\.\\d+)?){14}),SN1_(\\d+),\\d+");
 	smatch match;
 
 	string::const_iterator star = loadbin.begin();

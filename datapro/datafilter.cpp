@@ -20,11 +20,11 @@ static shared_ptr< vector< RESOBJ>> getRes(const char * resName)
 	if (fil == err_ok) {
 		TimeInterval p("time:");
 
-		//»ñÈ¡Êı¾İ
-		//Æ¥Åä Ò»ÌìµÄÃë,8¸ö¸¡µãÊı
-		//Æ¥ÅäÄêÔÂÈÕ£¬µ«²»Ê¹ÓÃ Ò²²»¶ÔÆäÕıÈ·ĞÔ×öÅĞ¶Ï
+		//è·å–æ•°æ®
+		//åŒ¹é… ä¸€å¤©çš„ç§’,8ä¸ªæµ®ç‚¹æ•°
+		//åŒ¹é…å¹´æœˆæ—¥ï¼Œä½†ä¸ä½¿ç”¨ ä¹Ÿä¸å¯¹å…¶æ­£ç¡®æ€§åšåˆ¤æ–­
 
-		regex reg("\\d{6}((?:,-?\\d*(?:.\\d+)?){8})");
+		regex reg("\\d{6}((?:,-?\\d*(?:\\.\\d+)?){8})");
 		smatch match;
 		string::const_iterator star = loadbin->begin();
 		string::const_iterator end = loadbin->end();

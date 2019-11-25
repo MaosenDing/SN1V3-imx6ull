@@ -17,7 +17,7 @@ static void sr_filter(const char * srName, shared_ptr< vector< RESOBJ>> retlist)
 	if (fil == err_ok) {
 		TimeInterval p("sr got:");
 
-		regex reg("\\d{2}:\\d{2}:\\d{2}((?:,-?\\d*(?:.\\d+)?){4})");
+		regex reg("\\d{2}:\\d{2}:\\d{2}((?:,-?\\d*(?:\\.\\d+)?){4})");
 		smatch match;
 		string::const_iterator star = loadbin->begin();
 		string::const_iterator end = loadbin->end();
@@ -65,12 +65,12 @@ static shared_ptr< vector< RESOBJ>>  sh_got(const char * shName)
 
 	if (fil == err_ok) {
 		TimeInterval p("sh got:");
-		//筛选sh文件
+		//绛涢�塻h鏂囦欢
 		/*
 2018-11-22 07:31:10,52.815,79.978,0.595199,0.784498,0.174072
 2018-11-22 07:31:20,52.785,79.953,0.595567,0.784123,0.174504
 		*/
-		regex reg("\\d{2}:\\d{2}:\\d{2}((?:,-?\\d*(?:.\\d+)?){5})");
+		regex reg("\\d{2}:\\d{2}:\\d{2}((?:,-?\\d*(?:\\.\\d+)?){5})");
 		smatch match;
 		string::const_iterator star = loadbin->begin();
 		string::const_iterator end = loadbin->end();
@@ -122,7 +122,7 @@ void v1_res_filter(const char * shName, const char *srName, const char * resName
 {
 	auto retlist = getResTest(shName, srName);
 
-	//获取cre
+	//鑾峰彇cre
 	auto creDataGrp = initCre(creName);
 	CREOBJ  creData = GetNewCre(*creDataGrp);
 
@@ -131,16 +131,16 @@ void v1_res_filter(const char * shName, const char *srName, const char * resName
 		return;
 	}
 
-	//计算偏差角度
+	//璁＄畻鍋忓樊瑙掑害
 	chkAng(retlist, pcfg, creData.extra);
-	//写回res文件
+	//鍐欏洖res鏂囦欢
 	REStoTxt(resName, *retlist , res_filter_normal);
 
-	//保存数据
+	//淇濆瓨鏁版嵁
 	if (err_ok == CalCre(resName, creData, pcfg->SPS, pcfg->SFL)) {
-		//添加成功的cre数据
+		//娣诲姞鎴愬姛鐨刢re鏁版嵁
 		creDataGrp->push_back(creData);
-		//导出文本
+		//瀵煎嚭鏂囨湰
 		save_cre(creName, *creDataGrp, pcfg->SID);
 	}
 }

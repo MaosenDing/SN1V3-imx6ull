@@ -360,7 +360,7 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 		{
 			//匹配 2018-5-14 15:14:13,-1.1,-2.2,-3.3,-4.4,-5.5
 			//匹配年月日，但不使用 也不对其正确性做判断
-			regex reg("\\d{4}-\\d{1,2}-\\d{1,2} (\\d{1,2}):(\\d{1,2}):(\\d{1,2})((?:,-?\\d*(?:.\\d+)?){5})");
+			regex reg("\\d{4}-\\d{1,2}-\\d{1,2} (\\d{1,2}):(\\d{1,2}):(\\d{1,2})((?:,-?\\d*(?:\\.\\d+)?){5})");
 			smatch match;
 
 			outTable.reserve(loadbin.size() / 60);
