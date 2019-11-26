@@ -16,7 +16,7 @@
 #include <sys/prctl.h>
 
 int init_cap(const char * videoName);
-void set_gain_expose(int fd, int gain, int expose);
+int set_gain_expose(int fd, int gain, int expose);
 
 using namespace std;
 
@@ -61,7 +61,12 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 	if (video_fd < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_open);
 	}
-	set_gain_expose(video_fd, gain, expo);
+	int ret = set_gain_expose(video_fd, gain, expo);
+
+	if (ret < 0) {
+		SN1V2_ERROR_CODE_RET(err_sensor_set);
+	}
+
 
 	shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
 

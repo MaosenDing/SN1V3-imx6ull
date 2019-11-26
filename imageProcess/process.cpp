@@ -694,23 +694,20 @@ ERR_STA ImageTestRGBFile(const char * fName, const char * srcPath, const char * 
 ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gain, const unsigned int expo
 	, const int horizenFlip, const int VeriFlip);
 ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
-	,bool ORGjpgSaveFlag, bool BINjpgSaveFlag,unsigned int MinCntGrp,const unsigned int gain,const unsigned int expo
-	,const int horflip , const int verFlip
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
+	, const int horflip, const int verFlip
 )
 {
 	ERR_STA err;
 	int imgSize = width * height * 2;
-	
-	try
-	{
+
+	try {
 		shared_ptr<unsigned char >ppp(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
 
-		if ((err = cap_once(ppp.get(), imgSize,gain,expo, horflip,verFlip)) != err_ok)
-		{
+		if ((err = cap_once(ppp.get(), imgSize, gain, expo, horflip, verFlip)) != err_ok) {
 			LOG(ERROR) << "cap error code = " << (int)err;
-		}
-		else
-		{
+			return err;
+		} else {
 			res.timGetImg = time(nullptr);
 
 			char FnameBuff[64];
@@ -719,22 +716,18 @@ ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT 
 			localtime_r(&res.timGetImg, &reftime);
 			sprintf(FnameBuff, "%s/%02d-%02d-%02d.jpg", dstPath, reftime.tm_hour, reftime.tm_min, reftime.tm_sec);
 
-			if (ORGjpgSaveFlag == true)
-			{
+			if (ORGjpgSaveFlag == true) {
 				char ORGBUFF[64];
 				snprintf(ORGBUFF, 64, "%s.org.jpeg", FnameBuff);
 
-				if ((err = SaveRGB565Jpg(ORGBUFF, ppp.get(), width, height)) != err_ok)
-				{
+				if ((err = SaveRGB565Jpg(ORGBUFF, ppp.get(), width, height)) != err_ok) {
 					LOG(WARNING) << "org rgb565 save fail =" << (int)err;
 				}
 			}
 
-			return ImageProcessRGB(FnameBuff, std::move(ppp), imgSize, width, height, res, thres, thresPer, BINjpgSaveFlag,MinCntGrp);
+			return ImageProcessRGB(FnameBuff, std::move(ppp), imgSize, width, height, res, thres, thresPer, BINjpgSaveFlag, MinCntGrp);
 		}
-	}
-	catch (std::bad_alloc & bd)
-	{
+	} catch (std::bad_alloc & bd) {
 		return	err_out_of_memory;
 	}
 	return err_UNKNOWN;

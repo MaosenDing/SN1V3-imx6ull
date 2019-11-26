@@ -120,7 +120,7 @@ int init_cap(const char * videoName)
 }
 
 
-void set_gain_expose(int fd, int gain, int expose)
+int set_gain_expose(int fd, int gain, int expose)
 {
 	struct v4l2_control  Setting;
 
@@ -137,13 +137,20 @@ void set_gain_expose(int fd, int gain, int expose)
 	Setting.id = V4L2_CID_GAIN;
 	Setting.value = gain;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
-	printf("V4L2_CID_GAIN ret = %d \n", ret);
-
+	if (ret < 0) {
+		printf("V4L2_CID_GAIN ret = %d \n", ret);
+		return -1;
+	}
 
 	Setting.id = V4L2_CID_EXPOSURE;
 	Setting.value = expose;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
 	printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
+
+	if (ret < 0) {
+		printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
+		return -2;
+	}
 }
 
 
