@@ -34,11 +34,11 @@
 %STN,3#运行cre迭代上限
 %SFD,false#是否清除数据
 %SHS,true#保留timetable
-%SGV,100#增益
-%SST,50#曝光
+%SGV,3#增益
+%SST,5#曝光
 %BFT,0.4#上午阈值
 %AFT,0.4#下午阈值
-%MRT,5#最长拍摄保留时间
+%MRT,6#最长拍摄保留时间
 %SVF,false
 %SHF,false
 %ISC,1#1表示会执行CER 0表示不执行CRE
