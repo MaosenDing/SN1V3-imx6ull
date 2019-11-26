@@ -17,10 +17,10 @@ struct stu1{
 #ifndef M_PI
 #define  M_PI (3.14159265358979323846)
 #endif
-// FUNC[0] Ì«Ñô×ËÌ¬¼ÆËã
+// FUNC[0] å¤ªé˜³å§¿æ€è®¡ç®—
 struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Second, int Delta_T, double Longitude, double Latitude, int E, int P, int T)
 {
-	// ¼ì²âµØÊ±Çø
+	// æ£€æµ‹åœ°æ—¶åŒº
 	int TimeZoneLocal = ((Longitude > 0 ? 1 : (Longitude == 0 ? 0 : -1))*(floor((abs(Longitude) - 7.5) / 15) + 1));
 
 	int AA, BB;
@@ -39,16 +39,16 @@ struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Sec
 	{
 		BB = 2 - AA + (int)(AA / 4);
 	}
-	double JD = (double)((int)(365.25 * (Year + 4716)) + (int)(30.6001 * (Month + 1)) + Day2 + BB - 1524.5);		//¼ÆËãÈåÂÔÈÕ
-	double JDE = JD + (double)((double)(Delta_T) / 86400);		//¼ÆËãÈåÂÔÀúÊéÈÕ Julian Ephemeris Day£¬ResJu[1]
-	double JC = (JD - 2451545) / 36525;  //¼ÆËãÈåÂÔÊÀ¼ÍÊıJulian Century£¬ResJu[2]
-	double JCE = (JDE - 2451545) / 36525;  //¼ÆËãÈåÂÔÀúÊéÊÀ¼ÍÊıJulian Ephemeris Century£¬ResJu[3]
-	double JME = JCE / 10;  //¼ÆËãÈåÂÔÀúÊéÇ§ÄêÊıJulian Ephemeris Millennium£¬ResJu[4]
+	double JD = (double)((int)(365.25 * (Year + 4716)) + (int)(30.6001 * (Month + 1)) + Day2 + BB - 1524.5);		//è®¡ç®—å„’ç•¥æ—¥
+	double JDE = JD + (double)((double)(Delta_T) / 86400);		//è®¡ç®—å„’ç•¥å†ä¹¦æ—¥ Julian Ephemeris Dayï¼ŒResJu[1]
+	double JC = (JD - 2451545) / 36525;  //è®¡ç®—å„’ç•¥ä¸–çºªæ•°Julian Centuryï¼ŒResJu[2]
+	double JCE = (JDE - 2451545) / 36525;  //è®¡ç®—å„’ç•¥å†ä¹¦ä¸–çºªæ•°Julian Ephemeris Centuryï¼ŒResJu[3]
+	double JME = JCE / 10;  //è®¡ç®—å„’ç•¥å†ä¹¦åƒå¹´æ•°Julian Ephemeris Millenniumï¼ŒResJu[4]
 
-	// FUNC[1] ¼ÆËãÒÔÌ«ÑôÎªÖĞĞÄ£¬µØÇòÏà¹Ø²ÎÊı
-	// LÎªÌ«ÑôÎªÖĞĞÄÊ±µÄ»ÆµÀ×ø±êÏÂ£¬µØÇòµÄ»Æ¾­
-	// BÎªÌ«ÑôÎªÖĞĞÄÊ±µÄ»ÆµÀ×ø±êÏÂ£¬µØÇòµÄ»ÆÎ³
-	// RÎªÌ«ÑôÎªÖĞĞÄÊ±µÄ»ÆµÀ×ø±êÏÂ£¬µØÇòµÄÏò¾¶£¨µ¥Î»ÎªÌìÎÄµ¥Î»£¬µØÔÂÖÊĞÄµ½Ì«ÑôÖĞĞÄµÄ¾àÀëÎªÒ»¸öÌìÎÄµ¥Î»£©
+	// FUNC[1] è®¡ç®—ä»¥å¤ªé˜³ä¸ºä¸­å¿ƒï¼Œåœ°çƒç›¸å…³å‚æ•°
+	// Lä¸ºå¤ªé˜³ä¸ºä¸­å¿ƒæ—¶çš„é»„é“åæ ‡ä¸‹ï¼Œåœ°çƒçš„é»„ç»
+	// Bä¸ºå¤ªé˜³ä¸ºä¸­å¿ƒæ—¶çš„é»„é“åæ ‡ä¸‹ï¼Œåœ°çƒçš„é»„çº¬
+	// Rä¸ºå¤ªé˜³ä¸ºä¸­å¿ƒæ—¶çš„é»„é“åæ ‡ä¸‹ï¼Œåœ°çƒçš„å‘å¾„ï¼ˆå•ä½ä¸ºå¤©æ–‡å•ä½ï¼Œåœ°æœˆè´¨å¿ƒåˆ°å¤ªé˜³ä¸­å¿ƒçš„è·ç¦»ä¸ºä¸€ä¸ªå¤©æ–‡å•ä½ï¼‰
 
 	const double L0_T[64][4] = { { 0, 175347046, 0, 0 }, { 1, 3341656, 4.6692568, 6283.07585 }, { 2, 34894, 4.6261, 12566.1517 }, \
 	{ 3, 3497, 2.7441, 5753.3849 }, { 4, 3418, 2.8289, 3.5231 }, { 5, 3136, 3.6277, 77713.7715 }, \
@@ -208,9 +208,9 @@ struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Sec
 	double R5 = 0;
 	double R = (R0 + R1*JME + R2*pow(JME, 2) + R3*pow(JME, 3) + R4*pow(JME, 4) + R5*pow(JME, 5)) / pow(10.0, 8);
 
-	// FUNC[2] ÕÂ¶¯ÒıÆğµÄÌ«Ñô»Æ¾­¡¢»Æ³à½»½ÇµÄÎó²î
-	// delta_psiÎªÕÂ¶¯ÒıÆğµÄ»Æ³à½»½ÇµÄ±ä¶¯
-	// delta_epsilonÎªÕÂ¶¯ÒıÆğµÄÌ«Ñô»Æ¾­±ä¶¯
+	// FUNC[2] ç« åŠ¨å¼•èµ·çš„å¤ªé˜³é»„ç»ã€é»„èµ¤äº¤è§’çš„è¯¯å·®
+	// delta_psiä¸ºç« åŠ¨å¼•èµ·çš„é»„èµ¤äº¤è§’çš„å˜åŠ¨
+	// delta_epsilonä¸ºç« åŠ¨å¼•èµ·çš„å¤ªé˜³é»„ç»å˜åŠ¨
 	double X0 = 297.85036 + 445267.111480*JCE - 0.0019142*pow(JCE,2) + pow(JCE,3) / 189474;
 	double X1 = 357.52772 + 35999.050340*JCE - 0.0001603*pow(JCE,2) - pow(JCE,3) / 300000;
 	double X2 = 134.96298 + 477198.867398*JCE + 0.0086972*pow(JCE,2) + pow(JCE,3) / 56250;
@@ -254,41 +254,41 @@ struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Sec
 	delta_psi = delta_psi / 36000000;
 	delta_epsilon = delta_epsilon / 36000000;
 
-	// FUNC[3] ĞŞÕıºóµÄ»Æ³à½»½Ç¼ÆËã
+	// FUNC[3] ä¿®æ­£åçš„é»„èµ¤äº¤è§’è®¡ç®—
 	double U = JME / 10;
 	double epsilon0 = 84381.448 - 4680.93*U - 1.55*pow(U,2) + 1999.25*pow(U,3) - 51.38*pow(U,4) - 249.67*pow(U,5) \
 		- 39.05*pow(U,6) + 7.12*pow(U,7) + 27.87*pow(U,8) + 5.79*pow(U,9) + 2.45*pow(U,10);
 	double epsilon = epsilon0 / 3600 + delta_epsilon;
 
-	// FunC[4] Ì«Ñô×ËÌ¬¼ÆËã
-	double THETA = fmod((L + 180), 360);     // ÒÔµØÇòÎªÖĞĞÄµÄÌ«ÑôµÄ»Æ¾­£¬µ¥Î»Îª¶È
-	double BETA = -B;   // ÒÔµØÇòÎªÖĞĞÄµÄÌ«ÑôµÄ»ÆÎ³£¬µ¥Î»Îª¶È
-	double delta_tau = -20.4898 / (3600 * R);   // ¼ÆËã¹âĞĞ²î£¬µ¥Î»Îª¶È
-	double lambda2 = THETA + delta_psi + delta_tau;  // ¼ÆËãÊÓÌ«Ñô»Æ¾­£¬µ¥Î»Îª¶È
+	// FunC[4] å¤ªé˜³å§¿æ€è®¡ç®—
+	double THETA = fmod((L + 180), 360);     // ä»¥åœ°çƒä¸ºä¸­å¿ƒçš„å¤ªé˜³çš„é»„ç»ï¼Œå•ä½ä¸ºåº¦
+	double BETA = -B;   // ä»¥åœ°çƒä¸ºä¸­å¿ƒçš„å¤ªé˜³çš„é»„çº¬ï¼Œå•ä½ä¸ºåº¦
+	double delta_tau = -20.4898 / (3600 * R);   // è®¡ç®—å…‰è¡Œå·®ï¼Œå•ä½ä¸ºåº¦
+	double lambda2 = THETA + delta_psi + delta_tau;  // è®¡ç®—è§†å¤ªé˜³é»„ç»ï¼Œå•ä½ä¸ºåº¦
 
-	// ¼ÆËã¸ñÁÖÍşÖÎ×ÓÎçÏß´¦µÄÈÎÒâÊ±¿ÌµÄÊÓºãĞÇÊ±£¬µ¥Î»Îª¶È
+	// è®¡ç®—æ ¼æ—å¨æ²»å­åˆçº¿å¤„çš„ä»»æ„æ—¶åˆ»çš„è§†æ’æ˜Ÿæ—¶ï¼Œå•ä½ä¸ºåº¦
 	double upsilon0 = fmod((280.46061837 + 360.98564736629*(JD - 2451545) + 0.000387933*pow(JC, 2) - pow(JC, 3)\
 		/ 38710000), 360);
-	double upsilon = upsilon0 + delta_psi * cos(epsilon*M_PI / 180);     // ¸ñÁÖÍşÖÎ×ÓÎçÏßÉÏµÄÊÓºãĞÇÊ±
+	double upsilon = upsilon0 + delta_psi * cos(epsilon*M_PI / 180);     // æ ¼æ—å¨æ²»å­åˆçº¿ä¸Šçš„è§†æ’æ˜Ÿæ—¶
 	
-	// ¼ÆËãµØĞÄ×ø±êÏµÏÂµÄÌ«Ñô³à¾­
+	// è®¡ç®—åœ°å¿ƒåæ ‡ç³»ä¸‹çš„å¤ªé˜³èµ¤ç»
 	double alpha = fmod((atan2((sin(lambda2*M_PI / 180)*cos(epsilon*M_PI / 180) - tan(BETA*M_PI / 180)*sin(epsilon*M_PI / 180)), \
 		cos(lambda2*M_PI / 180)) * 180 / M_PI), 360);
 	
-	// ¼ÆËãµØĞÄ×ø±êÏµÏÂµÄÌ«Ñô³àÎ³
+	// è®¡ç®—åœ°å¿ƒåæ ‡ç³»ä¸‹çš„å¤ªé˜³èµ¤çº¬
 	double delta = asin(sin(BETA*M_PI / 180)*cos(epsilon*M_PI / 180) + cos(BETA*M_PI / 180)*sin(epsilon*M_PI / 180)*sin(lambda2*M_PI\
 		/ 180)) * 180 / M_PI;
 	
-	// ¼ÆËã¹Û²ìÕßµÄµ±µØÊ±½Ç
+	// è®¡ç®—è§‚å¯Ÿè€…çš„å½“åœ°æ—¶è§’
 	double H = fmod((upsilon + Longitude - alpha), 360);
 
-	// FUNC[4] ÊÓ²î¶ÔÌ«Ñô³à¾­¡¢³àÎ³¡¢Ê±½ÇµÄĞŞÕı
-	// alpha_prime¡¢delta_prime¡¢H_prime·Ö±ğÎªÊÓ²îĞŞÕıºóµÄÌ«Ñô³à¾­¡¢³àÎ³¡¢Ê±½Ç
-	// RÎªµØÈÕ¾àÀë£¨µ¥Î»ÎªÌìÎÄµ¥Î»£©
-	// LatitudeÎª¹Û²ìÕßµØÀíÎ³¶È
-	// EÎª¹Û²ìÕßº£°Î¸ß¶È
-	// HÎªÊÓ²îĞŞÕıÇ°µÄÊ±½Ç
-	// deltaÎªÊÓ²îĞŞÕıÇ°µÄÌ«Ñô³àÎ³
+	// FUNC[4] è§†å·®å¯¹å¤ªé˜³èµ¤ç»ã€èµ¤çº¬ã€æ—¶è§’çš„ä¿®æ­£
+	// alpha_primeã€delta_primeã€H_primeåˆ†åˆ«ä¸ºè§†å·®ä¿®æ­£åçš„å¤ªé˜³èµ¤ç»ã€èµ¤çº¬ã€æ—¶è§’
+	// Rä¸ºåœ°æ—¥è·ç¦»ï¼ˆå•ä½ä¸ºå¤©æ–‡å•ä½ï¼‰
+	// Latitudeä¸ºè§‚å¯Ÿè€…åœ°ç†çº¬åº¦
+	// Eä¸ºè§‚å¯Ÿè€…æµ·æ‹”é«˜åº¦
+	// Hä¸ºè§†å·®ä¿®æ­£å‰çš„æ—¶è§’
+	// deltaä¸ºè§†å·®ä¿®æ­£å‰çš„å¤ªé˜³èµ¤çº¬
 	double ksi = 8.794 / (3600 * R) * M_PI / 180;
 	double mju = atan(0.99664719*tan(Latitude * M_PI / 180));
 	double x = cos(mju) + (double)E / 6378140 * cos(Latitude * M_PI / 180);
@@ -298,38 +298,38 @@ struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Sec
 	//double alpha_prime = alpha + delta_alpha;
 	double H_prime = H - delta_alpha;
 
-	// solar postion algorithmsÖĞµÄ¹«Ê½
+	// solar postion algorithmsä¸­çš„å…¬å¼
 	double delta_prime = atan2((sin(delta * M_PI / 180) - y*sin(ksi))*cos(delta_alpha * M_PI / 180), \
 		(cos(delta * M_PI / 180) - x*sin(ksi)*cos(H* M_PI / 180))) * 180 / M_PI;
 
-	// ¼ÆËãµØÆ½×ø±êÏµÏÂÌ«ÑôµÄ¸ß¶È½Ç
-    // ²»¿¼ÂÇ´óÆøÕÛÉäÏÂµÄÌ«Ñô¸ß¶È½Ç
+	// è®¡ç®—åœ°å¹³åæ ‡ç³»ä¸‹å¤ªé˜³çš„é«˜åº¦è§’
+    // ä¸è€ƒè™‘å¤§æ°”æŠ˜å°„ä¸‹çš„å¤ªé˜³é«˜åº¦è§’
 	double e0 = asin(sin(Latitude * M_PI / 180)*sin(delta_prime* M_PI / 180) + cos(Latitude * M_PI / 180) \
 		*cos(delta_prime * M_PI / 180)*cos(H_prime* M_PI / 180)) * 180 / M_PI;
 
-	// ´óÆøÕÛÉäÒıÆğµÄÌ«Ñô¸ß¶È½ÇĞŞÕıÖµ
+	// å¤§æ°”æŠ˜å°„å¼•èµ·çš„å¤ªé˜³é«˜åº¦è§’ä¿®æ­£å€¼
 	double delta_e = (double)P / 1010 * 283 / (273 + (double)T) * 1.02 / (60 * tan((e0 + 10.3 / (e0 + 5.11))* M_PI / 180));
 
-	double e = e0 + delta_e;      // ĞŞÕıºóµÄÌ«Ñô¸ß¶È½Ç
-	double theta = 90 - e;        // ĞŞÕıºóµÄÌ«ÑôÌì¶¥½Ç
+	double e = e0 + delta_e;      // ä¿®æ­£åçš„å¤ªé˜³é«˜åº¦è§’
+	double theta = 90 - e;        // ä¿®æ­£åçš„å¤ªé˜³å¤©é¡¶è§’
 
-	// ¼ÆËãµØÆ½×ø±êÏµµÄÌ«Ñô·½Î»½Ç
-	// ·½ÏòÎª´ÓÄÏÏòÎ÷
+	// è®¡ç®—åœ°å¹³åæ ‡ç³»çš„å¤ªé˜³æ–¹ä½è§’
+	// æ–¹å‘ä¸ºä»å—å‘è¥¿
 	double TAU = fmod(((atan2(sin(H_prime* M_PI / 180), (cos(H_prime* M_PI / 180)*sin(Latitude* M_PI / 180) \
 		- tan(delta_prime* M_PI / 180)*cos(Latitude* M_PI / 180)))) * 180 / M_PI), 360);
 
-	// ·½ÏòÎª´Ó±±Ïò¶«
+	// æ–¹å‘ä¸ºä»åŒ—å‘ä¸œ
 	double PHI = fmod((TAU + 180), 360);
 
-	// ÖØĞÂÓÃ±äÁ¿±ê¼Ç
-	double At = 90 - theta;     // Ì«Ñô¸ß¶È½Ç
-	double Az = PHI;            // Ì«Ñô·½Î»½Ç
+	// é‡æ–°ç”¨å˜é‡æ ‡è®°
+	double At = 90 - theta;     // å¤ªé˜³é«˜åº¦è§’
+	double Az = PHI;            // å¤ªé˜³æ–¹ä½è§’
 
 	struct stu1 SP;
 	SP.SAt = At;
 	SP.SAz = Az;
 
-	// ÈëÉä¹âÊ¸Á¿
+	// å…¥å°„å…‰çŸ¢é‡
 	SP.RIx = -cos(At / 180 * M_PI)*cos(Az / 180 * M_PI);
 	SP.RIy = cos(At / 180 * M_PI)*sin(Az / 180 * M_PI);
 	SP.RIz = sin(At / 180 * M_PI);
@@ -418,7 +418,7 @@ ERR_STA SHG(int Year, int Month, int Day, char fdir[], int HelioAdjTime, int Hel
 				if (ZxAng < 0) {
 					ZxAng = ZxAng + M_PI * 2;
 				}
-				YxAng = round(((YxAng*(1 + EP7) - EP4) * 180 / M_PI) * 1000) / 1000;   // »¡¶È×ª³É½Ç¶È, ¾«È·µ½Ğ¡ÊıµãºóÃæÈıÎ»
+				YxAng = round(((YxAng*(1 + EP7) - EP4) * 180 / M_PI) * 1000) / 1000;   // å¼§åº¦è½¬æˆè§’åº¦, ç²¾ç¡®åˆ°å°æ•°ç‚¹åé¢ä¸‰ä½
 				ZxAng = round(((ZxAng*(1 + EP6) - EP3) * 180 / M_PI) * 1000) / 1000;
 
 				Second2 = Second2 + dTHI;
@@ -525,7 +525,7 @@ ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, in
 				}
 #endif
 
-				YxAng = round(((YxAng*(1 + EP7) - EP4) * 180 / M_PI) * 1000) / 1000;   // »¡¶È×ª³É½Ç¶È, ¾«È·µ½Ğ¡ÊıµãºóÃæÈıÎ»
+				YxAng = round(((YxAng*(1 + EP7) - EP4) * 180 / M_PI) * 1000) / 1000;   // å¼§åº¦è½¬æˆè§’åº¦, ç²¾ç¡®åˆ°å°æ•°ç‚¹åé¢ä¸‰ä½
 				ZxAng = round(((ZxAng*(1 + EP6) - EP3) * 180 / M_PI) * 1000) / 1000;
 
 				Second2 = Second2 + dTHI;

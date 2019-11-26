@@ -23,10 +23,10 @@ __attribute__((unused))
 static void SetStampAsTimeTable(tm & reftime, PROCESS_RESULT  &pro)
 {
 #if 0
-	//¼ÇÂ¼½á¹ûÎªÅÄÉã¿ªÊ¼Ê±¼ä
+	//è®°å½•ç»“æœä¸ºæ‹æ‘„å¼€å§‹æ—¶é—´
 	time_t tt = pro.timGetImg;
 #else
-	//¼ÇÂ¼½á¹ûÎªÊ±¼ä±íÊ±¼ä
+	//è®°å½•ç»“æœä¸ºæ—¶é—´è¡¨æ—¶é—´
 	time_t tt = pro.TableTimeGetImg;
 #endif
 	localtime_r(&tt, &reftime);
@@ -36,10 +36,10 @@ __attribute__((unused))
 static void SetStampAsCaptureTime(tm & reftime, PROCESS_RESULT  &pro)
 {
 #if 1
-	//¼ÇÂ¼½á¹ûÎªÅÄÉã¿ªÊ¼Ê±¼ä
+	//è®°å½•ç»“æœä¸ºæ‹æ‘„å¼€å§‹æ—¶é—´
 	time_t tt = pro.timGetImg;
 #else
-	//¼ÇÂ¼½á¹ûÎªÊ±¼ä±íÊ±¼ä
+	//è®°å½•ç»“æœä¸ºæ—¶é—´è¡¨æ—¶é—´
 	time_t tt = pro.TableTimeGetImg;
 #endif
 	localtime_r(&tt, &reftime);
