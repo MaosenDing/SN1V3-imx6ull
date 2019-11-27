@@ -5,7 +5,7 @@
 #include <regex>
 #include <algorithm>
 #include <time_interval.h>
-#include "JDcomhead.h"
+#include "jd_share.h"
 
 
 #include <string.h>

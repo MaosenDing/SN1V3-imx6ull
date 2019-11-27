@@ -5,7 +5,6 @@ include(compiler.cmake)
 option(ENABLE_SHARED_COM "enable shared com" ON)
 option(ENABLE_ERRHANDLE_COM "enable shared errHandle" ON)
 
-set(useShared 1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(-mcpu=arm926ej-s -mapcs -rdynamic)
@@ -63,6 +62,9 @@ target_link_libraries(main timework)
 
 add_subdirectory(comlib)
 target_link_libraries(main comlib)
+
+add_subdirectory(JDsvc)
+
 
 #install main
 INSTALL(TARGETS main
