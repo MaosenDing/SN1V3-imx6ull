@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 
 include(compiler.cmake)
 
+option(ENABLE_SHARED_COM "enable shared com" ON)
+option(ENABLE_ERRHANDLE_COM "enable shared errHandle" ON)
+
 set(useShared 1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -22,9 +25,6 @@ include_directories("jpeg")
 link_directories("${PROJECT_SOURCE_DIR}/jpeg")
 #SN1头文件
 include_directories("com_inc")
-#glog
-include_directories("glog")
-link_directories("${PROJECT_SOURCE_DIR}/glog")
 
 #通用lib
 include_directories("${PROJECT_SOURCE_DIR}/comlib")
@@ -67,12 +67,10 @@ target_link_libraries(main text)
 target_link_libraries(main datapro)
 target_link_libraries(main timework)
 
-
 add_subdirectory(comlib)
 target_link_libraries(main comlib)
 
 #添加外部动态链接库 必须放后面 不然链接不过
-target_link_libraries(main -lglog)
 target_link_libraries(main -ljpeg)
 
 
