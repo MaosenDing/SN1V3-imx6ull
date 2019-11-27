@@ -1,5 +1,4 @@
 
-#PROJECT(MDC)
 include_directories("${PROJECT_SOURCE_DIR}/errHandle")
 include_directories("./")
 link_directories("${PROJECT_SOURCE_DIR}/errHandle")
@@ -15,3 +14,4 @@ INSTALL(TARGETS mdc
 
 target_link_libraries(mdc errHandle)
 target_link_libraries(mdc comlib)
+target_link_libraries(mdc -lpthread)

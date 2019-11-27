@@ -23,8 +23,34 @@
 using namespace std;
 int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
+static int diff_timeval_ms(timeval & a, timeval & b)
+{
+	timeval dif;
+	dif.tv_sec = a.tv_sec - b.tv_sec;
+	dif.tv_usec = a.tv_usec - b.tv_usec;
 
+	return dif.tv_sec * 1000 + dif.tv_usec / 1000;
+}
 
+static void mdc_alive_reflash(SN1_SHM * psn1)
+{
+	while (true) {
+		sleep(1);
+
+		timeval nowtv, rectv;
+		rectv.tv_sec = psn1->last_tv_sec;
+		rectv.tv_usec = psn1->last_tv_usec;
+
+		gettimeofday(&nowtv, nullptr);
+
+		int abs_ms = abs(diff_timeval_ms(nowtv, rectv));
+
+		if (abs_ms / 1000 > psn1->max_time_out_second) {
+			psn1->mdc_flag = SN1_SHM::MDC_TIME_FALSE;
+			psn1->helo_status = SN1_SHM::Helo_not_ready;
+		}
+	}
+}
 
 
 static int mdc_uart_init(JD_INFO_TIM & jit)
@@ -197,10 +223,9 @@ int init_mdc_monitor_Service(int argc,char * argv[])
 	}
 
 
-#if 0
 	thread p(mdc_alive_reflash, psn1);
 	p.detach();
-#endif
+
 
 	//mdc poll will never return
 	int ret = JD_run_poll(jif, -1);
