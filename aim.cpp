@@ -9,7 +9,6 @@
 #include "SN1V2_com.h"
 #include "timSet.h"
 #include <algorithm>
-#include "jpgInc/jpeglib.h"
 #include "time_interval.h"
 #include <sys/stat.h>
 #include "errHandle/errHandle.h"

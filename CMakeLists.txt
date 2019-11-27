@@ -18,11 +18,7 @@ PROJECT(PROJECT_ONE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-#添加链接
-#libjpeg.so
 
-include_directories("jpeg")
-link_directories("${PROJECT_SOURCE_DIR}/jpeg")
 #SN1头文件
 include_directories("com_inc")
 
@@ -32,8 +28,6 @@ include_directories("${PROJECT_SOURCE_DIR}/comlib")
 
 #主目录编译文件
 add_executable(main aim.cpp)
-
-
 
 
 #imageProcess
@@ -69,10 +63,6 @@ target_link_libraries(main timework)
 
 add_subdirectory(comlib)
 target_link_libraries(main comlib)
-
-#添加外部动态链接库 必须放后面 不然链接不过
-target_link_libraries(main -ljpeg)
-
 
 #install main
 INSTALL(TARGETS main
