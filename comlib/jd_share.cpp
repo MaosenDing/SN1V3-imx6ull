@@ -67,3 +67,35 @@ unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned int firs
 	else
 		return 0;
 }
+
+void disp_x_buff(FILE * fp, unsigned char * buff, int num)
+{
+	for (int i = 0; i < num; i++) {
+		fprintf(fp, "%#02x ", buff[i]);
+	}
+	fprintf(fp, "\n");
+}
+
+
+int ChkifCMD(int argc, char *argv[], const char * cmd)
+{
+	for (int i = 0; i < argc; i++) {
+		if (!strcmp(cmd, argv[i])) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+char * ChkCmdVal(int argc, char * argv[], const char *cmd)
+{
+	for (int i = 0; i < argc; i++) {
+		if (!strcmp(cmd, argv[i])) {
+			if (i + 1 < argc) {
+				return argv[i + 1];
+			}
+		}
+	}
+	return nullptr;
+}
+

@@ -1,6 +1,5 @@
 #include <JDcomhead.h>
 #include <iostream>
-//#include <communicate.h>
 #include <thread> 
 #include <sys/poll.h>
 #include <vector>
@@ -132,23 +131,6 @@ void JD_pro_ctl(JD_INFO & jif,int cmd ,JD_INFO::JD_PRO profun, int ctl)
 	}
 }
 
-int JD_Name_transfer(const unsigned char * input, char * outbuff, int InMaxSz)
-{
-	uint32_t tmp;
-	unsigned char buff[3];
-
-	memcpy(&tmp, input, 4);
-
-	buff[0] = tmp & 0x7f;
-
-	buff[1] = tmp >> 7;
-	buff[1] &= 7;
-
-	buff[2] = tmp >> 10;
-	buff[2] &= 0x3f;
-
-	return snprintf(outbuff, InMaxSz, "%03d%01d%02d%03d", (int)buff[0], (int)buff[1], (int)buff[2], (int)input[2]);
-}
 
 static int JD_command_respon(JD_INFO & jif, JD_FRAME & jfr)
 {
@@ -225,15 +207,6 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
 	return JD_CONTINUE;
 }
 
-
-void disp_x_buff(FILE * fp,unsigned char * buff, int num)
-{
-	for (int i = 0; i < num; i++)
-	{
-		fprintf(fp,"%#02x ", buff[i]);
-	}
-	fprintf(fp,"\n");
-}
 
 
 int JD_run_poll(JD_INFO& jif, int TimeOutMS)

@@ -8,9 +8,8 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <JDcomhead.h>
+#include "JDcomhead.h"
 #include <stdio.h>
-#include <thread>
 #include <string.h>
 #include <string>
 #include <fstream>
@@ -19,38 +18,14 @@
 #include "errHandle/errHandle.h"
 #include "mem_share.h"
 #include "versions.h"
+#include "jd_share.h"
+
 
 using namespace std;
 int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
-static int diff_timeval_ms(timeval & a, timeval & b)
-{
-	timeval dif;
-	dif.tv_sec = a.tv_sec - b.tv_sec;
-	dif.tv_usec = a.tv_usec - b.tv_usec;
 
-	return dif.tv_sec * 1000 + dif.tv_usec / 1000;
-}
 
-static void mdc_alive_reflash(SN1_SHM * psn1)
-{
-	while (true) {
-		sleep(1);
-
-		timeval nowtv, rectv;
-		rectv.tv_sec = psn1->last_tv_sec;
-		rectv.tv_usec = psn1->last_tv_usec;
-
-		gettimeofday(&nowtv, nullptr);
-
-		int abs_ms = abs(diff_timeval_ms(nowtv, rectv));
-
-		if (abs_ms / 1000 > psn1->max_time_out_second) {
-			psn1->mdc_flag = SN1_SHM::MDC_TIME_FALSE;
-			psn1->helo_status = SN1_SHM::Helo_not_ready;
-		}
-	}
-}
 
 
 static int mdc_uart_init(JD_INFO_TIM & jit)
@@ -96,27 +71,7 @@ JDPROSTRUCT JD_init_group[] =
 #endif
 };
 
-static int ChkifCMD(int argc, char *argv[], const char * cmd)
-{
-	for (int i = 0; i < argc; i++) {
-		if (!strcmp(cmd, argv[i])) {
-			return 1;
-		}
-	}
-	return 0;
-}
 
-static char * ChkCmdVal(int argc, char * argv[], const char *cmd)
-{
-	for (int i = 0; i < argc; i++) {
-		if (!strcmp(cmd, argv[i])) {
-			if (i + 1 < argc) {
-				return argv[i + 1];
-			}
-		}
-	}
-	return nullptr;
-}
 
 
 static void bus_handle(int signo)
@@ -126,25 +81,50 @@ static void bus_handle(int signo)
 	exit(-1);
 }
 
-
-int init_mdc_monitor_Service(int argc,char * argv[])
+static void jif_dbg_set(JD_INFO_TIM &jif)
 {
-	signal(SIGBUS, bus_handle);
+	jif.dbg_pri_snd_len = 1;
+	jif.dbg_pri_snd_word = 1;
+	jif.dbg_pri_rd_len = 1;
+	jif.dbg_pri_rd_word = 1;
+	jif.dbg_shm_ret_printf = 1;
 
-	prctl(PR_SET_NAME, "mdc service");
+	jif.fake_check_flag = 1;
+	jif.dbg_pri_chk_flag = 2;
+	jif.dbg_pri_error_cmd = 1;
+}
 
-	key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
-	
-	SN1_SHM * psn1 = (SN1_SHM *)getSHM(key, sizeof(SN1_SHM));
-	psn1->mdc_flag = SN1_SHM::MDC_TIME_FALSE;
-	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
-	if (psn1 == nullptr)
-	{
-		exit(EXIT_FAILURE);
-	}
-	
-	JD_INFO_TIM jif;
+static void jif_dbgtim_set(JD_INFO_TIM &jif)
+{
+	jif.dbg_pri_snd_len = 0;
+	jif.dbg_pri_snd_word = 0;
+	jif.dbg_pri_rd_len = 0;
+	jif.dbg_pri_rd_word = 0;
+	jif.dbg_shm_ret_printf = 0;
 
+	jif.fake_check_flag = 0;
+	jif.dbg_pri_chk_flag = 2;
+	jif.dbg_pri_error_cmd = 1;
+	jif.dbg_tim_rec_printf = 1;
+}
+
+
+static void jif_normal_set(JD_INFO_TIM &jif)
+{
+	jif.dbg_pri_snd_len = 0;
+	jif.dbg_pri_snd_word = 0;
+	jif.dbg_pri_rd_len = 0;
+	jif.dbg_pri_rd_word = 0;
+	jif.dbg_shm_ret_printf = 0;
+
+	jif.fake_check_flag = 0;
+	jif.dbg_pri_chk_flag = 0;
+	jif.dbg_pri_error_cmd = 0;
+	jif.dbg_tim_rec_printf = 0;
+}
+
+static void set_bound_rate(JD_INFO_TIM &jif, int argc, char * argv[])
+{
 	char * rateVal = ChkCmdVal(argc, argv, "-r");
 
 	int rate = 0;
@@ -155,81 +135,66 @@ int init_mdc_monitor_Service(int argc,char * argv[])
 	if (rate) {
 		jif.rate = rate;
 	}
+}
 
-	int fd = mdc_uart_init(jif);
-	if (fd < 0){
-		printf("mdc uart open failed\n");
+SN1_SHM * get_shared_cfg()
+{
+	key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
+
+	SN1_SHM * psn1 = (SN1_SHM *)getSHM(key, sizeof(SN1_SHM));
+	psn1->mdc_flag = SN1_SHM::MDC_TIME_FALSE;
+	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
+	return psn1;
+}
+
+
+
+int init_mdc_monitor_Service(int argc, char * argv[])
+{
+	signal(SIGBUS, bus_handle);
+
+	prctl(PR_SET_NAME, "mdc service");
+	SN1_SHM *psn1 = get_shared_cfg();
+	if (nullptr == psn1) {
 		exit(EXIT_FAILURE);
 	}
-	else{
+
+	JD_INFO_TIM jif;
+
+	set_bound_rate(jif, argc, argv);
+
+	int fd = mdc_uart_init(jif);
+	if (fd < 0) {
+		printf("mdc uart open failed\n");
+		exit(EXIT_FAILURE);
+	} else {
 		printf("mdc init\n");
 	}
-#if 0
-	//for send test
-	while (true)
-	{
-		char txtest[] = "1111111\n";
-
-		write(fd, txtest, sizeof(txtest));
-	}
-#endif
 
 	jif.fd = fd;
 	jif.dbg_tim_rec_printf = 1;
-	for (auto p : JD_init_group)
-	{
+	for (auto p : JD_init_group) {
 		JD_pro_ctl(jif, p.command, p.pro, 1);
 	}
 	jif.timesetFlag = JD_TIME_UNSET;
 
 	jif.fake_check_flag = JD_CRC_FACK_TEST;
-	
+
 	jif.psn1 = psn1;
 	if (ChkifCMD(argc, argv, "-dbg")) {
-		jif.dbg_pri_snd_len = 1;
-		jif.dbg_pri_snd_word = 1;
-		jif.dbg_pri_rd_len = 1;
-		jif.dbg_pri_rd_word = 1;
-		jif.dbg_shm_ret_printf = 1;
+		jif_dbg_set(jif);
 
-		jif.fake_check_flag = 1;
-		jif.dbg_pri_chk_flag = 2;
-		jif.dbg_pri_error_cmd = 1;
-	}
-	else if (ChkifCMD(argc, argv, "-dbgtim")) {
-		jif.dbg_pri_snd_len = 0;
-		jif.dbg_pri_snd_word = 0;
-		jif.dbg_pri_rd_len = 0;
-		jif.dbg_pri_rd_word = 0;
-		jif.dbg_shm_ret_printf = 0;
-
-		jif.fake_check_flag = 0;
-		jif.dbg_pri_chk_flag = 2;
-		jif.dbg_pri_error_cmd = 1;
-		jif.dbg_tim_rec_printf = 1;
-	}
-	else {
-		jif.dbg_pri_snd_len = 0;
-		jif.dbg_pri_snd_word = 0;
-		jif.dbg_pri_rd_len = 0;
-		jif.dbg_pri_rd_word = 0;
-		jif.dbg_shm_ret_printf = 0;
-
-		jif.fake_check_flag = 0;
-		jif.dbg_pri_chk_flag = 0;
-		jif.dbg_pri_error_cmd = 0;
-		jif.dbg_tim_rec_printf = 0;
+	} else if (ChkifCMD(argc, argv, "-dbgtim")) {
+		jif_dbgtim_set(jif);
+	} else {
+		jif_normal_set(jif);
 	}
 
-
-	thread p(mdc_alive_reflash, psn1);
-	p.detach();
-
+	//regist_timer_auto_flush(psn1);
 
 	//mdc poll will never return
 	int ret = JD_run_poll(jif, -1);
-	switch (ret)
-	{
+	switch (ret) {
 	case JD_TIME_OUT:
 		printf("mdc timeout\n");
 		exit(0);

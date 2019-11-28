@@ -133,4 +133,6 @@ int JD_Name_transfer(const unsigned char * input, char * outbuff,int InMaxSz);
 
 int UARTX_Init(char *, int baudrate, int fctl, int databit, int stopbit, int parity);
 
+int regist_timer_auto_flush(SN1_SHM * psn1);
+
 #endif
