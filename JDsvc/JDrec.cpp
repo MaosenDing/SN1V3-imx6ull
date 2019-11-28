@@ -22,27 +22,20 @@ static long diffMS(timeval & tstart, timeval & tend)
 
 
 
-/*
-* 函数名称： crc_check()
-* 功    能： CRC16校验码比较
-* 入口参数： len：数据个数   Buff：数组地址    firstcrc：0xFFFF   *match_byte:NULL
-* 出口参数： 1 :校验通过   0：校验失败
-*/
+
+
 
 static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned int firstcrc, unsigned char *match_byte,JD_INFO & jif)
 {
 	unsigned int crc0, crc1;
 
-	if (match_byte == NULL)
-	{
+	if (match_byte == NULL) {
 		if (len > 2) {
 			crc0 = crc_make(Buff, (len - 2), firstcrc);
 			crc1 = (Buff[len - 1] << 8) + Buff[len - 2];
-		}
-		else
+		} else
 			return 0;
-	}
-	else {
+	} else {
 		crc0 = crc_make(Buff, len, firstcrc);
 		crc1 = (match_byte[1] << 8) + match_byte[0];
 	}

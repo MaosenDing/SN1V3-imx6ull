@@ -18,7 +18,7 @@
 #include <sys/wait.h>
 #include "errHandle/errHandle.h"
 #include "mem_share.h"
-
+#include "versions.h"
 
 using namespace std;
 int JD_send(JD_INFO & jif, JD_FRAME & jfr);
@@ -140,7 +140,6 @@ int init_mdc_monitor_Service(int argc,char * argv[])
 	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
 	if (psn1 == nullptr)
 	{
-		//
 		exit(EXIT_FAILURE);
 	}
 	
@@ -251,7 +250,6 @@ int init_mdc_monitor_Service(int argc,char * argv[])
 
 int main(int argc, char **argv)
 {
-#if 0
 	char * getVersion();
 	for (int i = 0; i < argc; i++) {
 		if (!strcmp("-v", argv[i])) {
@@ -260,7 +258,6 @@ int main(int argc, char **argv)
 			return 0;
 		}
 	}
-#endif
 	logInit("mdc", "./mdc", google::GLOG_WARNING);
 	return init_mdc_monitor_Service(argc, argv);
 }

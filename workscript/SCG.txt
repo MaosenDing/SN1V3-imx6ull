@@ -34,8 +34,8 @@
 %STN,3#运行cre迭代上限
 %SFD,false#是否清除数据
 %SHS,true#保留timetable
-%SGV,3#增益
-%SST,5#曝光
+%SGV,5#增益
+%SST,200#曝光
 %BFT,0.4#上午阈值
 %AFT,0.4#下午阈值
 %MRT,6#最长拍摄保留时间
@@ -45,5 +45,5 @@
 %LHB,9#上午开始小时 -1表示不受限
 %LHA,17#下午结束小时 -1表示不受限
 #FSP,/home/556_bk/testp#保存路径
-%VER,1.5
+%VER,1.6
 

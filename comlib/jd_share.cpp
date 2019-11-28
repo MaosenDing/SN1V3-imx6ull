@@ -45,3 +45,25 @@ unsigned int crc_make(unsigned char *ptr, int len, unsigned int firstcrc)
 	return crc;
 }
 
+/*
+* 函数名称： crc_check()
+* 功    能： CRC16校验码比较
+* 入口参数： len：数据个数   Buff：数组地址    firstcrc：0xFFFF   *match_byte:NULL
+* 出口参数： 1 :校验通过   0：校验失败
+*/
+
+unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned int firstcrc)
+{
+	unsigned int crc0, crc1;
+
+	if (len <= 2) {
+		return 0;
+	}
+	crc0 = crc_make(Buff, (len - 2), firstcrc);
+	crc1 = (Buff[len - 1] << 8) + Buff[len - 2];
+
+	if (crc0 == crc1)
+		return 1;
+	else
+		return 0;
+}
