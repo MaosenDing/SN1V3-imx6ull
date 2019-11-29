@@ -8,6 +8,8 @@
 #include <map>
 #include <stdio.h>
 #include "SN1V2_rtConfig.h"
+#include <condition_variable>
+#include <semaphore.h>
 #define JD_OK 0
 #define JD_ERROR_HEAD (-1)
 #define JD_LACK_HEAD (-2)
@@ -85,6 +87,11 @@ struct JD_INFO
 	typedef int(*JD_PRO) (JD_INFO & jif, JD_FRAME & jfr);
 	std::map<int, JD_PRO> jd_pro_method;
 	std::mutex pro_mtd_mtx;//lock for jd_pro_method
+
+	sem_t sem_enable;
+	
+	int wait_time_out_ms = 20;
+
 	JDTIME timesetFlag;	
 	JD_PRO default_err_cmd;
 	int fake_check_flag;

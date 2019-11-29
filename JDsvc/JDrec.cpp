@@ -115,6 +115,7 @@ static int JD_default_response(JD_INFO & jif, JD_FRAME & jfr)
 JD_INFO::JD_INFO()
 {
 	default_err_cmd = JD_default_response;
+	sem_init(&sem_enable, 0, 0);
 }
 
 void JD_pro_ctl(JD_INFO & jif,int cmd ,JD_INFO::JD_PRO profun, int ctl)
@@ -196,7 +197,7 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
 					{
 						return JD_CLOSE_FRAME;
 					}
-					return JD_OK;
+					return ret;
 				}
 				else{
 					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc error\n");
@@ -266,7 +267,12 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 			if (JD_CONTINUE == retPro) {
 			}
 
-			if (JD_OK == retPro) {
+			if (JD_OK == retPro) {				
+				int val;
+				sem_getvalue(&jif.sem_enable, &val);
+				if (val == 0) {
+					sem_post(&jif.sem_enable);
+				}
 				rxlen = 0;
 			}
 		}

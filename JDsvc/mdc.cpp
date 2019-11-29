@@ -42,11 +42,7 @@ static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
 
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 
-JDPROSTRUCT JD_init_group[] =
-{
-	{ 0x34 | 0x80, JD_time_rec }
 
-};
 
 
 
@@ -124,7 +120,6 @@ SN1_SHM * get_shared_cfg()
 	return psn1;
 }
 
-
 int register_master_svc(JD_INFO& jif);
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
@@ -150,9 +145,8 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 	jif.fd = fd;
 	jif.dbg_tim_rec_printf = 1;
-	for (auto p : JD_init_group) {
-		JD_pro_ctl(jif, p.command, p.pro, 1);
-	}
+
+
 	jif.timesetFlag = JD_TIME_UNSET;
 
 	jif.fake_check_flag = JD_CRC_FACK_TEST;

@@ -21,32 +21,50 @@
 #include "mem_share.h"
 #include "versions.h"
 #include "jd_share.h"
-
+#include <iostream>
 #include <thread>
+#include "svc.h"
 using namespace std;
+
+
+JDAUTOSEND * jdsvc_time();
 
 int master_svc_thread(JD_INFO * pjif)
 {
 	while (true) {
-		sleep(1);
 
-		JD_FRAME jfr;
-		
-		unsigned char testbuff[] = "send test";
+		struct timespec ts;
+		ts.tv_nsec += 20 * 1000;
+		clock_gettime(CLOCK_REALTIME, &ts);
 
-		jfr.jd_send_buff = &testbuff;
-		jfr.jd_data_len = sizeof(testbuff);
-		jfr.jd_command = 0x34;
+		sem_timedwait(&pjif->sem_enable,&ts);
 
-		JD_send(*pjif, jfr);
+		JDAUTOSEND *t = jdsvc_time();
+
+		if (t->need_service()) {
+			t->service_pro(*pjif);
+		}
 	}
 }
+
+int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
+JDPROSTRUCT JD_init_rec_group[] =
+{
+	{ 0x34 | 0x80, JD_time_rec }
+
+};
+
+
 
 
 
 
 int register_master_svc(JD_INFO& jif)
 {
+	for (auto p : JD_init_rec_group) {
+		JD_pro_ctl(jif, p.command, p.pro, 1);
+	}
+
 	thread p(master_svc_thread, &jif);
 	p.detach();
 	return 0;
