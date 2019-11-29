@@ -160,7 +160,7 @@ int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
 		printf("mdc id = %s\n", outbuff);
 #endif
 		shm_set_time(jif, nowtv, (int)jfr.jd_data_buff[8], jfr.jd_data_len > 9 ? jfr.jd_data_buff + 9 : nullptr);
-		JD_ret_cap_status(jif, jfr);
+		//JD_ret_cap_status(jif, jfr);
 	}
 	return JD_OK;
 }

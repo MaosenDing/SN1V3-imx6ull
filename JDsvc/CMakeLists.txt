@@ -8,7 +8,9 @@ link_directories("${PROJECT_SOURCE_DIR}/comlib")
 
 set(JDsvcfil jdsvc_time.cpp)
 
-add_executable(mdc mdc.cpp JDrec.cpp uart.cpp timer_reflush.cpp ${JDsvcfil})
+add_executable(mdc mdc.cpp 
+JDrec.cpp uart.cpp timer_reflush.cpp mastersvc.cpp
+${JDsvcfil})
 
 
 

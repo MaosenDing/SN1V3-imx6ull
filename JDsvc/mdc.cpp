@@ -19,37 +19,26 @@
 #include "mem_share.h"
 #include "versions.h"
 #include "jd_share.h"
-
+#include "iostream"
 
 using namespace std;
-int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
 
 
 
 
-static int mdc_uart_init(JD_INFO_TIM & jit)
-{ 
+static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
+{
+	char * name = ChkCmdVal(argc, argv, "-s");
+	cout << "name " << name << endl;
+	if (!name) {
+		name = (char *)"/dev/ttyS6";
+	}
+
 	int rate = jit.rate ? jit.rate : 115200;
-	int fd = UARTX_Init("/dev/ttyS6", rate, 0, 8, 1, 0);
+	int fd = UARTX_Init(name, rate, 0, 8, 1, 0);
 	return fd;
 }
-
-
-
-#if ADD_TEST_JD_FUN
-static int JD_pro_test(JD_INFO & jif, JD_FRAME & jfr)
-{
-	const char * p = "recieve test";
-	jfr.jd_send_buff = (void*)p;
-	jfr.jd_data_len = strlen(p);
-
-	JD_send(jif, jfr);
-	printf("receive test ok\n");
-
-	return JD_CLOSE_FRAME;
-}
-#endif
 
 
 int JD_cre_response(JD_INFO & jif, JD_FRAME & jfr);
@@ -57,9 +46,10 @@ int JD_file_service(JD_INFO & jif, JD_FRAME & jfr);
 int JD_file_version(JD_INFO & jif, JD_FRAME & jfr);
 int JD_TransMit_img(JD_INFO & jif, JD_FRAME & jfr);
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
+
 JDPROSTRUCT JD_init_group[] =
 {
-	{ 0x34 , JD_time_rec }
+	{ 0x34 | 0x80, JD_time_rec }
 	//,{ 0x33, JD_cre_response }
 	//,{0x35 , JD_file_service }
 	//,{0x37 , JD_file_version}
@@ -148,7 +138,7 @@ SN1_SHM * get_shared_cfg()
 }
 
 
-
+int register_master_svc(JD_INFO& jif);
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
 	signal(SIGBUS, bus_handle);
@@ -163,7 +153,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 	set_bound_rate(jif, argc, argv);
 
-	int fd = mdc_uart_init(jif);
+	int fd = mdc_uart_init(jif, argc, argv);
 	if (fd < 0) {
 		printf("mdc uart open failed\n");
 		exit(EXIT_FAILURE);
@@ -189,7 +179,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	} else {
 		jif_normal_set(jif);
 	}
-
+	register_master_svc(jif);
 	//regist_timer_auto_flush(psn1);
 
 	//mdc poll will never return
