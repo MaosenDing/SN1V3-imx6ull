@@ -40,25 +40,12 @@ static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
 	return fd;
 }
 
-
-int JD_cre_response(JD_INFO & jif, JD_FRAME & jfr);
-int JD_file_service(JD_INFO & jif, JD_FRAME & jfr);
-int JD_file_version(JD_INFO & jif, JD_FRAME & jfr);
-int JD_TransMit_img(JD_INFO & jif, JD_FRAME & jfr);
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 
 JDPROSTRUCT JD_init_group[] =
 {
 	{ 0x34 | 0x80, JD_time_rec }
-	//,{ 0x33, JD_cre_response }
-	//,{0x35 , JD_file_service }
-	//,{0x37 , JD_file_version}
-	//,{0x38 , JD_TransMit_img}
-#if ADD_TEST_JD_FUN
-	//key request
-	//aa aa 80 1 4 5 6 13 00 2 3 4 5 6 7 8 1 b5 00
-	,{0x80 ,JD_pro_test}
-#endif
+
 };
 
 

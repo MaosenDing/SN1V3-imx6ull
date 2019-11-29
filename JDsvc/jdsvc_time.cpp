@@ -101,66 +101,11 @@ static int JD_ret_cap_status(JD_INFO & jif, JD_FRAME & jfr)
 
 
 
-
-
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
-	if (jfr.jd_data_len >= 9) {
-		tm NowTm;
-		tmktime(NowTm, jfr.jd_data_buff);
-
-		time_t tt = mktime(&NowTm);
-
-		timeval rectv;
-		rectv.tv_sec = tt;
-		rectv.tv_usec = (int)(jfr.jd_data_buff[6] | jfr.jd_data_buff[7] << 8) * 1000;
-
-		timeval nowtv;
-		gettimeofday(&nowtv, nullptr);
-
-		//enable time diff && time set
-		if (jit.time_diff_max) {
-			int diff_ms = diff_timeval_ms(nowtv, rectv);
-			int abs_ms = abs(diff_ms);
-			//disp diff time
-			if (jit.dbg_tim_rec_printf) {
-
-				char  buffer[256];
-				int sz = 0;
-				sz += sprintf(buffer + sz, "mdc time = ");
-				sz += modify_raw_time(buffer + sz, jfr.jd_data_buff);
-				sz += sprintf(buffer + sz, ",");
-				tm & now_time = NowTm;
-				sz += sprintf(buffer + sz, "sn1 time = %4d-%02d-%02d %02d:%02d:%02d--%06ld"
-					, now_time.tm_year + 1900, now_time.tm_mon + 1, now_time.tm_mday
-					, now_time.tm_hour, now_time.tm_min, now_time.tm_sec
-					, nowtv.tv_usec
-				);
-
-				fprintf(jit.dbg_fp, "%s , diff tick = %d ,status = %d \n", buffer, diff_ms, (int)jfr.jd_data_buff[8]);
-			}
-
-			if (abs_ms > jit.time_diff_max) {
-				settimeofday(&rectv, nullptr);
-				gettimeofday(&nowtv, nullptr);
-				disp_raw_time(jfr.jd_data_buff);
-
-				if (jit.dbg_tim_rec_printf)fprintf(jit.dbg_fp, "time set ok \n");
-			}
-		}
-		jit.psn1->mdc_id_num = jfr.jd_aim.value;
-#if 0
-		unsigned char buff[3];
-		memcpy(buff, &jfr.jd_aim, 3);
-
-		char outbuff[20];
-
-		JD_Name_transfer(buff, outbuff, sizeof(outbuff));
-		printf("mdc id = %s\n", outbuff);
-#endif
-		shm_set_time(jif, nowtv, (int)jfr.jd_data_buff[8], jfr.jd_data_len > 9 ? jfr.jd_data_buff + 9 : nullptr);
-		//JD_ret_cap_status(jif, jfr);
-	}
+	printf("rec data len = %d \n", jfr.jd_data_len);
 	return JD_OK;
 }
+
+
