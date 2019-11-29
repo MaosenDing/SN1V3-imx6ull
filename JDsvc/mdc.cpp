@@ -30,8 +30,8 @@ int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
 static int mdc_uart_init(JD_INFO_TIM & jit)
 { 
-	int rate = jit.rate ? jit.rate : 19200;
-	int fd = UARTX_Init("/dev/ttyS5", rate, 0, 8, 1, 0);
+	int rate = jit.rate ? jit.rate : 115200;
+	int fd = UARTX_Init("/dev/ttyS6", rate, 0, 8, 1, 0);
 	return fd;
 }
 
@@ -56,10 +56,10 @@ int JD_cre_response(JD_INFO & jif, JD_FRAME & jfr);
 int JD_file_service(JD_INFO & jif, JD_FRAME & jfr);
 int JD_file_version(JD_INFO & jif, JD_FRAME & jfr);
 int JD_TransMit_img(JD_INFO & jif, JD_FRAME & jfr);
-
+int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 JDPROSTRUCT JD_init_group[] =
 {
-	//{ 0x34 , JD_time_rec }
+	{ 0x34 , JD_time_rec }
 	//,{ 0x33, JD_cre_response }
 	//,{0x35 , JD_file_service }
 	//,{0x37 , JD_file_version}

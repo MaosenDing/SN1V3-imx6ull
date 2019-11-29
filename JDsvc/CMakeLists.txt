@@ -6,7 +6,12 @@ link_directories("${PROJECT_SOURCE_DIR}/comlib")
 
 
 
-add_executable(mdc mdc.cpp JDrec.cpp uart.cpp timer_reflush.cpp)
+set(JDsvcfil jdsvc_time.cpp)
+
+add_executable(mdc mdc.cpp JDrec.cpp uart.cpp timer_reflush.cpp ${JDsvcfil})
+
+
+
 
 INSTALL(TARGETS mdc
        RUNTIME DESTINATION bin
