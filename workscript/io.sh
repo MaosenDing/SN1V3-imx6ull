@@ -8,6 +8,7 @@ function ctrlIO()
 		echo $1 > /sys/class/gpio/export
 	fi	
 	echo out > /sys/class/gpio/gpio$1/direction
+	echo $2 > /sys/class/gpio/gpio$1/value
 }
 
 if [ $# -lt 2 ] ; then 

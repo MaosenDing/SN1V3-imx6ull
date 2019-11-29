@@ -215,7 +215,6 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 int main(int argc, char **argv)
 {
-	char * getVersion();
 	for (int i = 0; i < argc; i++) {
 		if (!strcmp("-v", argv[i])) {
 			printf("%s\n", getVersion());
