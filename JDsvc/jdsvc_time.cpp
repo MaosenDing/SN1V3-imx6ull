@@ -34,7 +34,7 @@ JDAUTOSEND * jdsvc_time()
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
-	printf("rec data len = %d \n", jfr.jd_data_len);
+	//printf("rec data len = %d \n", jfr.jd_data_len);
 	return JD_OK;
 }
 

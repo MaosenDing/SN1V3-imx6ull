@@ -115,7 +115,7 @@ static int JD_default_response(JD_INFO & jif, JD_FRAME & jfr)
 JD_INFO::JD_INFO()
 {
 	default_err_cmd = JD_default_response;
-	sem_init(&sem_enable, 0, 0);
+	//sem_init(&sem_enable, 0, 0);
 }
 
 void JD_pro_ctl(JD_INFO & jif,int cmd ,JD_INFO::JD_PRO profun, int ctl)
@@ -175,7 +175,7 @@ static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
 	}
 }
 
-static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
+static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int *remove_len)
 {
 	for (int i = 0; i < num; i++) {
 		int remainLen = num - i;
@@ -191,6 +191,9 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
 					int ret = JD_command_respon(jif, jfr);
 
 					if (ret == JD_UNKNOWN_COMMAND) {
+						if (remove_len) {
+							*remove_len = i + recpackLen;
+						}
 						continue;
 					}
 
@@ -257,7 +260,9 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 
 			if (jif.dbg_pri_rd_word && jif.dbg_fp)disp_x_buff(jif.dbg_fp, rxbuf, rxlen);
 
-			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif);
+			int removed_Len = 0;
+
+			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif, &removed_Len);
 
 			if (JD_CLOSE_FRAME == retPro) {
 				return JD_CLOSE_FRAME;
@@ -266,14 +271,14 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 			if (JD_CONTINUE == retPro) {
 			}
 
-			if (JD_OK == retPro) {				
-				int val;
-				sem_getvalue(&jif.sem_enable, &val);
-				//printf("post %d\n", val);
-				if (val == 0) {
-					sem_post(&jif.sem_enable);
-				}
+			if (JD_OK == retPro) {
+				jif.enable_cv.notify_all();
 				rxlen = 0;
+			}
+
+			if (removed_Len && removed_Len < rxlen) {
+				rxlen = rxlen - removed_Len;
+				memcpy(rxbuf, rxbuf + removed_Len, rxlen);
 			}
 		}
 	}

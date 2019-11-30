@@ -20,6 +20,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 #SN1头文件
 include_directories("com_inc")
+include_directories("errHandle")
 
 #通用lib
 include_directories("${PROJECT_SOURCE_DIR}/comlib")

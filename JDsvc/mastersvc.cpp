@@ -32,13 +32,9 @@ JDAUTOSEND * jdsvc_time();
 int master_svc_thread(JD_INFO * pjif)
 {
 	while (true) {
+		unique_lock<timed_mutex> lck(pjif->enable_mtx);
+		pjif->enable_cv.wait_for(lck, chrono::milliseconds(20));
 
-		struct timespec ts;		
-		clock_gettime(CLOCK_REALTIME, &ts);
-		ts.tv_nsec += 40 * 1000 * 1000;
-
-		int val = sem_timedwait(&pjif->sem_enable, &ts);
-		//printf("wait %d\n", val);
 
 		JDAUTOSEND *t = jdsvc_time();
 
