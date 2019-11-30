@@ -1,8 +1,7 @@
 
-include_directories("${PROJECT_SOURCE_DIR}/errHandle")
-include_directories("./")
-link_directories("${PROJECT_SOURCE_DIR}/errHandle")
-link_directories("${PROJECT_SOURCE_DIR}/comlib")
+#include_directories("${PROJECT_SOURCE_DIR}/errHandle")
+#link_directories("${PROJECT_SOURCE_DIR}/errHandle")
+#link_directories("${PROJECT_SOURCE_DIR}/comlib")
 
 
 
@@ -13,7 +12,7 @@ JDrec.cpp uart.cpp timer_reflush.cpp mastersvc.cpp
 ${JDsvcfil})
 
 
-
+target_include_directories(mdc PUBLIC "./")
 
 INSTALL(TARGETS mdc
        RUNTIME DESTINATION bin

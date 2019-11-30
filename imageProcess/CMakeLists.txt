@@ -9,7 +9,7 @@ target_link_libraries(imageProcess rgbxx_yuvxx2)
 
 
 
-include_directories("jpeg")
-link_directories("jpeg")
+target_include_directories(imageProcess PUBLIC "jpeg")
+target_link_directories(imageProcess PUBLIC "jpeg")
 target_link_libraries(imageProcess -ljpeg)
 
