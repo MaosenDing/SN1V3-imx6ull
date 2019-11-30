@@ -33,11 +33,12 @@ int master_svc_thread(JD_INFO * pjif)
 {
 	while (true) {
 
-		struct timespec ts;
-		ts.tv_nsec += 20 * 1000;
+		struct timespec ts;		
 		clock_gettime(CLOCK_REALTIME, &ts);
+		ts.tv_nsec += 40 * 1000 * 1000;
 
-		sem_timedwait(&pjif->sem_enable,&ts);
+		int val = sem_timedwait(&pjif->sem_enable, &ts);
+		//printf("wait %d\n", val);
 
 		JDAUTOSEND *t = jdsvc_time();
 

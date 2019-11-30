@@ -177,29 +177,28 @@ static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
 
 static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
 {
-	for (int i = 0; i < num; i++)
-	{
+	for (int i = 0; i < num; i++) {
 		int remainLen = num - i;
-		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA))
-		{
-			if (remainLen > 7)
-			{
+		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA)) {
+			if (remainLen > 7) {
 				int recpackLen = rxbuf[i + 7];
 
-				if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF, NULL, jif) == 1)
-				{
+				if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF, NULL, jif) == 1) {
 					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc ok\n");
 					JD_FRAME jfr;
 					make_rec_pack(rxbuf + i, num - i, jfr);
 
 					int ret = JD_command_respon(jif, jfr);
-					if (ret == JD_CLOSE_FRAME)
-					{
+
+					if (ret == JD_UNKNOWN_COMMAND) {
+						continue;
+					}
+
+					if (ret == JD_CLOSE_FRAME) {
 						return JD_CLOSE_FRAME;
 					}
 					return ret;
-				}
-				else{
+				} else {
 					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc error\n");
 				}
 			}
@@ -270,6 +269,7 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 			if (JD_OK == retPro) {				
 				int val;
 				sem_getvalue(&jif.sem_enable, &val);
+				//printf("post %d\n", val);
 				if (val == 0) {
 					sem_post(&jif.sem_enable);
 				}
