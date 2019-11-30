@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 3.0)
 include(compiler.cmake)
 
 option(ENABLE_SHARED_COM "enable shared com" ON)
-option(ENABLE_ERRHANDLE_COM "enable shared errHandle" ON)
+option(ENABLE_SHARED_ERRHANDLE "enable shared errHandle" ON)
+option(ENABLE_SHARED_TIM "enable shared tim" ON)
+
+
 option(CMAKE_VERBOSE_MAKEFILE "make verbose=1" ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")

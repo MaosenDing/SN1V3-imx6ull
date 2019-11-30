@@ -87,7 +87,10 @@ static int coredump(int argc, char * argv[])
 	return 0;
 }
 
-
+ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
+	, const int horFlip, const int VerFlip
+);
 
 
 static int capOnce(int argc, char * argv[])
@@ -133,7 +136,7 @@ static int capOnce(int argc, char * argv[])
 			cfg.FLAG_SAVE_BIN = 1;
 			cfg.FLAG_SAVE_ORG = 1;
 		}
-		capWork dw(capOnce, cfg, nullptr, testCSC);
+		capWork dw(capOnce, cfg, nullptr, testCSC, &ImageCapRGB);
 		dw.test_for_cap_once = 1;
 
 		//sleep(5);
@@ -325,7 +328,7 @@ int tableGenerate2(int argc, char * argv[])
 					cfg.af_size++;
 			}
 			//拍摄
-			capWork dw(photoPath, cfg, psn1, resName);
+			capWork dw(photoPath, cfg, psn1, resName, &ImageCapRGB);
 			__attribute__((unused)) int sz = timTableWorkWithReserveTime(timeset, dw, cfg.max_reserve_time);
 
 			//过滤res数据

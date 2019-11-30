@@ -7,13 +7,6 @@
 #include <thread>
 using namespace std;
 
-#if USING_DUMMY_CAP_SRC > 0
-
-dummyWork2::dummyWork2(int thr, float per, char *pa ,char * aimpp,float inQuality,int org,int bin) 
-	:thres(thr), thresPer(per), rdpath(pa), sp(getAllFileName(rdpath)),aimPath(aimpp),QualityThres(inQuality),save_org(org),save_bin(bin)
-	, index(0)
-{}
-
 static void PROCESS_RESULT_INIT(PROCESS_RESULT  &pro, timTableSet & tts)
 {
 	pro.TableTimeGetImg = tts.tt;
@@ -45,7 +38,12 @@ static void SetStampAsCaptureTime(tm & reftime, PROCESS_RESULT  &pro)
 	localtime_r(&tt, &reftime);
 }
 
+#if USING_DUMMY_CAP_SRC > 0
 
+dummyWork2::dummyWork2(int thr, float per, char *pa ,char * aimpp,float inQuality,int org,int bin) 
+	:thres(thr), thresPer(per), rdpath(pa), sp(getAllFileName(rdpath)),aimPath(aimpp),QualityThres(inQuality),save_org(org),save_bin(bin)
+	, index(0)
+{}
 
 void dummyWork2::work(timTableSet & tts, int flag)
 {
@@ -144,18 +142,16 @@ void dummyWork2::work(timTableSet & tts, int flag)
 #endif
 
 
-capWork::capWork(char * aimpp,SN1_CFG & inCfg,SN1_SHM * in_psn1,char * in_res_path) 
+capWork::capWork(char * aimpp,SN1_CFG & inCfg,SN1_SHM * in_psn1,char * in_res_path, T_ImageCapRGB * incap)
 	:aimPath(aimpp) ,res_path(in_res_path), cfg(inCfg), psn1(in_psn1)
+	, This_ImageCapRGB(incap)
 	,index(0), lastEnd(chrono::system_clock::now())
 {}
 
 
 
 
-ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
-	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
-	, const int horFlip, const int VerFlip
-);
+
 
 void capWork::cap_miss_process(timTableSet & time)
 {
@@ -244,8 +240,11 @@ void capWork::work(timTableSet & timets, int flag)
 
 		PROCESS_RESULT pro;
 		PROCESS_RESULT_INIT(pro, timets);
-		ERR_STA err = ImageCapRGB(aimPath, cfg.IMG_WIDTH, cfg.IMG_HEIGTH, pro, cfg.thres, cfg.thresPer, cfg.FLAG_SAVE_ORG, cfg.FLAG_SAVE_BIN, cfg.MinCntGrp
-			, cfg.gain, cfg.expo , cfg.isHorisFlip, cfg.isVeriFlip);
+		ERR_STA err = err_UNKNOWN;
+		if (This_ImageCapRGB) {
+			err = (*This_ImageCapRGB)(aimPath, cfg.IMG_WIDTH, cfg.IMG_HEIGTH, pro, cfg.thres, cfg.thresPer, cfg.FLAG_SAVE_ORG, cfg.FLAG_SAVE_BIN, cfg.MinCntGrp
+				, cfg.gain, cfg.expo, cfg.isHorisFlip, cfg.isVeriFlip);
+		}
 		//this_thread::sleep_for(chrono::milliseconds(3000));
 
 		tm reftime;

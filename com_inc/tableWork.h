@@ -49,6 +49,14 @@ private:
 };
 #endif
 #include <chrono>
+
+
+typedef ERR_STA(T_ImageCapRGB)(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
+	, const int horflip, const int verFlip
+	);
+
+
 struct capWork : public setWork
 {
 	char *rdpath;
@@ -60,8 +68,9 @@ struct capWork : public setWork
 	
 	int test_for_cap_once = 0;
 	
-	explicit capWork(char * aimP,SN1_CFG & inCfg,SN1_SHM * in_psn1,char *in_res_path);
+	explicit capWork(char * aimP,SN1_CFG & inCfg,SN1_SHM * in_psn1,char *in_res_path , T_ImageCapRGB * incap);
 	virtual void work(timTableSet & time, int flag) override;
+	T_ImageCapRGB * This_ImageCapRGB;
 private:
 	int index;
 	capWork(const capWork&);
@@ -70,8 +79,8 @@ private:
 	void cap_miss_process(timTableSet &);
 	//called when mdc status error
 	void cap_status_error_process(timTableSet &);
-	std::chrono::time_point<std::chrono::system_clock> lastEnd;//¼ÇÂ¼×îºóÒ»´ÎÊ±¼ä
-	void cap_ok();
+	std::chrono::time_point<std::chrono::system_clock> lastEnd;//è®°å½•æœ€åä¸€æ¬¡æ—¶é—´
+	void cap_ok();	
 };
 
 #endif

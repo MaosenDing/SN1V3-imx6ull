@@ -3,7 +3,7 @@
 
 
 
-IF(ENABLE_ERRHANDLE_COM)
+IF(ENABLE_SHARED_ERRHANDLE)
 add_library(errHandle SHARED errHandle.cpp)
 INSTALL(TARGETS errHandle LIBRARY DESTINATION lib)
 else()

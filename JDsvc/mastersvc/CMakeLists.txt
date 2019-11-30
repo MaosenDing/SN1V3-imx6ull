@@ -6,5 +6,4 @@
 
 
 add_library(mastersvc STATIC jdsvc_time.cpp)
-
-
+target_link_directories(mastersvc PUBLIC "${PROJECT_SOURCE_DIR}/timework")

@@ -206,7 +206,7 @@
 	//时间表裁剪
 	//void rm_past_tm(std::vector<unsigned int> &table);
 
-#define USING_DUMMY_CAP_SRC 1
+#define USING_DUMMY_CAP_SRC 0
 
 	//转换rgb文件
 	ERR_STA ImageTestRGBFile(const char * fName, const char * srcPath, const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer, const char * jpgName = nullptr);
