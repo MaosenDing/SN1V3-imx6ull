@@ -1,18 +1,15 @@
 
-#include_directories("${PROJECT_SOURCE_DIR}/errHandle")
-#link_directories("${PROJECT_SOURCE_DIR}/errHandle")
-#link_directories("${PROJECT_SOURCE_DIR}/comlib")
 
-
-
-set(JDsvcfil jdsvc_time.cpp)
 
 add_executable(mdc mdc.cpp 
-JDrec.cpp uart.cpp timer_reflush.cpp mastersvc.cpp
-${JDsvcfil})
+JDrec.cpp uart.cpp timer_reflush.cpp master_frame.cpp)
 
 
-target_include_directories(mdc PUBLIC "./")
+include_directories("./")
+
+add_subdirectory(mastersvc)
+target_link_libraries(mdc mastersvc)
+
 
 INSTALL(TARGETS mdc
        RUNTIME DESTINATION bin

@@ -3,7 +3,7 @@
 #include "svc.h"
 
 
-struct jdtimesvc :public JDAUTOSEND {
+struct jdtablesvc :public JDAUTOSEND {
 	virtual int need_service() final
 	{
 		return 1;
@@ -23,9 +23,9 @@ struct jdtimesvc :public JDAUTOSEND {
 	}
 };
 
-static jdtimesvc jsvc;
+static jdtablesvc jsvc;
 
-JDAUTOSEND * jdsvc_time()
+JDAUTOSEND * jdsvc_table()
 {
 	return &jsvc;
 }
@@ -34,7 +34,6 @@ JDAUTOSEND * jdsvc_time()
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
-	//printf("rec data len = %d \n", jfr.jd_data_len);
 	return JD_OK;
 }
 
