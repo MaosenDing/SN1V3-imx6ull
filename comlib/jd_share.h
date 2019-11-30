@@ -17,7 +17,8 @@ void disp_x_buff(FILE * fp, unsigned char * buff, int num);
 int ChkifCMD(int argc, char *argv[], const char * cmd);
 char * ChkCmdVal(int argc, char * argv[], const char *cmd);
 
-
+void SetWatchFile(const char * fil
+	, void(*profun)(void * priv, const char* fil), void * priv);
 
 #endif
 

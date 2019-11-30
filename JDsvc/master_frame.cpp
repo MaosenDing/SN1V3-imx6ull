@@ -26,8 +26,14 @@
 #include "svc.h"
 using namespace std;
 
-
+JDAUTOSEND * jdsvc_table();
 JDAUTOSEND * jdsvc_time();
+
+JDAUTOSEND *grp[] = {
+	jdsvc_table(),
+	jdsvc_time()
+};
+
 
 int master_svc_thread(JD_INFO * pjif)
 {
@@ -35,20 +41,21 @@ int master_svc_thread(JD_INFO * pjif)
 		unique_lock<timed_mutex> lck(pjif->enable_mtx);
 		pjif->enable_cv.wait_for(lck, chrono::milliseconds(20));
 
-
-		JDAUTOSEND *t = jdsvc_time();
-
-		if (t->need_service()) {
-			t->service_pro(*pjif);
+		for (auto & t : grp) {
+			if (t->need_service()) {
+				t->service_pro(*pjif);
+				break;
+			}		
 		}
 	}
 }
 
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
+int JD_table_rec(JD_INFO & jif, JD_FRAME & jfr);
 JDPROSTRUCT JD_init_rec_group[] =
 {
-	{ 0x34 | 0x80, JD_time_rec }
-
+	{ 0x34 | 0x80, JD_time_rec },
+	{ 0x35 | 0x80 ,JD_table_rec},
 };
 
 

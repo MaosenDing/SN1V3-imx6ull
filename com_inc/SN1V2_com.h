@@ -279,5 +279,8 @@
 
 	void shm_set_dayFlag(bool flag);
 
+	#define force_time_table_save_path ("/tmp/tmp_timetable")
+
+
 #endif
 

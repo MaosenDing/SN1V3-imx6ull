@@ -815,6 +815,11 @@ ERR_STA GetTableSet(char * fName, CREOBJ & creDate
 			if ((err = save_timTableSet(fName, year, mon, day, timeset)) != err_ok)
 				return err;
 		}
+
+#ifdef force_time_table_save_path
+		save_timTableSet(force_time_table_save_path, year, mon, day, timeset);
+#endif
+
 		cout << "size=" << timeset.size() << endl;
 		return err_ok;
 	}

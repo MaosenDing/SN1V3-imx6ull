@@ -2,7 +2,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-
+#include <sys/inotify.h>
+#include <sys/poll.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <signal.h>
+using namespace std;
 
 int JD_Name_transfer(const unsigned char * input, char * outbuff, int InMaxSz)
 {
@@ -97,5 +102,54 @@ char * ChkCmdVal(int argc, char * argv[], const char *cmd)
 		}
 	}
 	return nullptr;
+}
+
+
+void SetWatchFile(const char * fil
+	, void(*profun)(void * priv, const char* fil), void * priv)
+{
+	int fd = inotify_init1(IN_NONBLOCK);
+
+	if (fd < 0) {
+		return;
+	}
+
+	char buff[64];
+	sprintf(buff, "touch %s", fil);
+	system(buff);
+
+	int wd = inotify_add_watch(fd, fil, IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF);
+
+	if (wd < 0) {
+		close(fd);
+		return;
+	}
+
+	pollfd ipollfd;
+	ipollfd.fd = fd;
+	ipollfd.events = POLL_IN;
+	ipollfd.revents = 0;
+	int len;
+	while (true) {
+		if (0 >= poll(&ipollfd, 1, -1))
+			continue;
+		if (0 < (len = read(fd, buff, 128))) {
+			inotify_event * ievent;
+			for (char * ptr = buff; ptr < buff + len;
+				ptr += sizeof(inotify_event) + ievent->len
+				) {
+				ievent = (inotify_event*)(ptr);
+#if 1
+				fprintf(stdout, "len = %d ,mask = %d,watch fd = %d,len = %d", len, ievent->mask, ievent->wd, ievent->len);
+				if (ievent->len) {
+					fprintf(stdout, ",name= %s", ievent->name);
+				}
+				fprintf(stdout, "\n");
+#endif
+				if(profun)
+				profun(priv, fil);
+			}
+		}
+	}
 }
 
