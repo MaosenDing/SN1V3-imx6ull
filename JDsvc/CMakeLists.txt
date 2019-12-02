@@ -15,8 +15,5 @@ INSTALL(TARGETS mdc
        RUNTIME DESTINATION bin
 )
 
-target_link_libraries(mdc errHandle)
 target_link_libraries(mdc comlib)
 target_link_libraries(mdc -lpthread)
-target_link_libraries(mdc timework)
-target_link_libraries(mdc text)

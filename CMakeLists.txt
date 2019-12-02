@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.0)
 include(compiler.cmake)
 
 option(ENABLE_SHARED_COM "enable shared com" ON)
-option(ENABLE_SHARED_ERRHANDLE "enable shared errHandle" ON)
-option(ENABLE_SHARED_TIM "enable shared tim" ON)
+#option(ENABLE_SHARED_ERRHANDLE "enable shared errHandle" ON)
+#option(ENABLE_SHARED_TIM "enable shared tim" ON)
 
 
 option(CMAKE_VERBOSE_MAKEFILE "make verbose=1" ON)
@@ -32,37 +32,10 @@ include_directories("${PROJECT_SOURCE_DIR}/comlib")
 #主目录编译文件
 add_executable(main aim.cpp)
 
-
-#imageProcess
-add_subdirectory(imageProcess)
-target_link_libraries(main imageProcess)
-#errHandle
-add_subdirectory(errHandle)
-target_link_libraries(main errHandle)
 #sensor
 add_subdirectory(sensor)
 target_link_libraries(main sensor)
-#CRE
-add_subdirectory(CRE)
-target_link_libraries(main CRE)
-#text
-add_subdirectory(text)
-target_link_libraries(main text)
-#datapro
-add_subdirectory(datapro)
-target_link_libraries(main datapro)
-#timework
-add_subdirectory(timework)
-target_link_libraries(main timework)
 
-
-target_link_libraries(main imageProcess)
-target_link_libraries(main errHandle)
-target_link_libraries(main sensor)
-target_link_libraries(main CRE)
-target_link_libraries(main text)
-target_link_libraries(main datapro)
-target_link_libraries(main timework)
 
 add_subdirectory(comlib)
 target_link_libraries(main comlib)
