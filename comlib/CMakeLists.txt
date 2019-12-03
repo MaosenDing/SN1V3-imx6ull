@@ -11,9 +11,6 @@ else()
 add_library(comlib STATIC ${fil})
 endif()
 
-
-#imageProcess
-add_subdirectory(imageProcess)
 #errHandle
 add_subdirectory(errHandle)
 #datapro
@@ -35,9 +32,7 @@ CRE
 timework
 datapro
 errHandle
-imageProcess
 "-Wl,--no-whole-archive"
-
 )
 
 target_include_directories(comlib PUBLIC "glog")
