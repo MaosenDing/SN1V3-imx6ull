@@ -1,7 +1,7 @@
 
 
-#add_compile_options(-Ofast)
 
-add_library(text STATIC fileOperator.cpp scanfText.cpp)
+
+add_library(text OBJECT fileOperator.cpp scanfText.cpp)
 
 

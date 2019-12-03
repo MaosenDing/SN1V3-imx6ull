@@ -1,7 +1,6 @@
 
 
-#add_compile_options(-Ofast)
+#set_source_files_properties(cre.cpp.c PROPERTIES COMPILE_FLAGS -Ofast)
 
-#add_library(CRE STATIC cre.cpp CRE.c)
-add_library(CRE STATIC cre.cpp)
+add_library(CRE OBJECT cre.cpp)
 

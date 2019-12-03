@@ -1,14 +1,8 @@
 
 
-#add_compile_options(-Ofast)
 
-add_library(SN1SG2 STATIC SN1SG_2.cpp)
-target_compile_options(SN1SG2 PRIVATE -Ofast)
+set_source_files_properties(SN1SG_2.cpp PROPERTIES COMPILE_FLAGS -Ofast)
 
+add_library(timework OBJECT tableWork.cpp timeOperator.cpp timeTable.cpp timRegType_1.cpp timSet.c SN1SG_2.cpp)
 
-add_library(timework STATIC tableWork.cpp timeOperator.cpp timeTable.cpp timRegType_1.cpp timSet.c)
-
-
-
-target_link_libraries(timework SN1SG2)
 

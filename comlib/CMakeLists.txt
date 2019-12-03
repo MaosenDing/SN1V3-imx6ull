@@ -14,19 +14,32 @@ endif()
 
 #imageProcess
 add_subdirectory(imageProcess)
-target_link_libraries(comlib imageProcess)
 #errHandle
 add_subdirectory(errHandle)
-target_link_libraries(comlib errHandle)
 #datapro
 add_subdirectory(datapro)
-target_link_libraries(comlib datapro)
 #timework
 add_subdirectory(timework)
-target_link_libraries(comlib timework)
-#CRE
-add_subdirectory(CRE)
-target_link_libraries(comlib CRE)
 #text
 add_subdirectory(text)
-target_link_libraries(comlib text)
+#CRE
+add_subdirectory(CRE)
+
+
+
+target_link_libraries(comlib
+PRIVATE
+"-Wl,--whole-archive" 
+text
+CRE
+timework
+datapro
+errHandle
+imageProcess
+"-Wl,--no-whole-archive"
+
+)
+
+target_include_directories(comlib PUBLIC "glog")
+target_link_directories(comlib PUBLIC "glog")
+target_link_libraries(comlib PUBLIC -lglog)

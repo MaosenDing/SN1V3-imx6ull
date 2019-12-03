@@ -32,7 +32,7 @@ add_subdirectory(comlib)
 link_libraries(comlib)
 
 add_subdirectory(capmain)
-add_subdirectory(JDsvc)
+#add_subdirectory(JDsvc)
 
 
 

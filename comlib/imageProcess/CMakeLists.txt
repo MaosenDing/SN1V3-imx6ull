@@ -1,15 +1,14 @@
 
 
 
-add_library(rgbxx_yuvxx2 STATIC rgbxx_yuvxx.c binaryzation.cpp)
-target_compile_options(rgbxx_yuvxx2 PRIVATE -Ofast)
 
-add_library(imageProcess STATIC  jpegProcess process IMAGEDATA.cpp imageOperator.cpp)
-target_link_libraries(imageProcess rgbxx_yuvxx2)
+set_source_files_properties(rgbxx_yuvxx.c PROPERTIES COMPILE_FLAGS -Ofast)
+set_source_files_properties(binaryzation.c PROPERTIES COMPILE_FLAGS -Ofast)
 
+add_library(imageProcess OBJECT  jpegProcess process IMAGEDATA.cpp imageOperator.cpp rgbxx_yuvxx.c binaryzation.cpp)
 
 
 target_include_directories(imageProcess PUBLIC "jpeg")
 target_link_directories(imageProcess PUBLIC "jpeg")
-target_link_libraries(imageProcess -ljpeg)
+target_link_libraries(imageProcess PUBLIC -ljpeg)
 
