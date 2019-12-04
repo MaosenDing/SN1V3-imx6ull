@@ -7,7 +7,7 @@ struct jdtimesvc :public JDAUTOSEND {
 
 	timeval last_tv;
 
-	virtual int need_service() final
+	virtual int need_service(JD_INFO & jif) final
 	{
 		timeval tv;
 		gettimeofday(&tv, nullptr);

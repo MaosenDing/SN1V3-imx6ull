@@ -95,8 +95,12 @@ struct jdtablesvc :public JDAUTOSEND {
 	uint64_t last_send_tim;
 	int send_period_s = 5;
 
-	virtual int need_service() final
+	virtual int need_service(JD_INFO & jif) final
 	{
+		if (jif.JD_MOD != jif.mdc_mode_table) {
+			return 0;
+		}
+
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 
@@ -128,6 +132,7 @@ struct jdtablesvc :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & jif)final
 	{
+		std::unique_lock<std::mutex> lk(tableLock);
 		rm_back(timeset);
 
 		for (auto &thisaim : aim) {

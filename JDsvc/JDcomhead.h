@@ -95,6 +95,11 @@ struct JD_INFO
 	JDTIME timesetFlag;	
 	JD_PRO default_err_cmd;
 	int fake_check_flag;
+	enum _JD_MOD {
+		mdc_mode_table = 0,
+		mdc_mode_manual = 1,
+		mdc_mode_off=2,
+	}JD_MOD;
 //for debug
 	FILE * dbg_fp = stdout;
 	char dbg_pri_rd_len = 0;
@@ -141,5 +146,7 @@ int JD_Name_transfer(const unsigned char * input, char * outbuff,int InMaxSz);
 int UARTX_Init(char *, int baudrate, int fctl, int databit, int stopbit, int parity);
 
 int regist_timer_auto_flush(SN1_SHM * psn1);
+
+#define MDC_MODE_FILE ("/tmp/mdc_mode")
 
 #endif
