@@ -33,7 +33,7 @@ add_subdirectory(comlib)
 
 add_subdirectory(capmain)
 add_subdirectory(JDsvc)
-
+add_subdirectory(daemon)
 
 
 #install scripts

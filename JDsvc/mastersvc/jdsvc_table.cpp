@@ -100,6 +100,10 @@ struct jdtablesvc :public JDAUTOSEND {
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 
+		if (timeset.empty()) {
+			return 0;
+		}
+
 		uint64_t now_send_tim = tv.tv_sec / send_period_s;
 
 		if (now_send_tim == last_send_tim) {
@@ -138,6 +142,8 @@ struct jdtablesvc :public JDAUTOSEND {
 
 				printf("using %d ,cnt = %d\n", using_index, thisaim.retry_cnt);
 				int len = snprintf(databuff, 64, "%d-%d-%d,%.4f\n", p.tm_hour, p.tm_min, p.tm_sec, using_index ? p.ZxAng : p.YxAng);
+				printf(databuff);
+
 
 				jfr.jd_aim.value = using_index;
 				jfr.jd_send_buff = &databuff;

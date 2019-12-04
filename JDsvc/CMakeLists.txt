@@ -1,7 +1,7 @@
 
 
 
-add_executable(mdc mdc.cpp 
+add_executable(mdc.exe mdc.cpp 
 JDrec.cpp uart.cpp timer_reflush.cpp master_frame.cpp)
 
 
@@ -10,12 +10,12 @@ include_directories("./")
 
 
 add_subdirectory(mastersvc)
-target_link_libraries(mdc PRIVATE mastersvc)
-target_link_libraries(mdc PRIVATE comlib)
+target_link_libraries(mdc.exe PRIVATE mastersvc)
+target_link_libraries(mdc.exe PRIVATE comlib)
 
-INSTALL(TARGETS mdc
+INSTALL(TARGETS mdc.exe
        RUNTIME DESTINATION bin
 )
 
-target_link_libraries(mdc PRIVATE -lpthread)
+target_link_libraries(mdc.exe PRIVATE -lpthread)
 
