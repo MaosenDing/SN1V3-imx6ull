@@ -13,9 +13,6 @@ using namespace std;
 struct jdsvc_manual :public JDAUTOSEND {
 	jdsvc_manual()
 	{
-		scan_file(this, MDC_MODE_FILE);
-		thread watch(SetWatchFile, MDC_MODE_FILE, scan_file, this);
-		watch.detach();
 	}
 	std::mutex tableLock;
 
@@ -23,19 +20,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 	{
 
 	}
-
-
-	static void scan_file(void * p, const char * fil)
-	{
-		if (!p || !fil) {
-			return;
-		}
-
-		jdsvc_manual *thissvc = (jdsvc_manual*)p;
-
-		//thissvc->_scan_file(fil);
-	}
-
+	const int max_retry_cnt = 5;
 	int using_index;
 
 	struct AIM{
@@ -54,16 +39,50 @@ struct jdsvc_manual :public JDAUTOSEND {
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 
-		if (tv.tv_sec == last_tv.tv_sec) {
-			return 0;
+		uint64_t now_send_tim = tv.tv_sec / send_period_s;
+
+		if (now_send_tim == last_send_tim) {
+			for (auto &p : aim) {
+				if (p.succ_flag == 0 && p.retry_cnt < max_retry_cnt) {
+					using_index = std::distance(&aim[0], &p);
+					return 1;
+				}
+			}
+		} else {
+			last_send_tim = now_send_tim;
+			for (auto &p : aim) {
+				p.succ_flag = 0;
+				p.retry_cnt = 0;
+			}
+			using_index = 0;
+			return 1;
 		}
-		return 1;
+		return 0;
 	}
 
 	virtual void service_pro(JD_INFO & jif)final
 	{
+		for (auto &thisaim : aim) {
+			if (thisaim.succ_flag == 0 && thisaim.retry_cnt < max_retry_cnt) {
+				thisaim.retry_cnt++;
 
+				JD_FRAME jfr;
 
+				char databuff[64];
+
+				printf("using %d ,cnt = %d\n", using_index, thisaim.retry_cnt);
+				int len = snprintf(databuff, 64, "set %f\n",jif.manual_deg[using_index]);
+				printf(databuff);
+
+				jfr.jd_aim.value = using_index;
+				jfr.jd_send_buff = &databuff;
+				jfr.jd_data_len = len;
+				jfr.jd_command = 0x35;
+
+				JD_send(jif, jfr);
+				return;
+			}
+		}
 	}
 };
 

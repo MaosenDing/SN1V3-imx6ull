@@ -104,6 +104,8 @@ static void scan_file(void * p, const char * fil)
 
 		if (ret2 == 2) {
 			pjif->JD_MOD = pjif->mdc_mode_manual;
+			pjif->manual_deg[0] = f1;
+			pjif->manual_deg[1] = f2;
 			printf("scanf manual = %f %f\n", f1, f2);
 			return;
 		}

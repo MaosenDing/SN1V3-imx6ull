@@ -100,6 +100,9 @@ struct JD_INFO
 		mdc_mode_manual = 1,
 		mdc_mode_off=2,
 	}JD_MOD;
+
+	float manual_deg[2];
+
 //for debug
 	FILE * dbg_fp = stdout;
 	char dbg_pri_rd_len = 0;
