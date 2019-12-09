@@ -18,7 +18,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 
 	void trig_cpl(JD_FRAME & jfr)
 	{
-
+		aim[using_index].succ_flag = 1;
 	}
 	const int max_retry_cnt = 5;
 	int using_index;
@@ -77,7 +77,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 				jfr.jd_aim.value = using_index;
 				jfr.jd_send_buff = &databuff;
 				jfr.jd_data_len = len;
-				jfr.jd_command = 0x35;
+				jfr.jd_command = 0x36;
 
 				JD_send(jif, jfr);
 				return;
@@ -92,8 +92,6 @@ JDAUTOSEND * jdsvc_manuals()
 {
 	return &jsvc;
 }
-
-
 int JD_manual_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
