@@ -121,7 +121,6 @@ static unsigned int Infect(vector<unsigned char> & data, int width, int startPoi
 				thisPosPPP - width,
 				thisPosPPP + width
 			};
-
 			for (int testIndex : dirIndex)
 			{
 				if (data[testIndex] == InfectAim)
@@ -213,7 +212,6 @@ static int step_in_tag(IMAGEDATA & inImage, int &pixCnt,const unsigned int MinCn
 	for (size_t index = 0; index < maxIndex; index++)
 	{
 		unsigned char & testPoint = inImage.Image_data->at(index);
-
 		if (testPoint == 255)
 		{
 			//递进感染编号
@@ -359,7 +357,6 @@ ERR_STA RegImg(IMAGEDATA & inImage, int &pixCnt, const unsigned int MinCntGroup)
 	{
 		//求分割区域
 		int tag = step_in_tag(inImage, pixCnt, MinCntGroup);
-
 		if (tag == 0)
 		{//infect fail..
 			return err_binaryzation_aim_null;
@@ -469,9 +466,63 @@ int saveCir(char * SavePath, vector<PixPos> & RangePixPos, int img_start_x, int 
 	return 0;
 }
 
+enum error_bound {
+	bound_null = 0,
+	bound_top = 1 << 1,
+	bound_bottom = 1 << 2,
+	bound_left = 1 << 3,
+	bound_right = 1 << 4,
+};
 
 
+static void fixBound(IMAGEDATA & inImage, error_bound er, int &left, int &right, int& top, int &bottom)
+{
+	if (er && bound_top) {
+		for (int i = 0; i < inImage.right; i++) {
+			inImage.at(i, top) = 0;
+		}
+		top += 1;
+	}
+	if (er && bound_bottom) {
+		for (int i = 0; i < inImage.right; i++) {
+			inImage.at(i, bottom) = 0;
+		}
+		bottom -= 1;
+	}
+	if (er && bound_left) {
+		for (int i = 0; i < inImage.bottom; i++) {
+			inImage.at(left, i) = 0;
+		}
+		left += 1;
+	}
+	if (er && bound_right) {
+		for (int i = 0; i < inImage.bottom; i++) {
+			inImage.at(right, i) = 0;
+		}
+		right -= 1;
+	}
+}
 
+static error_bound check_bound(IMAGEDATA & inImage, int top, int bottom, int left, int right)
+{
+	int boudf = bound_null;
+	if (top <= inImage.top) {
+		boudf |= bound_top;
+	}
+
+	if (bottom >= inImage.bottom) {
+		boudf |= bound_bottom;
+	}
+
+	if (left <= inImage.left) {
+		boudf |= bound_left;
+	}
+
+	if (right >= inImage.right) {
+		boudf |= bound_right;
+	}
+	return (error_bound)boudf;
+}
 
 static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned int MinCntGrp)
 {
@@ -482,28 +533,10 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 		SN1V2_WARN_MWSSAGE_WITH("bound error", err);
 		return err;
 	} else {
-		int boudf = 0;
-		if (top <= inImage.top) {
-			top += 1;
-			boudf = 1;
-		}
+		error_bound boudf = check_bound(inImage, top, bottom, left, right);
 
-		if (bottom >= inImage.bottom) {
-			bottom -= 1;
-			boudf = 1;
-		}
-
-		if (left <= inImage.left) {
-			left += 1;
-			boudf = 1;
-		}
-
-		if (right >= inImage.right) {
-			right -= 1;
-			boudf = 1;
-		}
 		if (boudf) {
-			//cout <<"bound error:"<< "left =" << left << ",right =" << right << ",top =" << top << ",bottom =" << bottom << endl;
+			fixBound(inImage, boudf, left, right, top, bottom);
 			SN1V2_INF_LOG("bound error,left = %d,right = %d,top = %d,bottom = %d\n", left, right, top, bottom);
 		}
 		shared_ptr<IMAGEDATA> processImage = make_shared<IMAGEDATA>();
@@ -511,7 +544,7 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 		int clone_top = top - 1;
 		int clone_width = right - left + 1 + 2;
 		int clone_heigth = bottom - top + 1 + 2;
-
+		
 		err = inImage.clone(clone_left, clone_top, clone_width, clone_heigth, processImage);
 		//释放二值化内存
 		inImage.Image_data.reset();

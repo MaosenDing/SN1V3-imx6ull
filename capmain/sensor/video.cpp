@@ -120,8 +120,20 @@ int init_cap(const char * videoName)
 }
 
 
+
+
+
+
 int set_gain_expose(int fd, int gain, int expose)
 {
+	static int old_gain, old_expose;
+
+	if (gain == old_gain && expose == old_expose) {
+		return 0;
+	}
+	old_expose = expose;
+	old_gain = gain;
+	printf("set gain = %d ,expose = %d \n", gain, expose);
 	struct v4l2_control  Setting;
 
 	Setting.id = V4L2_CID_EXPOSURE_AUTO;
@@ -145,12 +157,14 @@ int set_gain_expose(int fd, int gain, int expose)
 	Setting.id = V4L2_CID_EXPOSURE;
 	Setting.value = expose;
 	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
-	printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
-
 	if (ret < 0) {
 		printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
 		return -2;
 	}
+	//remove three frame
+	get_one_frame(fd);
+	get_one_frame(fd);
+	get_one_frame(fd);
 }
 
 
@@ -164,7 +178,6 @@ void cap_deinit(CAP_FRAME * pcap)
 				printf("VIDIOC_QBUF error\n");
 		}
 		delete pcap;
-		printf("del \n");
 	}
 }
 
