@@ -37,10 +37,9 @@ struct jdtablesvc :public JDAUTOSEND {
 
 	void trig_cpl(JD_FRAME & jfr)
 	{
-		if (jfr.jd_data_len > 0)
-		{
-			aim[using_index].succ_flag = 1;
-		}
+		//if (jfr.jd_data_len > 0) {
+		//	aim[using_index].succ_flag = 1;
+		//}
 	}
 
 	void _scan_file(const char * fil)
@@ -85,9 +84,8 @@ struct jdtablesvc :public JDAUTOSEND {
 
 	const int max_retry_cnt = 5;
 
-	int using_index;
 
-	struct AIM{
+	struct AIM {
 		int succ_flag;
 		int retry_cnt;
 	}aim[2];
@@ -111,11 +109,8 @@ struct jdtablesvc :public JDAUTOSEND {
 		uint64_t now_send_tim = tv.tv_sec / send_period_s;
 
 		if (now_send_tim == last_send_tim) {
-			for (auto &p : aim) {
-				if (p.succ_flag == 0 && p.retry_cnt < max_retry_cnt) {
-					using_index = std::distance(&aim[0], &p);
-					return 1;
-				}
+			if (searchUncoplete() >= 0) {
+				return 1;
 			}
 		} else {
 			last_send_tim = now_send_tim;
@@ -123,7 +118,6 @@ struct jdtablesvc :public JDAUTOSEND {
 				p.succ_flag = 0;
 				p.retry_cnt = 0;
 			}
-			using_index = 0;
 			return 1;
 		}
 		//send every 5 second
@@ -132,34 +126,62 @@ struct jdtablesvc :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & jif)final
 	{
+		int using_index = searchUncoplete();
+
+		if (using_index < 0) {
+			return;
+		}
+
 		std::unique_lock<std::mutex> lk(tableLock);
 		rm_back(timeset);
 
+		auto &thisaim = aim[using_index];
+		thisaim.retry_cnt++;
+
+		int sz = timeset.size();
+		int max_snd = 3;
+
+		std::vector<timTableSet> timesettmp;
+
+		for (int i = 0; i < max_snd && sz > 0; i++, sz--) {
+			timesettmp.push_back(timeset[sz - 1]);
+		}
+
+		JD_FRAME jfr;
+
+		char databuff[128];
+
+		int len = mkPack(databuff, 128, timesettmp, using_index);
+#if 0
+		printf("using %d ,cnt = %d\n", using_index, thisaim.retry_cnt);
+		printf(databuff);
+#endif
+		jfr.jd_aim.value = using_index;
+		jfr.jd_send_buff = &databuff;
+		jfr.jd_data_len = len;
+		jfr.jd_command = 0x35;
+
+		JD_send(jif, jfr);
+	}
+
+private:
+	int searchUncoplete()
+	{
 		for (auto &thisaim : aim) {
 			if (thisaim.succ_flag == 0 && thisaim.retry_cnt < max_retry_cnt) {
-				thisaim.retry_cnt++;
-
-				auto & p = timeset.back();
-
-				JD_FRAME jfr;
-								
-				char databuff[64];
-
-				printf("using %d ,cnt = %d\n", using_index, thisaim.retry_cnt);
-				int len = snprintf(databuff, 64, "%d-%d-%d,%.4f\n", p.tm_hour, p.tm_min, p.tm_sec, using_index ? p.ZxAng : p.YxAng);
-				printf(databuff);
-
-
-				jfr.jd_aim.value = using_index;
-				jfr.jd_send_buff = &databuff;
-				jfr.jd_data_len = len;
-				jfr.jd_command = 0x35;
-
-				JD_send(jif, jfr);
-
-				return;
+				return  std::distance(&aim[0], &thisaim);
 			}
 		}
+		return -1;
+	}
+
+	int mkPack(char * databuff, int maxsz, std::vector<timTableSet> &timesettmp ,int using_index)
+	{
+		int len = 0;
+		for (auto & p : timesettmp) {
+			len += snprintf(databuff, maxsz - len, "%d-%d-%d,%.4f\n", p.tm_hour, p.tm_min, p.tm_sec, using_index ? p.ZxAng : p.YxAng);
+		}
+		return len;
 	}
 };
 
