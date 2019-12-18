@@ -9,6 +9,8 @@ struct jdtimesvc :public JDAUTOSEND {
 
 	virtual int need_service(JD_INFO & jif) final
 	{
+		return 0;
+		printf("nnn\n");
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 

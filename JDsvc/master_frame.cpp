@@ -41,7 +41,8 @@ int master_svc_thread(JD_INFO * pjif)
 {
 	while (true) {
 		unique_lock<timed_mutex> lck(pjif->enable_mtx);
-		pjif->enable_cv.wait_for(lck, chrono::milliseconds(20));
+		pjif->enable_cv.wait_for(lck, chrono::milliseconds(50));
+
 
 		for (auto & t : grp) {
 			if (t->need_service(*pjif)) {
@@ -59,7 +60,7 @@ JDPROSTRUCT JD_init_rec_group[] =
 {
 	{ 0x34 | 0x80, JD_time_rec },
 	{ 0x35 | 0x80 ,JD_table_rec},
-	{ 0x36 | 0x80 ,JD_manual_rec},
+	{ 0x0b | 0x80 ,JD_manual_rec},
 };
 //ERR_STA loadFile(char *fname, vector<uint8_t> & refVect)
 
@@ -104,8 +105,8 @@ static void scan_file(void * p, const char * fil)
 
 		if (ret2 == 2) {
 			pjif->JD_MOD = pjif->mdc_mode_manual;
-			pjif->manual_deg[0] = f1;
-			pjif->manual_deg[1] = f2;
+			pjif->mdcCtrl[0].trig_set(f1);
+			pjif->mdcCtrl[1].trig_set(f2);
 			printf("scanf manual = %f %f\n", f1, f2);
 			return;
 		}

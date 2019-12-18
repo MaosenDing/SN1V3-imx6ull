@@ -38,6 +38,17 @@ static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned i
 		crc0 = crc_make(Buff, len, firstcrc);
 		crc1 = (match_byte[1] << 8) + match_byte[0];
 	}
+
+#if 0
+	printf("\n");
+	for (int i = 0; i < len; i++) {
+		printf("%02x ", Buff[i]);
+	}
+
+	printf("rec =%04x , chk =%04x\n", crc1, crc0);
+#endif
+
+
 	//fake crc just for test
 	if (jif.fake_check_flag != JD_OK)
 	{
@@ -67,11 +78,12 @@ typedef union
 int JD_send(JD_INFO & jif, JD_FRAME & jfr)
 {
 	unsigned char AnsBuffer[256] = { 0 };
-
+	static int thisseq;
 	AnsBuffer[0] = 0xAA;
 	AnsBuffer[1] = 0xAA;
 	AnsBuffer[2] = jfr.jd_command;
-	AnsBuffer[3] = jfr.seq;
+	//AnsBuffer[3] = jfr.seq;
+	AnsBuffer[3] = thisseq++;
 
 	AnsBuffer[4] = jfr.jd_aim.byte_value.low_byte;
 	AnsBuffer[5] = jfr.jd_aim.byte_value.mlow_byte;
@@ -115,6 +127,10 @@ static int JD_default_response(JD_INFO & jif, JD_FRAME & jfr)
 JD_INFO::JD_INFO()
 {
 	default_err_cmd = JD_default_response;
+
+	mdcCtrl[0].addr = 0xaaaa << 8;
+	mdcCtrl[1].addr = 0xbbbb << 8;
+
 	//sem_init(&sem_enable, 0, 0);
 }
 

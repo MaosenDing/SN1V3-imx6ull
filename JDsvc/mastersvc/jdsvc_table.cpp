@@ -94,7 +94,7 @@ struct jdtablesvc :public JDAUTOSEND {
 	int send_period_s = 5;
 
 	virtual int need_service(JD_INFO & jif) final
-	{
+	{		
 		if (jif.JD_MOD != jif.mdc_mode_table) {
 			return 0;
 		}

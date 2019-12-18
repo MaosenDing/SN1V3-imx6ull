@@ -153,3 +153,85 @@ void SetWatchFile(const char * fil
 	}
 }
 
+
+
+
+typedef union
+{
+	struct
+	{
+		unsigned char bit0 : 1;
+		unsigned char bit1 : 1;
+		unsigned char bit2 : 1;
+		unsigned char bit3 : 1;
+		unsigned char bit4 : 1;
+		unsigned char bit5 : 1;
+		unsigned char bit6 : 1;
+		unsigned char bit7 : 1;
+		unsigned char bit8 : 1;
+		unsigned char bit9 : 1;
+		unsigned char bit10 : 1;
+		unsigned char bit11 : 1;
+		unsigned char bit12 : 1;
+		unsigned char bit13 : 1;
+		unsigned char bit14 : 1;
+		unsigned char bit15 : 1;
+		unsigned char bit16 : 1;
+		unsigned char bit17 : 1;
+		unsigned char bit18 : 1;
+		unsigned char bit19 : 1;
+		unsigned char bit20 : 1;
+		unsigned char bit21 : 1;
+		unsigned char bit22 : 1;
+		unsigned char bit23 : 1;
+		unsigned char bit24 : 1;
+		unsigned char bit25 : 1;
+		unsigned char bit26 : 1;
+		unsigned char bit27 : 1;
+		unsigned char bit28 : 1;
+		unsigned char bit29 : 1;
+		unsigned char bit30 : 1;
+		unsigned char bit31 : 1;
+	}bit_value;
+	struct
+	{
+		unsigned char low_byte;
+		unsigned char mlow_byte;
+		unsigned char mhigh_byte;
+		unsigned char high_byte;
+	}byte_value;
+	unsigned int value;
+}UINT;
+
+
+float Angle_Convert(unsigned char *dat)
+{
+	double angle_tmp;
+	UINT angle = { 0 };
+	angle.byte_value.low_byte = dat[0];
+	angle.byte_value.mlow_byte = dat[1];
+	angle.byte_value.mhigh_byte = dat[2];
+	if ((dat[2] & 0xF0) == 0xF0)
+	{
+		angle.byte_value.high_byte = 0xFF;
+	} else
+		angle.byte_value.high_byte = 0x00;
+	angle_tmp = (int)angle.value*0.00125;
+
+	return (float)angle_tmp;
+}
+
+unsigned int Angle_Convert_UShort(float angle)
+{
+	double angle_tmp = angle;
+	int angle_out;
+
+	angle_tmp = angle_tmp * 800;
+	
+	angle_out = (int)angle_tmp;
+
+	return angle_out;
+}
+
+
+

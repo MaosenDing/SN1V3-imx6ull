@@ -20,5 +20,10 @@ char * ChkCmdVal(int argc, char * argv[], const char *cmd);
 void SetWatchFile(const char * fil
 	, void(*profun)(void * priv, const char* fil), void * priv);
 
+
+
+float Angle_Convert(unsigned char *dat);
+unsigned int Angle_Convert_UShort(float angle);
+
 #endif
 

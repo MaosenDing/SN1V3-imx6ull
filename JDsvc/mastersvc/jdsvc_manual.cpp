@@ -12,77 +12,96 @@ using namespace std;
 
 struct jdsvc_manual :public JDAUTOSEND {
 	jdsvc_manual()
-	{
-	}
+	{}
 	std::mutex tableLock;
 
-	void trig_cpl(JD_FRAME & jfr)
+	inline int findMdc_addr(JD_INFO & jif, int addr)
 	{
-		aim[using_index].succ_flag = 1;
+		int using_index = -1;
+		for (auto & p : jif.mdcCtrl) {
+			if (p.addr == addr) {
+				using_index = std::distance(&jif.mdcCtrl[0], &p);
+				return using_index;
+			}
+		}
+		return using_index;
 	}
-	const int max_retry_cnt = 5;
-	int using_index;
 
-	struct AIM{
-		int succ_flag;
-		int retry_cnt;
-	}aim[2];
 
-	uint64_t last_send_tim;
-	int send_period_s = 1;
+	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
+	{
+		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
+
+		if (getIndex < 0) {
+			printf("bad addr = 0x%x\n", jfr.jd_aim.value);
+			return;
+		}
+		MDC_CTRL & ctl = jif.mdcCtrl[getIndex];
+
+		if (jfr.jd_data_len != 3) {
+			printf("bad rec len = %d\n", jfr.jd_data_len);
+			return;
+		}
+		ctl.cpl_flag = 1;
+	}
+	
+	inline int getUncpl(JD_INFO & jif)
+	{
+		int using_index = -1;
+		for (auto &p : jif.mdcCtrl) {
+			if (p.cpl_flag == 0 && p.retry_num < p.Max_retry) {
+				using_index = std::distance(&jif.mdcCtrl[0], &p);
+				printf("index = %d\n", using_index);
+				return using_index;
+			}
+		}
+		return using_index;
+	}
+
 
 	virtual int need_service(JD_INFO & jif) final
 	{
 		if (jif.JD_MOD != jif.mdc_mode_manual) {
 			return 0;
 		}
-		timeval tv;
-		gettimeofday(&tv, nullptr);
-
-		uint64_t now_send_tim = tv.tv_sec / send_period_s;
-
-		if (now_send_tim == last_send_tim) {
-			for (auto &p : aim) {
-				if (p.succ_flag == 0 && p.retry_cnt < max_retry_cnt) {
-					using_index = std::distance(&aim[0], &p);
-					return 1;
-				}
-			}
-		} else {
-			last_send_tim = now_send_tim;
-			for (auto &p : aim) {
-				p.succ_flag = 0;
-				p.retry_cnt = 0;
-			}
-			using_index = 0;
+		
+		if (getUncpl(jif) >= 0) {
+			printf("555\n");
 			return 1;
 		}
 		return 0;
 	}
 
+
 	virtual void service_pro(JD_INFO & jif)final
 	{
-		for (auto &thisaim : aim) {
-			if (thisaim.succ_flag == 0 && thisaim.retry_cnt < max_retry_cnt) {
-				thisaim.retry_cnt++;
+		int using_index = getUncpl(jif);
 
-				JD_FRAME jfr;
-
-				char databuff[64];
-
-				printf("using %d ,cnt = %d\n", using_index, thisaim.retry_cnt);
-				int len = snprintf(databuff, 64, "set %f\n",jif.manual_deg[using_index]);
-				printf(databuff);
-
-				jfr.jd_aim.value = using_index;
-				jfr.jd_send_buff = &databuff;
-				jfr.jd_data_len = len;
-				jfr.jd_command = 0x36;
-
-				JD_send(jif, jfr);
-				return;
-			}
+		if (using_index < 0) {
+			return;
 		}
+		MDC_CTRL &aim = jif.mdcCtrl[using_index];
+
+		JD_FRAME jfr;
+
+		float aimdeg = aim.manual_deg;
+		unsigned int tmpdeg = Angle_Convert_UShort(aimdeg);
+		printf("using %d ,cnt = %d, deg = %f\n", using_index, aim.retry_num, aimdeg);
+
+		char databuff[3];
+		databuff[0] = (tmpdeg >> (0 * 8)) & 0xff;
+		databuff[1] = (tmpdeg >> (1 * 8)) & 0xff;
+		databuff[2] = (tmpdeg >> (2 * 8)) & 0xff;
+
+		jfr.jd_aim.value = using_index ? 0xbbbb00 : 0xaaaa00;
+
+		jfr.jd_send_buff = &databuff;
+		jfr.jd_data_len = 3;
+		jfr.jd_command = 0xB;
+
+		aim.retry_num++;
+		JD_send(jif, jfr);
+		return;
 	}
 };
 
@@ -96,7 +115,7 @@ int JD_manual_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
 
-	jsvc.trig_cpl(jfr);
+	jsvc.trig_cpl(jif, jfr);
 
 	return JD_OK;
 }

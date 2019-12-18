@@ -21,7 +21,7 @@
 #include "camera.h"
 //#include "communicate.h"
 #include "errHandle/errHandle.h"
-
+#include <jd_share.h>
 #include <iostream>
 using namespace std;
 
@@ -373,6 +373,27 @@ int tableGenerate2(int argc, char * argv[])
 	return 0;
 }
 
+int test_converter(int argc, char * argv[])
+{
+	float aimdeg = 82.24;
+	unsigned int tmpdeg = Angle_Convert_UShort(aimdeg);
+
+	char databuff[3];
+	databuff[0] = (tmpdeg >> (0 * 8)) & 0xff;
+	databuff[1] = (tmpdeg >> (1 * 8)) & 0xff;
+	databuff[2] = (tmpdeg >> (2 * 8)) & 0xff;
+	databuff[3] = (tmpdeg >> (3 * 8)) & 0xff;
+
+	printf("from %f to %02x,%02x,%02x,%02x,,,%#08x\n", aimdeg, databuff[0], databuff[1], databuff[2],databuff[3],tmpdeg);
+	
+	printf("%d\n", tmpdeg);
+	
+	printf("from %f to %02x,%02x,%02x\n", &tmpdeg);
+	return 0;
+}
+
+
+
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
@@ -381,6 +402,7 @@ MAIN_CMD cmd_group[] = {
 	{ "CREsave" ,creSaveTest},
 	{"ip",ipchange_pp},
 	{ "tableGen2" ,tableGenerate2 },
+	{ "tv" , test_converter},
 };
 
 

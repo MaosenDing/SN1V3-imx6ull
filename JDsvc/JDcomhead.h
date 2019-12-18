@@ -78,6 +78,25 @@ enum JDTIME {
 //is fake check is jd_ok
 //any 0xff 0xff is consider as correct crc
 
+
+struct MDC_CTRL
+{
+	int addr;
+	float manual_deg;
+	const int Max_retry = 10;
+	int retry_num = 0;
+	int cpl_flag = 0 ;
+
+	void trig_set(float infloat)
+	{
+		manual_deg = infloat;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+};
+
+
+
 struct JD_INFO 
 {	
 //base jd info
@@ -95,13 +114,15 @@ struct JD_INFO
 	JDTIME timesetFlag;	
 	JD_PRO default_err_cmd;
 	int fake_check_flag;
+
 	enum _JD_MOD {
 		mdc_mode_table = 0,
 		mdc_mode_manual = 1,
-		mdc_mode_off=2,
+		mdc_mode_off = 2,
 	}JD_MOD;
 
-	float manual_deg[2];
+
+	MDC_CTRL mdcCtrl[2];
 
 //for debug
 	FILE * dbg_fp = stdout;
