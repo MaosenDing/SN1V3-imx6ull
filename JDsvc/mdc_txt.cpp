@@ -210,9 +210,6 @@ SCANF_DATA real_scan_file(const char * fil)
 	if ((err = SDG(mdcdata, "current1", out.currect[1])) == err_ok) {
 		out.set_flg |= diff_currect1;
 	}
-
-
-
 	if ((err = SDG(mdcdata, "ratio0", out.Ratio[0])) == err_ok) {
 		out.set_flg |= diff_ratio0;
 	}
@@ -220,7 +217,6 @@ SCANF_DATA real_scan_file(const char * fil)
 	if ((err = SDG(mdcdata, "ratio1", out.Ratio[1])) == err_ok) {
 		out.set_flg |= diff_ratio1;
 	}
-
 	return out;
 }
 
@@ -244,8 +240,8 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 	if (dat.correct_flag & (1 << 1)) {
 		pjif->mdcCtrl[1].correct.trig_set(dat.correct[1]);
 	}
-
 	if (dat.set_flg) {
+		
 		for (auto & aim : pjif->mdcCtrl) {
 			if (aim.parget.succ_flag == 0) {
 				aim.parget.retry_num = 0;

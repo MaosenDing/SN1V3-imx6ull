@@ -56,11 +56,11 @@ struct jdsvc_par_set :public JDAUTOSEND {
 	inline void setPart2buff(char * databuff, Par_CTRL & aim)
 	{
 		char * point = databuff;
-		*point++ = aim.initSpeed >> 8 & 0xff;
 		*point++ = aim.initSpeed & 0xff;
+		*point++ = aim.initSpeed >> 8 & 0xff;
 
-		*point++ = aim.MaxSpeed >> 8 & 0xff;
 		*point++ = aim.MaxSpeed & 0xff;
+		*point++ = aim.MaxSpeed >> 8 & 0xff;
 
 		*point++ = aim.period;
 
@@ -68,8 +68,8 @@ struct jdsvc_par_set :public JDAUTOSEND {
 
 		*point++ = aim.current;
 
-		*point++ = aim.Ratio >> 8 & 0xff;
 		*point++ = aim.Ratio & 0xff;
+		*point++ = aim.Ratio >> 8 & 0xff;
 	}
 
 
