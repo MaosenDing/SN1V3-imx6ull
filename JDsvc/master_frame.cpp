@@ -32,11 +32,13 @@ JDAUTOSEND * jdsvc_table();
 JDAUTOSEND * jdsvc_time();
 JDAUTOSEND * jdsvc_manuals();
 JDAUTOSEND * jdsvc_corrects();
+JDAUTOSEND * jdsvc_par_sets();
 JDAUTOSEND *grp[] = {
 	jdsvc_table(),
 	jdsvc_time(),
 	jdsvc_manuals(),
 	jdsvc_corrects(),
+	jdsvc_par_sets(),
 };
 
 
@@ -60,12 +62,14 @@ int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_table_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_manual_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_correct_rec(JD_INFO & jif, JD_FRAME & jfr);
+int JD_parset_rec(JD_INFO & jif, JD_FRAME & jfr);
 JDPROSTRUCT JD_init_rec_group[] =
 {
 	{ 0x34 | 0x80, JD_time_rec },
 	{ 0x35 | 0x80 ,JD_table_rec},
 	{ 0x0b | 0x80 ,JD_manual_rec},
 	{ 0x0C | 0x80 ,JD_correct_rec},
+	{ 0x11 | 0x80 ,JD_parset_rec},
 };
 //ERR_STA loadFile(char *fname, vector<uint8_t> & refVect)
 
@@ -113,13 +117,16 @@ int register_master_svc(JD_INFO& jif)
 }
 
 
-
-
-
-
-
-
-
-
+int JDAUTOSEND::findMdc_addr(JD_INFO & jif, int addr)
+{
+	int using_index = -1;
+	for (auto & p : jif.mdcCtrl) {
+		if (p.addr == addr) {
+			using_index = std::distance(&jif.mdcCtrl[0], &p);
+			return using_index;
+		}
+	}
+	return using_index;
+}
 
 

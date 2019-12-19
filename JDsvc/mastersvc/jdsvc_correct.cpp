@@ -14,19 +14,6 @@ struct jdsvc_correct :public JDAUTOSEND {
 	jdsvc_correct()
 	{}
 
-	inline int findMdc_addr(JD_INFO & jif, int addr)
-	{
-		int using_index = -1;
-		for (auto & p : jif.mdcCtrl) {
-			if (p.addr == addr) {
-				using_index = std::distance(&jif.mdcCtrl[0], &p);
-				return using_index;
-			}
-		}
-		return using_index;
-	}
-
-
 	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
 	{
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
@@ -87,7 +74,7 @@ struct jdsvc_correct :public JDAUTOSEND {
 		databuff[1] = (tmpdeg >> (1 * 8)) & 0xff;
 		databuff[2] = (tmpdeg >> (2 * 8)) & 0xff;
 
-		jfr.jd_aim.value = using_index ? 0xbbbb00 : 0xaaaa00;
+		jfr.jd_aim.value = jif.mdcCtrl[using_index].addr;
 
 		jfr.jd_send_buff = &databuff;
 		jfr.jd_data_len = 3;

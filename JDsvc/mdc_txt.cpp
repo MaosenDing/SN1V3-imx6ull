@@ -204,6 +204,15 @@ SCANF_DATA real_scan_file(const char * fil)
 		out.set_flg |= diff_period1;
 	}
 
+	if ((err = SDG(mdcdata, "current0", out.currect[0])) == err_ok) {
+		out.set_flg |= diff_currect0;
+	}
+	if ((err = SDG(mdcdata, "current1", out.currect[1])) == err_ok) {
+		out.set_flg |= diff_currect1;
+	}
+
+
+
 	if ((err = SDG(mdcdata, "ratio0", out.Ratio[0])) == err_ok) {
 		out.set_flg |= diff_ratio0;
 	}
@@ -245,37 +254,37 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 	}
 
 	if (dat.set_flg & diff_max0) {
-		pjif->mdcCtrl[0].par.trig_set_init(dat.MaxSpeed[0]);
+		pjif->mdcCtrl[0].par.trig_set_max(dat.MaxSpeed[0]);
 	}
 
 	if (dat.set_flg & diff_max1) {
-		pjif->mdcCtrl[1].par.trig_set_init(dat.MaxSpeed[1]);
+		pjif->mdcCtrl[1].par.trig_set_max(dat.MaxSpeed[1]);
 	}
 
 
 	if (dat.set_flg & diff_phase0) {
-		pjif->mdcCtrl[0].par.trig_set_init(dat.Phase[0]);
+		pjif->mdcCtrl[0].par.trig_set_pha(dat.Phase[0]);
 	}
 
 	if (dat.set_flg & diff_phase1) {
-		pjif->mdcCtrl[1].par.trig_set_init(dat.Phase[1]);
+		pjif->mdcCtrl[1].par.trig_set_pha(dat.Phase[1]);
 	}
 
 
 	if (dat.set_flg & diff_period0) {
-		pjif->mdcCtrl[0].par.trig_set_init(dat.period[0]);
+		pjif->mdcCtrl[0].par.trig_set_cur(dat.period[0]);
 	}
 
 	if (dat.set_flg & diff_period1) {
-		pjif->mdcCtrl[1].par.trig_set_init(dat.period[1]);
+		pjif->mdcCtrl[1].par.trig_set_cur(dat.period[1]);
 	}
 
 	if (dat.set_flg & diff_ratio0) {
-		pjif->mdcCtrl[0].par.trig_set_init(dat.Ratio[0]);
+		pjif->mdcCtrl[0].par.trig_set_rat(dat.Ratio[0]);
 	}
 
 	if (dat.set_flg & diff_ratio1) {
-		pjif->mdcCtrl[1].par.trig_set_init(dat.Ratio[1]);
+		pjif->mdcCtrl[1].par.trig_set_rat(dat.Ratio[1]);
 	}
 }
 

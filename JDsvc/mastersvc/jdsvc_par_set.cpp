@@ -10,8 +10,8 @@ using namespace std;
 
 
 
-struct jdsvc_manual :public JDAUTOSEND {
-	jdsvc_manual()
+struct jdsvc_par_set :public JDAUTOSEND {
+	jdsvc_par_set()
 	{}
 
 	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
@@ -22,7 +22,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 			printf("bad addr = 0x%x\n", jfr.jd_aim.value);
 			return;
 		}
-		CTRL_BASE & ctl = jif.mdcCtrl[getIndex].manual;
+		CTRL_BASE & ctl = jif.mdcCtrl[getIndex].correct;
 
 		if (jfr.jd_data_len != 3) {
 			printf("bad rec len = %d\n", jfr.jd_data_len);
@@ -30,12 +30,12 @@ struct jdsvc_manual :public JDAUTOSEND {
 		}
 		ctl.cpl_flag = 1;
 	}
-	
+
 	inline int getUncpl(JD_INFO & jif)
 	{
 		int using_index = -1;
 		for (auto &par : jif.mdcCtrl) {
-			auto & p = par.manual;
+			auto & p = par.correct;
 			if (p.cpl_flag == 0 && p.retry_num < p.Max_retry) {
 				using_index = std::distance(&jif.mdcCtrl[0], &par);
 				return using_index;
@@ -47,14 +47,29 @@ struct jdsvc_manual :public JDAUTOSEND {
 
 	virtual int need_service(JD_INFO & jif) final
 	{
-		if (jif.JD_MOD != mdc_mode_manual) {
-			return 0;
-		}
-		
 		if (getUncpl(jif) >= 0) {
 			return 1;
 		}
 		return 0;
+	}
+
+	inline void setPart2buff(char * databuff, Par_CTRL & aim)
+	{
+		char * point = databuff;
+		*point++ = aim.initSpeed >> 8 & 0xff;
+		*point++ = aim.initSpeed & 0xff;
+
+		*point++ = aim.MaxSpeed >> 8 & 0xff;
+		*point++ = aim.MaxSpeed & 0xff;
+
+		*point++ = aim.period;
+
+		*point++ = aim.Phase;
+
+		*point++ = aim.current;
+
+		*point++ = aim.Ratio >> 8 & 0xff;
+		*point++ = aim.Ratio & 0xff;
 	}
 
 
@@ -65,24 +80,24 @@ struct jdsvc_manual :public JDAUTOSEND {
 		if (using_index < 0) {
 			return;
 		}
-		Man_CTRL &aim = jif.mdcCtrl[using_index].manual;
+		Par_CTRL &aim = jif.mdcCtrl[using_index].par;
 
 		JD_FRAME jfr;
 
-		float aimdeg = aim.manual_deg;
-		unsigned int tmpdeg = Angle_Convert_UShort(aimdeg);
-		printf("manual using %d ,cnt = %d, deg = %f\n", using_index, aim.retry_num, aimdeg);
 
-		char databuff[3];
-		databuff[0] = (tmpdeg >> (0 * 8)) & 0xff;
-		databuff[1] = (tmpdeg >> (1 * 8)) & 0xff;
-		databuff[2] = (tmpdeg >> (2 * 8)) & 0xff;
+		printf("parset using %d ,cnt = %d, init %d,max %d,period %d,phase %d, current %d,ratio %d\n"
+			, using_index, aim.retry_num
+			,aim.initSpeed,aim.MaxSpeed,aim.period,aim.Phase,aim.current,aim.Ratio		
+		);
+
+		char databuff[9];
+		setPart2buff(databuff, aim);
 
 		jfr.jd_aim.value = jif.mdcCtrl[using_index].addr;
 
 		jfr.jd_send_buff = &databuff;
-		jfr.jd_data_len = 3;
-		jfr.jd_command = 0xB;
+		jfr.jd_data_len = 9;
+		jfr.jd_command = 0xc;
 
 		aim.retry_num++;
 		JD_send(jif, jfr);
@@ -90,13 +105,13 @@ struct jdsvc_manual :public JDAUTOSEND {
 	}
 };
 
-static jdsvc_manual jsvc;
+static jdsvc_par_set jsvc;
 
-JDAUTOSEND * jdsvc_manuals()
+JDAUTOSEND * jdsvc_par_sets()
 {
 	return &jsvc;
 }
-int JD_manual_rec(JD_INFO & jif, JD_FRAME & jfr)
+int JD_parset_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
 

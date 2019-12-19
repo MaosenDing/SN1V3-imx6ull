@@ -6,6 +6,9 @@ struct JDAUTOSEND
 {
 	virtual int need_service(JD_INFO & jif) = 0;
 	virtual void service_pro(JD_INFO & jif) = 0;
+
+	int findMdc_addr(JD_INFO & jif, int addr);
+
 };
 
 

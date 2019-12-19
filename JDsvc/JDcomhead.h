@@ -102,6 +102,7 @@ struct Par_CTRL:public CTRL_BASE
 	int MaxSpeed;
 	int Phase;
 	int period;
+	int current;
 	int Ratio;
 	void trig_set_init(int inspeed)
 	{
@@ -124,6 +125,12 @@ struct Par_CTRL:public CTRL_BASE
 	void trig_set_per(int inPer)
 	{
 		period = inPer;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+	void trig_set_cur(int incur)
+	{
+		current = incur;
 		retry_num = 0;
 		cpl_flag = 0;
 	}
@@ -214,8 +221,11 @@ enum {
 	diff_period0 = 1 << 6,
 	diff_period1 = 1 << 7,
 
-	diff_ratio0 = 1 << 8,
-	diff_ratio1 = 1 << 9,
+	diff_currect0 = 1<<8,
+	diff_currect1 = 1<<9,
+
+	diff_ratio0 = 1 << 10,
+	diff_ratio1 = 1 << 11,
 };
 
 
@@ -233,6 +243,7 @@ struct SCANF_DATA {
 	int MaxSpeed[2];
 	int Phase[2];
 	int period[2];
+	int currect[2];
 	int Ratio[2];
 };
 
