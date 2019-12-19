@@ -25,15 +25,18 @@
 #include <thread>
 #include "svc.h"
 #include "SN1V2_com.h"
+
 using namespace std;
 
 JDAUTOSEND * jdsvc_table();
 JDAUTOSEND * jdsvc_time();
 JDAUTOSEND * jdsvc_manuals();
+JDAUTOSEND * jdsvc_corrects();
 JDAUTOSEND *grp[] = {
 	jdsvc_table(),
 	jdsvc_time(),
 	jdsvc_manuals(),
+	jdsvc_corrects(),
 };
 
 
@@ -56,23 +59,26 @@ int master_svc_thread(JD_INFO * pjif)
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_table_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_manual_rec(JD_INFO & jif, JD_FRAME & jfr);
+int JD_correct_rec(JD_INFO & jif, JD_FRAME & jfr);
 JDPROSTRUCT JD_init_rec_group[] =
 {
 	{ 0x34 | 0x80, JD_time_rec },
 	{ 0x35 | 0x80 ,JD_table_rec},
 	{ 0x0b | 0x80 ,JD_manual_rec},
+	{ 0x0C | 0x80 ,JD_correct_rec},
 };
 //ERR_STA loadFile(char *fname, vector<uint8_t> & refVect)
 
 
-void save_default(JD_INFO& jif, const char * fil)
-{
-	jif.JD_MOD = jif.mdc_mode_table;
-
-	char defchar[] = "auto\n";
-
-	saveBin((char *)fil, defchar, strlen(defchar));
-}
+//void save_default(JD_INFO& jif, const char * fil)
+//{
+//	jif.JD_MOD = jif.mdc_mode_table;
+//
+//	char defchar[] = "auto\n";
+//
+//	saveBin((char *)fil, defchar, strlen(defchar));
+//}
+void merge_data(JD_INFO * pjif, SCANF_DATA & dat);
 
 static void scan_file(void * p, const char * fil)
 {
@@ -81,38 +87,10 @@ static void scan_file(void * p, const char * fil)
 	}
 	JD_INFO * pjif = (JD_INFO *)p;
 
-	vector<uint8_t> stText;
-	loadFile((char *)fil, stText);
-	do{
-		if (stText.empty()) {
-			break;
-		}
+	auto dat = real_scan_file(fil);
 
-		if (strstr((char *)&stText.at(0), "auto")) {
-			pjif->JD_MOD = pjif->mdc_mode_table;
-			printf("scanf auto\n");
-			return;
-		}
-
-		if (strstr((char *)&stText.at(0), "off")) {
-			pjif->JD_MOD = pjif->mdc_mode_off;
-			printf("scanf auto\n");
-			return;
-		}
-
-		float f1, f2;
-		int ret2 = sscanf((char *)&stText.at(0), "manual %f %f", &f1, &f2);
-
-		if (ret2 == 2) {
-			pjif->JD_MOD = pjif->mdc_mode_manual;
-			pjif->mdcCtrl[0].trig_set(f1);
-			pjif->mdcCtrl[1].trig_set(f2);
-			printf("scanf manual = %f %f\n", f1, f2);
-			return;
-		}
-	} while (0);
-	printf("scanf null\n");
-	save_default(*pjif, fil);
+	merge_data(pjif, dat);
+	//save_default(*pjif, fil);
 }
 
 

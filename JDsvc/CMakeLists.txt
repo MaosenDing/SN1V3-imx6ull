@@ -2,7 +2,10 @@
 
 
 add_executable(mdc.exe mdc.cpp 
-JDrec.cpp uart.cpp timer_reflush.cpp master_frame.cpp)
+JDrec.cpp uart.cpp timer_reflush.cpp master_frame.cpp
+mdc_txt.cpp
+
+)
 
 
 include_directories("./")

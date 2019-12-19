@@ -79,14 +79,14 @@ enum JDTIME {
 //any 0xff 0xff is consider as correct crc
 
 
-struct MDC_CTRL
-{
-	int addr;
-	float manual_deg;
+struct CTRL_BASE{
 	const int Max_retry = 10;
 	int retry_num = 0;
-	int cpl_flag = 0 ;
+	int cpl_flag = 1;
+};
 
+struct Man_CTRL :public CTRL_BASE{
+	float manual_deg;
 	void trig_set(float infloat)
 	{
 		manual_deg = infloat;
@@ -96,6 +96,61 @@ struct MDC_CTRL
 };
 
 
+struct Par_CTRL:public CTRL_BASE
+{
+	int initSpeed;
+	int MaxSpeed;
+	int Phase;
+	int period;
+	int Ratio;
+	void trig_set_init(int inspeed)
+	{
+		initSpeed = inspeed;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+	void trig_set_max(int inMax)
+	{
+		MaxSpeed = inMax;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+	void trig_set_pha(int inPha)
+	{
+		Phase = inPha;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+	void trig_set_per(int inPer)
+	{
+		period = inPer;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+	void trig_set_rat(int inRat)
+	{
+		Ratio = inRat;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+};
+
+
+struct MDC_CTRL
+{
+	int addr;
+	Man_CTRL manual;
+	Man_CTRL correct;
+	Par_CTRL par;
+};
+
+
+
+enum _JD_MOD {
+	mdc_mode_table = 0,
+	mdc_mode_manual = 1,
+	mdc_mode_off = 2,
+};
 
 struct JD_INFO 
 {	
@@ -115,11 +170,7 @@ struct JD_INFO
 	JD_PRO default_err_cmd;
 	int fake_check_flag;
 
-	enum _JD_MOD {
-		mdc_mode_table = 0,
-		mdc_mode_manual = 1,
-		mdc_mode_off = 2,
-	}JD_MOD;
+	_JD_MOD JD_MOD;
 
 
 	MDC_CTRL mdcCtrl[2];
@@ -147,6 +198,45 @@ struct JD_INFO_TIM : public JD_INFO {
 	//enable time diff && time set
 	int time_diff_max = 20;
 };
+
+
+
+enum {
+	diff_init0 = 1 << 0,
+	diff_init1 = 1 << 1,
+
+	diff_max0 = 1 << 2,
+	diff_max1 = 1 << 3,
+
+	diff_phase0 = 1 << 4,
+	diff_phase1 = 1 << 5,
+
+	diff_period0 = 1 << 6,
+	diff_period1 = 1 << 7,
+
+	diff_ratio0 = 1 << 8,
+	diff_ratio1 = 1 << 9,
+};
+
+
+struct SCANF_DATA {
+	_JD_MOD JD_MOD;
+
+	int manual_flag = 0;
+	float manual_deg[2];
+
+	int correct_flag = 0;
+	float correct[2];
+
+	int set_flg = 0;
+	int initSpeed[2];
+	int MaxSpeed[2];
+	int Phase[2];
+	int period[2];
+	int Ratio[2];
+};
+
+SCANF_DATA real_scan_file(const char * fil);
 
 
 struct JDPROSTRUCT

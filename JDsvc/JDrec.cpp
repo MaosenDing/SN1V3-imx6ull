@@ -130,8 +130,6 @@ JD_INFO::JD_INFO()
 
 	mdcCtrl[0].addr = 0xaaaa << 8;
 	mdcCtrl[1].addr = 0xbbbb << 8;
-
-	//sem_init(&sem_enable, 0, 0);
 }
 
 void JD_pro_ctl(JD_INFO & jif,int cmd ,JD_INFO::JD_PRO profun, int ctl)
