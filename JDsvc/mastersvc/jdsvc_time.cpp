@@ -5,40 +5,72 @@
 
 struct jdtimesvc :public JDAUTOSEND {
 
-	timeval last_tv;
-
-	virtual int need_service(JD_INFO & jif) final
+	int searchUncoplete(JD_INFO & jif)
 	{
-		return 0;
-		printf("nnn\n");
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 
-		if (tv.tv_sec == last_tv.tv_sec) {
-			return 0;
+		for (auto &p : jif.mdcCtrl) {
+			auto &sta = p.sta;
+
+			if (tv.tv_sec != sta.last_tv.tv_sec) {
+				sta.last_tv.tv_sec = tv.tv_sec;
+				sta.trig_set_init();
+				return  std::distance(&jif.mdcCtrl[0], &p);
+			} else {
+				if (sta.cpl_flag == 0 && sta.retry_num < sta.Max_retry) {
+					return  std::distance(&jif.mdcCtrl[0], &p);
+				}
+			}
 		}
-		return 1;
+		return -1;
+	}
+
+
+	virtual int need_service(JD_INFO & jif) final
+	{
+		if (searchUncoplete(jif) >= 0) {
+			return 1;
+		}
+		return 0;
 	}
 
 
 	virtual void service_pro(JD_INFO & jif)final
 	{
+		int using_index = searchUncoplete(jif);
+		if (using_index < 0) {
+			return;
+		}
+		MDC_STA &aim = jif.mdcCtrl[using_index].sta;
+
 		JD_FRAME jfr;
 
-		unsigned char testbuff[] = "send test";
-
-		jfr.jd_send_buff = &testbuff;
-		jfr.jd_data_len = sizeof(testbuff);
-		jfr.jd_command = 0x34;
+		jfr.jd_aim.value = jif.mdcCtrl[using_index].addr;
+		jfr.jd_send_buff = nullptr;
+		jfr.jd_data_len = 0;
+		jfr.jd_command = 0xd;
+		aim.retry_num++;
 
 		JD_send(jif, jfr);
 	}
 
-	void trig_cpl()
+	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
 	{
-		timeval tv;
-		gettimeofday(&tv, nullptr);
-		last_tv.tv_sec = tv.tv_sec;
+		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
+
+		if (getIndex < 0) {
+			printf("bad addr = 0x%x\n", jfr.jd_aim.value);
+			return;
+		}
+		MDC_STA & sta = jif.mdcCtrl[getIndex].sta;
+
+		if (jfr.jd_data_len != 3) {
+			printf("bad rec len = %d\n", jfr.jd_data_len);
+			return;
+		}		
+		sta.cpl_flag = 1;
+		gettimeofday(&sta.last_tv, nullptr);
 	}
 };
 
@@ -53,8 +85,7 @@ JDAUTOSEND * jdsvc_time()
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
 	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
-	jsvc.trig_cpl();
-	//printf("rec data len = %d \n", jfr.jd_data_len);
+	jsvc.trig_cpl(jif, jfr);
 	return JD_OK;
 }
 

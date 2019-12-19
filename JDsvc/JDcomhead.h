@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "SN1V2_rtConfig.h"
 #include <condition_variable>
+#include <sys/time.h>
 #define JD_OK 0
 #define JD_ERROR_HEAD (-1)
 #define JD_LACK_HEAD (-2)
@@ -80,7 +81,7 @@ enum JDTIME {
 
 
 struct CTRL_BASE{
-	const int Max_retry = 10;
+	int Max_retry = 3;
 	int retry_num = 0;
 	int cpl_flag = 1;
 };
@@ -94,6 +95,8 @@ struct Man_CTRL :public CTRL_BASE{
 		cpl_flag = 0;
 	}
 };
+
+
 
 
 struct Par_CTRL:public CTRL_BASE
@@ -142,6 +145,28 @@ struct Par_CTRL:public CTRL_BASE
 	}
 };
 
+struct Par_GET :public Par_CTRL
+{
+	int succ_flag = 0;
+};
+
+
+struct MDC_STA :public CTRL_BASE {
+	timeval last_tv;
+	float deg;
+	int temperature;
+	int current;
+	int status[4];
+	void trig_set_init()
+	{
+		Max_retry = 2;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+};
+
+
+
 
 struct MDC_CTRL
 {
@@ -149,6 +174,8 @@ struct MDC_CTRL
 	Man_CTRL manual;
 	Man_CTRL correct;
 	Par_CTRL par;
+	Par_GET parget;
+	MDC_STA sta;
 };
 
 

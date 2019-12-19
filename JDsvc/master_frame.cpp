@@ -33,12 +33,14 @@ JDAUTOSEND * jdsvc_time();
 JDAUTOSEND * jdsvc_manuals();
 JDAUTOSEND * jdsvc_corrects();
 JDAUTOSEND * jdsvc_par_sets();
+JDAUTOSEND * jdsvc_par_gets();
 JDAUTOSEND *grp[] = {
-	jdsvc_table(),
-	jdsvc_time(),
-	jdsvc_manuals(),
-	jdsvc_corrects(),
+//	jdsvc_table(),
+//	jdsvc_time(),
+//	jdsvc_manuals(),
+//	jdsvc_corrects(),
 	jdsvc_par_sets(),
+	jdsvc_par_gets(),
 };
 
 
@@ -47,7 +49,6 @@ int master_svc_thread(JD_INFO * pjif)
 	while (true) {
 		unique_lock<timed_mutex> lck(pjif->enable_mtx);
 		pjif->enable_cv.wait_for(lck, chrono::milliseconds(50));
-
 
 		for (auto & t : grp) {
 			if (t->need_service(*pjif)) {
@@ -63,13 +64,15 @@ int JD_table_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_manual_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_correct_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_parset_rec(JD_INFO & jif, JD_FRAME & jfr);
+int JD_parget_rec(JD_INFO & jif, JD_FRAME & jfr);
 JDPROSTRUCT JD_init_rec_group[] =
 {
-	{ 0x34 | 0x80, JD_time_rec },
-	{ 0x35 | 0x80 ,JD_table_rec},
-	{ 0x0b | 0x80 ,JD_manual_rec},
-	{ 0x0C | 0x80 ,JD_correct_rec},
+	{ 0x0d | 0x80, JD_time_rec },
+//	{ 0x35 | 0x80 ,JD_table_rec},
+//	{ 0x0b | 0x80 ,JD_manual_rec},
+//	{ 0x0C | 0x80 ,JD_correct_rec},
 	{ 0x11 | 0x80 ,JD_parset_rec},
+	{ 0x12 | 0x80 ,JD_parget_rec},
 };
 //ERR_STA loadFile(char *fname, vector<uint8_t> & refVect)
 

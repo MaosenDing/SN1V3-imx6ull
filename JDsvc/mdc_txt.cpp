@@ -244,6 +244,22 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 	if (dat.correct_flag & (1 << 1)) {
 		pjif->mdcCtrl[1].correct.trig_set(dat.correct[1]);
 	}
+
+	if (dat.set_flg) {
+		for (auto & aim : pjif->mdcCtrl) {
+			if (aim.parget.succ_flag == 0) {
+				aim.parget.retry_num = 0;
+			} else {
+				aim.par.initSpeed = aim.parget.initSpeed;
+				aim.par.MaxSpeed = aim.parget.MaxSpeed;
+				aim.par.period = aim.parget.period;
+				aim.par.Phase = aim.parget.Phase;
+				aim.par.current = aim.parget.current;
+				aim.par.Ratio = aim.parget.Ratio;
+			}
+		}
+	}
+
 	//参数设置
 	if (dat.set_flg & diff_init0) {
 		pjif->mdcCtrl[0].par.trig_set_init(dat.initSpeed[0]);
@@ -271,12 +287,12 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 	}
 
 
-	if (dat.set_flg & diff_period0) {
-		pjif->mdcCtrl[0].par.trig_set_cur(dat.period[0]);
+	if (dat.set_flg & diff_currect0) {
+		pjif->mdcCtrl[0].par.trig_set_cur(dat.currect[0]);
 	}
 
-	if (dat.set_flg & diff_period1) {
-		pjif->mdcCtrl[1].par.trig_set_cur(dat.period[1]);
+	if (dat.set_flg & diff_currect1) {
+		pjif->mdcCtrl[1].par.trig_set_cur(dat.currect[1]);
 	}
 
 	if (dat.set_flg & diff_ratio0) {
