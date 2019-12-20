@@ -24,10 +24,6 @@ struct jdsvc_par_set :public JDAUTOSEND {
 		}
 		Par_CTRL & par = jif.mdcCtrl[getIndex].par;
 
-		if (jfr.jd_data_len != 3) {
-			printf("bad rec len = %d\n", jfr.jd_data_len);
-			return;
-		}
 		par.cpl_flag = 1;
 	}
 
@@ -35,7 +31,7 @@ struct jdsvc_par_set :public JDAUTOSEND {
 	{
 		int using_index = -1;
 		for (auto &par : jif.mdcCtrl) {
-			auto & p = par.correct;
+			auto & p = par.par;
 			if (p.cpl_flag == 0 && p.retry_num < p.Max_retry && par.parget.succ_flag ) {
 				using_index = std::distance(&jif.mdcCtrl[0], &par);
 				return using_index;
@@ -72,6 +68,32 @@ struct jdsvc_par_set :public JDAUTOSEND {
 		*point++ = aim.Ratio >> 8 & 0xff;
 	}
 
+	inline void copydata(Par_GET & src, Par_CTRL &dst, int flg)
+	{
+		if (!(flg & diff_init0)) {
+			dst.initSpeed = src.initSpeed;
+		}
+
+		if (!(flg & diff_max0)) {
+			dst.MaxSpeed = src.MaxSpeed;
+		}
+
+		if (!(flg & diff_period0)) {
+			dst.period = src.period;
+		}
+
+		if (!(flg & diff_phase0)) {
+			dst.Phase = src.Phase;
+		}
+
+		if (!(flg & diff_currect0)) {
+			dst.current = src.current;
+		}
+
+		if (!(flg & diff_ratio0)) {
+			dst.Ratio = src.Ratio;
+		}
+	}
 
 	virtual void service_pro(JD_INFO & jif)final
 	{
@@ -80,7 +102,10 @@ struct jdsvc_par_set :public JDAUTOSEND {
 		if (using_index < 0) {
 			return;
 		}
+		Par_GET &org = jif.mdcCtrl[using_index].parget;
 		Par_CTRL &aim = jif.mdcCtrl[using_index].par;
+
+		copydata(org, aim, aim.setflg);
 
 		JD_FRAME jfr;
 
@@ -97,7 +122,7 @@ struct jdsvc_par_set :public JDAUTOSEND {
 
 		jfr.jd_send_buff = &databuff;
 		jfr.jd_data_len = 9;
-		jfr.jd_command = 0xc;
+		jfr.jd_command = 0x11;
 
 		aim.retry_num++;
 		JD_send(jif, jfr);

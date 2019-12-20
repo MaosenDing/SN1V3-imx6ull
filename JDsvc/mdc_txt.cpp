@@ -224,7 +224,9 @@ SCANF_DATA real_scan_file(const char * fil)
 void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 {
 	//手动 自动 
+	printf("mod %d man %d\n", dat.JD_MOD, dat.manual_flag);
 	if (dat.JD_MOD == mdc_mode_manual && dat.manual_flag) {
+		pjif->JD_MOD = mdc_mode_manual;
 		if (dat.manual_flag & (1 << 0)) {
 			pjif->mdcCtrl[0].manual.trig_set(dat.manual_deg[0]);
 		}
@@ -232,6 +234,12 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 		if (dat.manual_flag & (1 << 1)) {
 			pjif->mdcCtrl[1].manual.trig_set(dat.manual_deg[1]);
 		}
+	} else if (dat.JD_MOD == mdc_mode_off) {
+		pjif->mdcCtrl[0].stop.trig_set();
+		pjif->mdcCtrl[1].stop.trig_set();		
+		pjif->JD_MOD = mdc_mode_off;
+	} else {
+		pjif->JD_MOD = mdc_mode_table;
 	}
 	//校正
 	if (dat.correct_flag & (1 << 0)) {
@@ -241,17 +249,10 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 		pjif->mdcCtrl[1].correct.trig_set(dat.correct[1]);
 	}
 	if (dat.set_flg) {
-		
 		for (auto & aim : pjif->mdcCtrl) {
+			aim.par.setflg = 0;
 			if (aim.parget.succ_flag == 0) {
 				aim.parget.retry_num = 0;
-			} else {
-				aim.par.initSpeed = aim.parget.initSpeed;
-				aim.par.MaxSpeed = aim.parget.MaxSpeed;
-				aim.par.period = aim.parget.period;
-				aim.par.Phase = aim.parget.Phase;
-				aim.par.current = aim.parget.current;
-				aim.par.Ratio = aim.parget.Ratio;
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 #include "jd_share.h"
 #include "svc.h"
 #include <sys/time.h>
-
+#include <string.h>
 struct jdtimesvc :public JDAUTOSEND {
 
 	int searchUncoplete(JD_INFO & jif)
@@ -49,7 +49,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		jfr.jd_aim.value = jif.mdcCtrl[using_index].addr;
 		jfr.jd_send_buff = nullptr;
 		jfr.jd_data_len = 0;
-		jfr.jd_command = 0xd;
+		jfr.jd_command = 0x13;
 		aim.retry_num++;
 
 		JD_send(jif, jfr);
@@ -65,12 +65,23 @@ struct jdtimesvc :public JDAUTOSEND {
 		}
 		MDC_STA & sta = jif.mdcCtrl[getIndex].sta;
 
-		if (jfr.jd_data_len != 3) {
+		if (jfr.jd_data_len != 9) {
 			printf("bad rec len = %d\n", jfr.jd_data_len);
 			return;
-		}		
+		}
+		
+		sta.deg = Angle_Convert(jfr.jd_data_buff);
+
+		sta.temperature = jfr.jd_data_buff[3];
+		sta.current = jfr.jd_data_buff[4];
+		memcpy(sta.status, &jfr.jd_data_buff[5], 4);
+
+		printf("addr %x , deg %f,tem %d,cur %d ,%d %d %d %d\n", jif.mdcCtrl[getIndex].addr,
+			sta.deg,sta.temperature,sta.current
+			, (char)sta.status[0], (char)sta.status[1], (char)sta.status[2], (char)sta.status[3]
+			);
+
 		sta.cpl_flag = 1;
-		gettimeofday(&sta.last_tv, nullptr);
 	}
 };
 

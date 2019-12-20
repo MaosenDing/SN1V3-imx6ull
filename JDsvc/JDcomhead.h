@@ -96,8 +96,33 @@ struct Man_CTRL :public CTRL_BASE{
 	}
 };
 
+struct STOP_CTRL :public CTRL_BASE {
+	void trig_set()
+	{
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+};
 
+enum {
+	diff_init0 = 1 << 0,
+	diff_init1 = 1 << 1,
 
+	diff_max0 = 1 << 2,
+	diff_max1 = 1 << 3,
+
+	diff_phase0 = 1 << 4,
+	diff_phase1 = 1 << 5,
+
+	diff_period0 = 1 << 6,
+	diff_period1 = 1 << 7,
+
+	diff_currect0 = 1 << 8,
+	diff_currect1 = 1 << 9,
+
+	diff_ratio0 = 1 << 10,
+	diff_ratio1 = 1 << 11,
+};
 
 struct Par_CTRL:public CTRL_BASE
 {
@@ -107,38 +132,46 @@ struct Par_CTRL:public CTRL_BASE
 	int period;
 	int current;
 	int Ratio;
+
+	int setflg;
 	void trig_set_init(int inspeed)
 	{
+		setflg |= diff_init0;
 		initSpeed = inspeed;
 		retry_num = 0;
 		cpl_flag = 0;
 	}
 	void trig_set_max(int inMax)
 	{
+		setflg |= diff_max0;
 		MaxSpeed = inMax;
 		retry_num = 0;
 		cpl_flag = 0;
 	}
 	void trig_set_pha(int inPha)
 	{
+		setflg |= diff_phase0;
 		Phase = inPha;
 		retry_num = 0;
 		cpl_flag = 0;
 	}
 	void trig_set_per(int inPer)
 	{
+		setflg |= diff_period0;
 		period = inPer;
 		retry_num = 0;
 		cpl_flag = 0;
 	}
 	void trig_set_cur(int incur)
 	{
+		setflg |= diff_currect0;
 		current = incur;
 		retry_num = 0;
 		cpl_flag = 0;
 	}
 	void trig_set_rat(int inRat)
 	{
+		setflg |= diff_ratio0;
 		Ratio = inRat;
 		retry_num = 0;
 		cpl_flag = 0;
@@ -176,6 +209,7 @@ struct MDC_CTRL
 	Par_CTRL par;
 	Par_GET parget;
 	MDC_STA sta;
+	STOP_CTRL stop;
 };
 
 
@@ -235,25 +269,7 @@ struct JD_INFO_TIM : public JD_INFO {
 
 
 
-enum {
-	diff_init0 = 1 << 0,
-	diff_init1 = 1 << 1,
 
-	diff_max0 = 1 << 2,
-	diff_max1 = 1 << 3,
-
-	diff_phase0 = 1 << 4,
-	diff_phase1 = 1 << 5,
-
-	diff_period0 = 1 << 6,
-	diff_period1 = 1 << 7,
-
-	diff_currect0 = 1<<8,
-	diff_currect1 = 1<<9,
-
-	diff_ratio0 = 1 << 10,
-	diff_ratio1 = 1 << 11,
-};
 
 
 struct SCANF_DATA {
