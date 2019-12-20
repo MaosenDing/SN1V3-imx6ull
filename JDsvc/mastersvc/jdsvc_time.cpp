@@ -3,6 +3,11 @@
 #include "svc.h"
 #include <sys/time.h>
 #include <string.h>
+#include "SN1V2_com.h"
+#include <iostream>
+#include <math.h>
+#include "SN1V2_com.h"
+using namespace  std;
 struct jdtimesvc :public JDAUTOSEND {
 
 	int searchUncoplete(JD_INFO & jif)
@@ -14,7 +19,6 @@ struct jdtimesvc :public JDAUTOSEND {
 			auto &sta = p.sta;
 
 			if (tv.tv_sec != sta.last_tv.tv_sec) {
-				sta.last_tv.tv_sec = tv.tv_sec;
 				sta.trig_set_init();
 				return  std::distance(&jif.mdcCtrl[0], &p);
 			} else {
@@ -55,6 +59,18 @@ struct jdtimesvc :public JDAUTOSEND {
 		JD_send(jif, jfr);
 	}
 
+	bool checkDeg(JD_INFO & jif)
+	{		
+		for (auto & p : jif.mdcCtrl) {
+			double tmp = p.manual.manual_deg - p.sta.deg;
+			if (fabs(tmp) > 0.05f) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
 	{
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
@@ -76,11 +92,25 @@ struct jdtimesvc :public JDAUTOSEND {
 		sta.current = jfr.jd_data_buff[4];
 		memcpy(sta.status, &jfr.jd_data_buff[5], 4);
 
-		printf("addr %x , deg %f,tem %d,cur %d ,%d %d %d %d\n", jif.mdcCtrl[getIndex].addr,
-			sta.deg,sta.temperature,sta.current
-			, (char)sta.status[0], (char)sta.status[1], (char)sta.status[2], (char)sta.status[3]
-			);
 
+		char name[128];
+		snprintf(name, 128, "%s%d", MDC_STATUS_FILE, getIndex);
+
+		char buff[128];
+		int len = snprintf(buff, 128,"addr %x , deg %f,tem %d,cur %d ,%02x %02x %02x %02x\n", jif.mdcCtrl[getIndex].addr,
+			sta.deg, sta.temperature, sta.current
+			, (char)sta.status[0], (char)sta.status[1], (char)sta.status[2], (char)sta.status[3]
+		);
+		gettimeofday(&sta.last_tv, nullptr);
+
+		if (checkDeg(jif)) {
+			auto &pp = (JD_INFO_TIM &)jif;
+			auto psn1 = pp.psn1;
+			psn1->helo_status = psn1->Helo_ok;
+		}
+		printf(buff);
+
+		saveBin(name, buff, len);
 		sta.cpl_flag = 1;
 	}
 };

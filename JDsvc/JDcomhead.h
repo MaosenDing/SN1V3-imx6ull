@@ -317,4 +317,6 @@ int regist_timer_auto_flush(SN1_SHM * psn1);
 
 #define MDC_MODE_FILE ("/tmp/mdc_mode")
 
+#define MDC_STATUS_FILE ("/tmp/mdc_status")
+
 #endif

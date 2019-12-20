@@ -25,7 +25,7 @@
 #include <thread>
 #include "svc.h"
 #include "SN1V2_com.h"
-
+#include "time_interval.h"
 using namespace std;
 
 JDAUTOSEND * jdsvc_table();
@@ -36,7 +36,7 @@ JDAUTOSEND * jdsvc_par_sets();
 JDAUTOSEND * jdsvc_par_gets();
 JDAUTOSEND * jdsvc_stops();
 JDAUTOSEND *grp[] = {
-//	jdsvc_table(),	
+	jdsvc_table(),	
 	jdsvc_stops(),
 	jdsvc_manuals(),
 	jdsvc_corrects(),
@@ -96,6 +96,7 @@ static void scan_file(void * p, const char * fil)
 	if (!p || !fil) {
 		return ;
 	}
+	TimeInterval ttt("scanf:");
 	JD_INFO * pjif = (JD_INFO *)p;
 
 	auto dat = real_scan_file(fil);

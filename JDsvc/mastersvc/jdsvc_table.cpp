@@ -94,7 +94,7 @@ struct jdtablesvc :public JDAUTOSEND {
 	int send_period_s = 5;
 
 	virtual int need_service(JD_INFO & jif) final
-	{		
+	{
 		if (jif.JD_MOD != mdc_mode_table) {
 			return 0;
 		}
@@ -108,16 +108,8 @@ struct jdtablesvc :public JDAUTOSEND {
 
 		uint64_t now_send_tim = tv.tv_sec / send_period_s;
 
-		if (now_send_tim == last_send_tim) {
-			if (searchUncoplete() >= 0) {
-				return 1;
-			}
-		} else {
+		if (now_send_tim != last_send_tim) {
 			last_send_tim = now_send_tim;
-			for (auto &p : aim) {
-				p.succ_flag = 0;
-				p.retry_cnt = 0;
-			}
 			return 1;
 		}
 		//send every 5 second
@@ -126,42 +118,15 @@ struct jdtablesvc :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & jif)final
 	{
-		int using_index = searchUncoplete();
-
-		if (using_index < 0) {
-			return;
-		}
-
 		std::unique_lock<std::mutex> lk(tableLock);
 		rm_back(timeset);
-
-		auto &thisaim = aim[using_index];
-		thisaim.retry_cnt++;
-
-		int sz = timeset.size();
-		int max_snd = 3;
-
-		std::vector<timTableSet> timesettmp;
-
-		for (int i = 0; i < max_snd && sz > 0; i++, sz--) {
-			timesettmp.push_back(timeset[sz - 1]);
+		if (!timeset.empty()) {
+			auto &pp = (JD_INFO_TIM &)jif;
+			auto psn1 = pp.psn1;
+			psn1->helo_status = psn1->Helo_not_ready;
+			jif.mdcCtrl[0].manual.trig_set(timeset.back().YxAng);
+			jif.mdcCtrl[1].manual.trig_set(timeset.back().ZxAng);
 		}
-
-		JD_FRAME jfr;
-
-		char databuff[128];
-
-		int len = mkPack(databuff, 128, timesettmp, using_index);
-#if 0
-		printf("using %d ,cnt = %d\n", using_index, thisaim.retry_cnt);
-		printf(databuff);
-#endif
-		jfr.jd_aim.value = using_index;
-		jfr.jd_send_buff = &databuff;
-		jfr.jd_data_len = len;
-		jfr.jd_command = 0x35;
-
-		JD_send(jif, jfr);
 	}
 
 private:
@@ -175,7 +140,7 @@ private:
 		return -1;
 	}
 
-	int mkPack(char * databuff, int maxsz, std::vector<timTableSet> &timesettmp ,int using_index)
+	int mkPack(char * databuff, int maxsz, std::vector<timTableSet> &timesettmp, int using_index)
 	{
 		int len = 0;
 		for (auto & p : timesettmp) {
