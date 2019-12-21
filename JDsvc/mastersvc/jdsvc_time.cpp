@@ -97,10 +97,20 @@ struct jdtimesvc :public JDAUTOSEND {
 		snprintf(name, 128, "%s%d", MDC_STATUS_FILE, getIndex);
 
 		char buff[128];
-		int len = snprintf(buff, 128,"addr %x , deg %f,tem %d,cur %d ,%02x %02x %02x %02x\n", jif.mdcCtrl[getIndex].addr,
+		
+		sta.statusint = sta.status[0]
+			| sta.status[1] << 8
+			| sta.status[2] << 16
+			| sta.status[3] << 24;
+
+		sta.runningflg = (sta.statusint & 1 << 9) ? 0 : 1;
+
+		int len = snprintf(buff, 128, "addr %x , deg %f,tem %d,cur %d ,%02x %02x %02x %02x run %d\n", jif.mdcCtrl[getIndex].addr,
 			sta.deg, sta.temperature, sta.current
-			, (char)sta.status[0], (char)sta.status[1], (char)sta.status[2], (char)sta.status[3]
+			, sta.status[0], sta.status[1], sta.status[2], sta.status[3], sta.runningflg
 		);
+
+
 		gettimeofday(&sta.last_tv, nullptr);
 
 		if (checkDeg(jif)) {

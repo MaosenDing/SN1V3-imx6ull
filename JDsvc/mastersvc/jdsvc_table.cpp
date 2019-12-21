@@ -6,6 +6,7 @@
 #include <mutex>
 #include <iostream>
 #include <algorithm>
+#include <math.h>
 using namespace std;
 
 static void rm_back(std::vector<timTableSet> & ts)
@@ -116,6 +117,18 @@ struct jdtablesvc :public JDAUTOSEND {
 		return 0;
 	}
 
+	//bool checkDeg(JD_INFO & jif)
+	//{
+	//	for (auto & p : jif.mdcCtrl) {
+	//		double tmp = p.manual.manual_deg - p.sta.deg;
+	//		if (fabs(tmp) > 0.05f) {
+	//			return false;
+	//		}
+	//	}
+	//	return true;
+	//}
+
+
 	virtual void service_pro(JD_INFO & jif)final
 	{
 		std::unique_lock<std::mutex> lk(tableLock);
@@ -124,8 +137,18 @@ struct jdtablesvc :public JDAUTOSEND {
 			auto &pp = (JD_INFO_TIM &)jif;
 			auto psn1 = pp.psn1;
 			psn1->helo_status = psn1->Helo_not_ready;
-			jif.mdcCtrl[0].manual.trig_set(timeset.back().YxAng);
-			jif.mdcCtrl[1].manual.trig_set(timeset.back().ZxAng);
+
+			float f0 = fabs(timeset.back().YxAng - jif.mdcCtrl[0].sta.deg);
+			float f1 = fabs(timeset.back().ZxAng - jif.mdcCtrl[1].sta.deg);
+
+			if (0 == jif.mdcCtrl[0].sta.runningflg) {
+				jif.mdcCtrl[0].manual.trig_set(timeset.back().YxAng);
+			}
+
+			if (0 == jif.mdcCtrl[1].sta.runningflg) {
+				jif.mdcCtrl[1].manual.trig_set(timeset.back().ZxAng);
+			}
+
 		}
 	}
 

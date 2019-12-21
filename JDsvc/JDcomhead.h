@@ -184,12 +184,16 @@ struct Par_GET :public Par_CTRL
 };
 
 
+
 struct MDC_STA :public CTRL_BASE {
 	timeval last_tv;
 	float deg;
 	int temperature;
 	int current;
-	int status[4];
+	char status[4];
+
+	int statusint;
+	char runningflg = 0;
 	void trig_set_init()
 	{
 		Max_retry = 2;
