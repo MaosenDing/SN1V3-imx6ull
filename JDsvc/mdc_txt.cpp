@@ -227,7 +227,7 @@ SCANF_DATA real_scan_file(const char * fil)
 	}
 	if ((err = SDG(mdcdata, "getpar1", tmpget)) == err_ok)
 	{
-		out.set_flg |= 1 << 1;
+		out.get_flg |= 1 << 1;
 	}
 	return out;
 }
@@ -312,11 +312,11 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 		pjif->mdcCtrl[1].par.trig_set_rat(dat.Ratio[1]);
 	}
 	//参数查询
-	if (dat.get_flg | (1 << 0)) {
+	if (dat.get_flg & (1 << 0)) {
 		pjif->mdcCtrl[0].parget.trig_get();
 	}
-	if (dat.get_flg | (1 << 1)) {
-		pjif->mdcCtrl[0].parget.trig_get();
+	if (dat.get_flg & (1 << 1)) {
+		pjif->mdcCtrl[1].parget.trig_get();
 	}
 }
 
