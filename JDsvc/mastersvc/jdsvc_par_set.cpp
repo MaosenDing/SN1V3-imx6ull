@@ -25,6 +25,29 @@ struct jdsvc_par_set :public JDAUTOSEND {
 		Par_CTRL & par = jif.mdcCtrl[getIndex].par;
 
 		par.cpl_flag = 1;
+
+
+		Par_GET & get = jif.mdcCtrl[getIndex].parget;
+
+		if (jfr.jd_data_len != 9) {
+			printf("bad rec len = %d\n", jfr.jd_data_len);
+			return;
+		}
+
+		get.initSpeed = jfr.jd_data_buff[0] | jfr.jd_data_buff[1] << 8;
+		get.MaxSpeed = jfr.jd_data_buff[2] | jfr.jd_data_buff[3] << 8;
+		get.period = jfr.jd_data_buff[4];
+		get.Phase = jfr.jd_data_buff[5];
+		get.current = jfr.jd_data_buff[6];
+		get.Ratio = jfr.jd_data_buff[7] | jfr.jd_data_buff[8] << 8;
+
+		get.cpl_flag = 1;
+		get.succ_flag = 1;
+
+		printf("get par %x, init %d,max %d,period %d,phase %d, current %d,ratio %d\n"
+			, jif.mdcCtrl[getIndex].addr
+			, get.initSpeed, get.MaxSpeed, get.period, get.Phase, get.current, get.Ratio
+		);
 	}
 
 	inline int getUncpl(JD_INFO & jif)

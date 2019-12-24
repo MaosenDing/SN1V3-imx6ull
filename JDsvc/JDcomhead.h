@@ -181,6 +181,13 @@ struct Par_CTRL:public CTRL_BASE
 struct Par_GET :public Par_CTRL
 {
 	int succ_flag = 0;
+
+	void trig_get()
+	{
+		succ_flag = 0;
+		retry_num = 0;
+		cpl_flag = 0;
+	}
 };
 
 
@@ -292,6 +299,8 @@ struct SCANF_DATA {
 	int period[2];
 	int currect[2];
 	int Ratio[2];
+
+	int get_flg = 0;
 };
 
 SCANF_DATA real_scan_file(const char * fil);

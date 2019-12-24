@@ -217,6 +217,18 @@ SCANF_DATA real_scan_file(const char * fil)
 	if ((err = SDG(mdcdata, "ratio1", out.Ratio[1])) == err_ok) {
 		out.set_flg |= diff_ratio1;
 	}
+
+
+	out.get_flg = 0;
+	int tmpget = 0;
+	if ((err = SDG(mdcdata, "getpar0", tmpget)) == err_ok)
+	{
+		out.get_flg |= 1 << 0;
+	}
+	if ((err = SDG(mdcdata, "getpar1", tmpget)) == err_ok)
+	{
+		out.set_flg |= 1 << 1;
+	}
 	return out;
 }
 
@@ -236,7 +248,7 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 		}
 	} else if (dat.JD_MOD == mdc_mode_off) {
 		pjif->mdcCtrl[0].stop.trig_set();
-		pjif->mdcCtrl[1].stop.trig_set();		
+		pjif->mdcCtrl[1].stop.trig_set();
 		pjif->JD_MOD = mdc_mode_off;
 	} else {
 		pjif->JD_MOD = mdc_mode_table;
@@ -298,6 +310,13 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 
 	if (dat.set_flg & diff_ratio1) {
 		pjif->mdcCtrl[1].par.trig_set_rat(dat.Ratio[1]);
+	}
+	//参数查询
+	if (dat.get_flg | (1 << 0)) {
+		pjif->mdcCtrl[0].parget.trig_get();
+	}
+	if (dat.get_flg | (1 << 1)) {
+		pjif->mdcCtrl[0].parget.trig_get();
 	}
 }
 

@@ -10,6 +10,14 @@
 using namespace  std;
 struct jdtimesvc :public JDAUTOSEND {
 
+	uint64_t difftv_ms(timeval & ntv, timeval &ltv)
+	{
+		int64_t ret = (ntv.tv_sec - ltv.tv_sec) * 1000 + (ntv.tv_usec - ltv.tv_usec) / 1000;
+		return ret > 0 ? ret : -ret;
+	}
+
+
+
 	int searchUncoplete(JD_INFO & jif)
 	{
 		timeval tv;
@@ -18,7 +26,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		for (auto &p : jif.mdcCtrl) {
 			auto &sta = p.sta;
 
-			if (tv.tv_sec != sta.last_tv.tv_sec) {
+			if (difftv_ms(tv,sta.last_tv) > 300) {
 				sta.trig_set_init();
 				return  std::distance(&jif.mdcCtrl[0], &p);
 			} else {

@@ -119,7 +119,7 @@ SN1_SHM * get_shared_cfg()
 	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
 	return psn1;
 }
-
+void init_auto_recoder(JD_INFO_TIM & jif);
 int register_master_svc(JD_INFO& jif);
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
@@ -152,6 +152,8 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	jif.fake_check_flag = JD_CRC_FACK_TEST;
 
 	jif.psn1 = psn1;
+
+	//init_auto_recoder(jif);
 	if (ChkifCMD(argc, argv, "-dbg")) {
 		jif_dbg_set(jif);
 
