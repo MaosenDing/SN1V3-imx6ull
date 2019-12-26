@@ -241,11 +241,16 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 		pjif->JD_MOD = mdc_mode_manual;
 		if (dat.manual_flag & (1 << 0)) {
 			pjif->mdcCtrl[0].manual.trig_set(dat.manual_deg[0]);
+		} else {
+			pjif->mdcCtrl[0].manual.cpl_flag = 1;
 		}
 
 		if (dat.manual_flag & (1 << 1)) {
 			pjif->mdcCtrl[1].manual.trig_set(dat.manual_deg[1]);
+		} else {
+			pjif->mdcCtrl[1].manual.cpl_flag = 1;
 		}
+
 	} else if (dat.JD_MOD == mdc_mode_off) {
 		pjif->mdcCtrl[0].stop.trig_set();
 		pjif->mdcCtrl[1].stop.trig_set();

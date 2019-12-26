@@ -7,7 +7,9 @@
 #include <iostream>
 #include <math.h>
 #include "SN1V2_com.h"
+#include "led_ctrl.h"
 using namespace  std;
+
 struct jdtimesvc :public JDAUTOSEND {
 
 	uint64_t difftv_ms(timeval & ntv, timeval &ltv)
@@ -16,7 +18,10 @@ struct jdtimesvc :public JDAUTOSEND {
 		return ret > 0 ? ret : -ret;
 	}
 
-
+	jdtimesvc()
+	{
+		led_init();
+	}
 
 	int searchUncoplete(JD_INFO & jif)
 	{
@@ -26,7 +31,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		for (auto &p : jif.mdcCtrl) {
 			auto &sta = p.sta;
 
-			if (difftv_ms(tv,sta.last_tv) > 300) {
+			if (difftv_ms(tv, sta.last_tv) > 300) {
 				sta.trig_set_init();
 				return  std::distance(&jif.mdcCtrl[0], &p);
 			} else {
@@ -68,7 +73,7 @@ struct jdtimesvc :public JDAUTOSEND {
 	}
 
 	bool checkDeg(JD_INFO & jif)
-	{		
+	{
 		for (auto & p : jif.mdcCtrl) {
 			double tmp = p.manual.manual_deg - p.sta.deg;
 			if (fabs(tmp) > 0.05f) {
@@ -93,7 +98,7 @@ struct jdtimesvc :public JDAUTOSEND {
 			printf("bad rec len = %d\n", jfr.jd_data_len);
 			return;
 		}
-		
+
 		sta.deg = Angle_Convert(jfr.jd_data_buff);
 
 		sta.temperature = jfr.jd_data_buff[3];
@@ -105,7 +110,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		snprintf(name, 128, "%s%d", MDC_STATUS_FILE, getIndex);
 
 		char buff[128];
-		
+
 		sta.statusint = sta.status[0]
 			| sta.status[1] << 8
 			| sta.status[2] << 16

@@ -141,6 +141,10 @@ struct jdtablesvc :public JDAUTOSEND {
 			float f0 = fabs(timeset.back().YxAng - jif.mdcCtrl[0].sta.deg);
 			float f1 = fabs(timeset.back().ZxAng - jif.mdcCtrl[1].sta.deg);
 
+			if (jif.JD_MOD != mdc_mode_table) {
+				return;
+			}
+
 			if (0 == jif.mdcCtrl[0].sta.runningflg) {
 				jif.mdcCtrl[0].manual.trig_set(timeset.back().YxAng);
 			}
