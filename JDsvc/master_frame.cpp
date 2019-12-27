@@ -35,6 +35,8 @@ JDAUTOSEND * jdsvc_corrects();
 JDAUTOSEND * jdsvc_par_sets();
 JDAUTOSEND * jdsvc_par_gets();
 JDAUTOSEND * jdsvc_stops();
+JDAUTOSEND * jdsvc_alarm_clean();
+
 JDAUTOSEND *grp[] = {
 	jdsvc_table(),	
 	jdsvc_stops(),
@@ -43,6 +45,7 @@ JDAUTOSEND *grp[] = {
 	jdsvc_par_sets(),
 	jdsvc_par_gets(),
 	jdsvc_time(),
+	jdsvc_alarm_clean(),
 };
 
 
@@ -68,8 +71,10 @@ int JD_correct_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_parset_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_parget_rec(JD_INFO & jif, JD_FRAME & jfr);
 int JD_stop_rec(JD_INFO & jif, JD_FRAME & jfr);
+int JD_clean_alarm_rec(JD_INFO & jif, JD_FRAME & jfr);
+
 JDPROSTRUCT JD_init_rec_group[] =
-{	
+{
 //	{ 0x35 | 0x80 ,JD_table_rec},
 	{ 0x0a | 0x80 ,JD_stop_rec},
 	{ 0x0b | 0x80 ,JD_manual_rec},
@@ -77,6 +82,7 @@ JDPROSTRUCT JD_init_rec_group[] =
 	{ 0x11 | 0x80 ,JD_parset_rec},
 	{ 0x12 | 0x80 ,JD_parget_rec},
 	{ 0x13 | 0x80, JD_time_rec },
+	{ 0x18 | 0x80,JD_clean_alarm_rec},
 };
 
 void merge_data(JD_INFO * pjif, SCANF_DATA & dat);

@@ -104,6 +104,16 @@ struct STOP_CTRL :public CTRL_BASE {
 	}
 };
 
+
+struct CLEAN_ALARM :public CTRL_BASE {
+	void trig()
+	{
+		retry_num = 0;
+		cpl_flag = 0;
+	}
+};
+
+
 enum {
 	diff_init0 = 1 << 0,
 	diff_init1 = 1 << 1,
@@ -230,6 +240,7 @@ struct MDC_CTRL
 	Par_GET parget;
 	MDC_STA sta;
 	STOP_CTRL stop;
+	CLEAN_ALARM alarm;
 
 	void disconnect_pro()
 	{
@@ -315,6 +326,8 @@ struct SCANF_DATA {
 	int Ratio[2];
 
 	int get_flg = 0;
+
+	int alarm_clean_flg = 0;
 };
 
 SCANF_DATA real_scan_file(const char * fil);

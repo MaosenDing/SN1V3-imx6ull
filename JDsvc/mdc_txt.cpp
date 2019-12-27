@@ -229,6 +229,15 @@ SCANF_DATA real_scan_file(const char * fil)
 	{
 		out.get_flg |= 1 << 1;
 	}
+
+	out.alarm_clean_flg = 0;
+	if ((err = SDG(mdcdata, "cleanalarm0", tmpget)) == err_ok) {
+		out.alarm_clean_flg |= 1 << 0;
+	}
+	if ((err = SDG(mdcdata, "cleanalarm1", tmpget)) == err_ok) {
+		out.alarm_clean_flg |= 1 << 1;
+	}
+
 	return out;
 }
 
@@ -322,6 +331,14 @@ void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
 	}
 	if (dat.get_flg & (1 << 1)) {
 		pjif->mdcCtrl[1].parget.trig_get();
+	}
+	//解除报警
+
+	if (dat.alarm_clean_flg & (1 << 0)) {
+		pjif->mdcCtrl[0].alarm.trig();
+	}
+	if (dat.alarm_clean_flg & (1 << 1)) {
+		pjif->mdcCtrl[1].alarm.trig();
 	}
 }
 

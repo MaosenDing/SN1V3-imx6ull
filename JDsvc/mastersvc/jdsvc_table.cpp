@@ -117,18 +117,6 @@ struct jdtablesvc :public JDAUTOSEND {
 		return 0;
 	}
 
-	//bool checkDeg(JD_INFO & jif)
-	//{
-	//	for (auto & p : jif.mdcCtrl) {
-	//		double tmp = p.manual.manual_deg - p.sta.deg;
-	//		if (fabs(tmp) > 0.05f) {
-	//			return false;
-	//		}
-	//	}
-	//	return true;
-	//}
-
-
 	virtual void service_pro(JD_INFO & jif)final
 	{
 		std::unique_lock<std::mutex> lk(tableLock);
