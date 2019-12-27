@@ -78,17 +78,7 @@ JDPROSTRUCT JD_init_rec_group[] =
 	{ 0x12 | 0x80 ,JD_parget_rec},
 	{ 0x13 | 0x80, JD_time_rec },
 };
-//ERR_STA loadFile(char *fname, vector<uint8_t> & refVect)
 
-
-//void save_default(JD_INFO& jif, const char * fil)
-//{
-//	jif.JD_MOD = jif.mdc_mode_table;
-//
-//	char defchar[] = "auto\n";
-//
-//	saveBin((char *)fil, defchar, strlen(defchar));
-//}
 void merge_data(JD_INFO * pjif, SCANF_DATA & dat);
 
 static void scan_file(void * p, const char * fil)
@@ -102,7 +92,6 @@ static void scan_file(void * p, const char * fil)
 	auto dat = real_scan_file(fil);
 
 	merge_data(pjif, dat);
-	//save_default(*pjif, fil);
 }
 
 

@@ -20,7 +20,7 @@
 #include "versions.h"
 #include "jd_share.h"
 #include "iostream"
-
+#include "led_ctrl.h"
 using namespace std;
 
 
@@ -121,6 +121,8 @@ SN1_SHM * get_shared_cfg()
 }
 void init_auto_recoder(JD_INFO_TIM & jif);
 int register_master_svc(JD_INFO& jif);
+void init_led_svc(JD_INFO& jif);
+
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
 	signal(SIGBUS, bus_handle);
@@ -163,6 +165,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		jif_normal_set(jif);
 	}
 	register_master_svc(jif);
+	init_led_svc(jif);
 	//regist_timer_auto_flush(psn1);
 
 	//mdc poll will never return

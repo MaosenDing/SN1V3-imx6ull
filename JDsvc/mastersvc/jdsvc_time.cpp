@@ -18,11 +18,6 @@ struct jdtimesvc :public JDAUTOSEND {
 		return ret > 0 ? ret : -ret;
 	}
 
-	jdtimesvc()
-	{
-		led_init();
-	}
-
 	int searchUncoplete(JD_INFO & jif)
 	{
 		timeval tv;
@@ -60,6 +55,12 @@ struct jdtimesvc :public JDAUTOSEND {
 			return;
 		}
 		MDC_STA &aim = jif.mdcCtrl[using_index].sta;
+		aim.lost_time++;
+		if (aim.is_lost()) {
+			jif.mdcCtrl[using_index].disconnect_pro();
+			printf("%x is lost\n", jif.mdcCtrl[using_index].addr);
+		}
+
 
 		JD_FRAME jfr;
 
@@ -93,12 +94,12 @@ struct jdtimesvc :public JDAUTOSEND {
 			return;
 		}
 		MDC_STA & sta = jif.mdcCtrl[getIndex].sta;
-
+		
 		if (jfr.jd_data_len != 9) {
 			printf("bad rec len = %d\n", jfr.jd_data_len);
 			return;
 		}
-
+		sta.lost_time = 0;
 		sta.deg = Angle_Convert(jfr.jd_data_buff);
 
 		sta.temperature = jfr.jd_data_buff[3];

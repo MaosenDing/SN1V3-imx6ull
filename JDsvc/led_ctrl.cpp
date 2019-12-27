@@ -4,6 +4,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <thread>
+
+#include "JDcomhead.h"
+
+using namespace std;
+
 
 static int led_status_green = 0;
 static int led_status_red = 0;
@@ -17,9 +23,10 @@ static void led_ctrl(char * ledname, int status)
 
 	if (fd >= 0) {
 		if (status) {
-			write(fd, "1", 1);
-		} else {
+			//write 0 to turn the light			
 			write(fd, "0", 1);
+		} else {
+			write(fd, "1", 1);
 		}
 		close(fd);
 	}
@@ -89,5 +96,22 @@ int led_get_red()
 	return led_status_red;
 }
 
+void led_svc_main(JD_INFO * pjif)
+{
+	led_init();
+	while (true) {
+		sleep(1);
+		if (!( pjif->mdcCtrl[0].sta.is_lost() || pjif->mdcCtrl[1].sta.is_lost()))
+			led_trig_green(1);
+		sleep(1);
+		led_trig_green(0);
+	}
+}
 
+
+void init_led_svc(JD_INFO& jif)
+{
+	thread ppp(led_svc_main, &jif);
+	ppp.detach();
+}
 

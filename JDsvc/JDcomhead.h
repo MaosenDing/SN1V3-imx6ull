@@ -194,6 +194,8 @@ struct Par_GET :public Par_CTRL
 
 struct MDC_STA :public CTRL_BASE {
 	timeval last_tv;
+	
+
 	float deg;
 	int temperature;
 	int current;
@@ -201,6 +203,13 @@ struct MDC_STA :public CTRL_BASE {
 
 	int statusint;
 	char runningflg = 0;
+
+	int lost_time = 0;
+	bool is_lost()
+	{
+		return lost_time > 6;
+	}
+
 	void trig_set_init()
 	{
 		Max_retry = 2;
@@ -221,6 +230,11 @@ struct MDC_CTRL
 	Par_GET parget;
 	MDC_STA sta;
 	STOP_CTRL stop;
+
+	void disconnect_pro()
+	{
+		parget.trig_get();
+	}
 };
 
 
