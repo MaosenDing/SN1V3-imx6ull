@@ -186,7 +186,7 @@ void cap_deinit(CAP_FRAME * pcap)
 shared_ptr< CAP_FRAME> get_one_frame(int fd)
 {
 	shared_ptr< CAP_FRAME> ret(new CAP_FRAME, cap_deinit);
-	
+
 	struct v4l2_buffer &buf = ret->buf;
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	buf.memory = V4L2_MEMORY_MMAP;

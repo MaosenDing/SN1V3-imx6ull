@@ -35,7 +35,7 @@
 %SFD,false#是否清除数据
 %SHS,true#保留timetable
 %SGV,5#增益
-%SST,200#曝光
+%SST,800#曝光
 %BFT,0.4#上午阈值
 %AFT,0.4#下午阈值
 %MRT,6#最长拍摄保留时间

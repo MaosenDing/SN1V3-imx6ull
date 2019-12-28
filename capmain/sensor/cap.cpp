@@ -67,7 +67,11 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 		SN1V2_ERROR_CODE_RET(err_sensor_set);
 	}
 
-
+	{
+		auto p0 = get_one_frame(video_fd);
+		auto p1 = get_one_frame(video_fd);
+	}
+	
 	shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
 
 	if (fram && fram->useFlag) {
