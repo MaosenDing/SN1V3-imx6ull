@@ -205,7 +205,8 @@ struct Par_GET :public Par_CTRL
 struct MDC_STA :public CTRL_BASE {
 	timeval last_tv;
 	
-
+	int dir;
+	float last_deg;
 	float deg;
 	int temperature;
 	int current;

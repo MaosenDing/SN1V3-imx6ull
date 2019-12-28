@@ -84,6 +84,12 @@ struct jdtimesvc :public JDAUTOSEND {
 		return true;
 	}
 
+	bool checkSta(JD_INFO & jif)
+	{
+		return jif.JD_MOD == mdc_mode_table;
+	}
+
+
 
 	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
 	{
@@ -94,13 +100,25 @@ struct jdtimesvc :public JDAUTOSEND {
 			return;
 		}
 		MDC_STA & sta = jif.mdcCtrl[getIndex].sta;
-		
+
 		if (jfr.jd_data_len != 9) {
 			printf("bad rec len = %d\n", jfr.jd_data_len);
 			return;
 		}
 		sta.lost_time = 0;
+		sta.last_deg = sta.deg;
 		sta.deg = Angle_Convert(jfr.jd_data_buff);
+
+		float ff = sta.deg - sta.last_deg;
+
+		if (ff > 0.0002f) {
+			sta.dir = 1;
+		} else if (ff < -0.0002f) {
+			sta.dir = -1;
+		} else {
+			sta.dir = 0;
+		}
+
 
 		sta.temperature = jfr.jd_data_buff[3];
 		sta.current = jfr.jd_data_buff[4];
@@ -127,7 +145,7 @@ struct jdtimesvc :public JDAUTOSEND {
 
 		gettimeofday(&sta.last_tv, nullptr);
 
-		if (checkDeg(jif)) {
+		if (checkDeg(jif) && checkSta(jif)) {
 			auto &pp = (JD_INFO_TIM &)jif;
 			auto psn1 = pp.psn1;
 			psn1->helo_status = psn1->Helo_ok;

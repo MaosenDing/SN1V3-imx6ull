@@ -36,13 +36,6 @@ struct jdtablesvc :public JDAUTOSEND {
 	std::mutex tableLock;
 	std::vector<timTableSet> timeset;
 
-	void trig_cpl(JD_FRAME & jfr)
-	{
-		//if (jfr.jd_data_len > 0) {
-		//	aim[using_index].succ_flag = 1;
-		//}
-	}
-
 	void _scan_file(const char * fil)
 	{
 		std::unique_lock<std::mutex> lk(tableLock);
@@ -126,21 +119,18 @@ struct jdtablesvc :public JDAUTOSEND {
 			auto psn1 = pp.psn1;
 			psn1->helo_status = psn1->Helo_not_ready;
 
-			float f0 = fabs(timeset.back().YxAng - jif.mdcCtrl[0].sta.deg);
-			float f1 = fabs(timeset.back().ZxAng - jif.mdcCtrl[1].sta.deg);
-
 			if (jif.JD_MOD != mdc_mode_table) {
 				return;
 			}
 
-			if (0 == jif.mdcCtrl[0].sta.runningflg) {
-				jif.mdcCtrl[0].manual.trig_set(timeset.back().YxAng);
-			}
+			float nextdeg[2] = { timeset.back().YxAng  , timeset.back().ZxAng };
 
-			if (0 == jif.mdcCtrl[1].sta.runningflg) {
-				jif.mdcCtrl[1].manual.trig_set(timeset.back().ZxAng);
-			}
+			for (int i = 0; i < 2; i++) {
 
+				if (0 == jif.mdcCtrl[i].sta.runningflg) {
+					jif.mdcCtrl[i].manual.trig_set(nextdeg[i]);
+				}
+			}
 		}
 	}
 
@@ -154,15 +144,6 @@ private:
 		}
 		return -1;
 	}
-
-	int mkPack(char * databuff, int maxsz, std::vector<timTableSet> &timesettmp, int using_index)
-	{
-		int len = 0;
-		for (auto & p : timesettmp) {
-			len += snprintf(databuff, maxsz - len, "%d-%d-%d,%.4f\n", p.tm_hour, p.tm_min, p.tm_sec, using_index ? p.ZxAng : p.YxAng);
-		}
-		return len;
-	}
 };
 
 static jdtablesvc jsvc;
@@ -171,15 +152,3 @@ JDAUTOSEND * jdsvc_table()
 {
 	return &jsvc;
 }
-
-
-int JD_table_rec(JD_INFO & jif, JD_FRAME & jfr)
-{
-	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
-
-	jsvc.trig_cpl(jfr);
-
-	return JD_OK;
-}
-
-

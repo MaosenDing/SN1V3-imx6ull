@@ -214,7 +214,6 @@ ERR_STA SDG(const char * inkey, char * outData)
 	string st;
 	ERR_STA err = SDG(inkey, st);
 	if (err != err_ok) {
-		SN1V2_ERROR_WITH(err);
 		return err;
 	}
 	strcpy(outData, st.c_str());
@@ -227,39 +226,29 @@ ERR_STA SDG(const char * inkey, int & outInt)
 	string st;
 	ERR_STA err = SDG(inkey, st);
 
-	if (err != err_ok)
-	{
-		SN1V2_ERROR_WITH(err);
+	if (err != err_ok) {
 		return err;
 	}
 
-	if (sscanf(st.c_str(), "%d", &outInt) == 1)
-	{
+	if (sscanf(st.c_str(), "%d", &outInt) == 1) {
 		return err_ok;
-	}
-	else
-	{
+	} else {
 		SN1V2_ERROR_CODE_RET(err_conf_tran_error);
 	}
 }
 
-ERR_STA SDG(const char * inkey,unsigned int & outInt)
+ERR_STA SDG(const char * inkey, unsigned int & outInt)
 {
 	string st;
 	ERR_STA err = SDG(inkey, st);
 
-	if (err != err_ok)
-	{
-		SN1V2_ERROR_WITH(err);
+	if (err != err_ok) {
 		return err;
 	}
 
-	if (sscanf(st.c_str(), "%d", &outInt) == 1)
-	{
+	if (sscanf(st.c_str(), "%d", &outInt) == 1) {
 		return err_ok;
-	}
-	else
-	{
+	} else {
 		SN1V2_ERROR_CODE_RET(err_conf_tran_error);
 	}
 }
@@ -270,18 +259,13 @@ ERR_STA SDG(const char * inkey, float & outfloat)
 	string st;
 	ERR_STA err = SDG(inkey, st);
 
-	if (err != err_ok)
-	{
-		SN1V2_ERROR_WITH(err);
+	if (err != err_ok) {
 		return err;
 	}
 
-	if (sscanf(st.c_str(), "%f", &outfloat) == 1)
-	{
+	if (sscanf(st.c_str(), "%f", &outfloat) == 1) {
 		return err_ok;
-	}
-	else
-	{
+	} else {
 		SN1V2_ERROR_CODE_RET(err_conf_tran_error);
 	}
 }
@@ -291,22 +275,18 @@ ERR_STA SDG(const char * inkey, bool & outbool)
 	string st;
 	ERR_STA err = SDG(inkey, st);
 
-	if (err != err_ok)
-	{
-		SN1V2_ERROR_WITH(err);
+	if (err != err_ok) {
 		return err;
 	}
 
 	transform(st.begin(), st.end(), st.begin(), ::tolower);
 
-	if (!strcmp(st.c_str(), "true"))
-	{
+	if (!strcmp(st.c_str(), "true")) {
 		outbool = true;
 		return err_ok;
 	}
 
-	if (!strcmp(st.c_str(), "false"))
-	{
+	if (!strcmp(st.c_str(), "false")) {
 		outbool = false;
 		return err_ok;
 	}
