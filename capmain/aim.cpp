@@ -23,6 +23,7 @@
 #include "errHandle/errHandle.h"
 #include <jd_share.h>
 #include <iostream>
+#include <math.h>
 using namespace std;
 
 
@@ -392,6 +393,32 @@ int test_converter(int argc, char * argv[])
 	return 0;
 }
 
+#define PI 3.1415926535898
+static double getdeg(double len)
+{
+	return acos((222929.1433 - (len + 85)*(len + 85)) / 221102.5584)*180.0f/ PI - 24.7421;
+}
+
+
+int degtest(int argc, char * argv[])
+{
+	double degpos, diffdeg;
+	double difflen = 0.02;
+	int sum = 0;
+	{
+		TimeInterval ppp2("degtest:");
+		for (double pos = 0.0f; pos < 800; pos += 0.01) {
+			sum++;
+			double tmpdiff = fabs(getdeg(pos) - getdeg(pos + difflen));
+
+			if (tmpdiff > diffdeg) {
+				diffdeg = tmpdiff;
+				degpos = pos;
+			}
+		}
+	}
+	printf("sum = %d , deg = %lf , diff = %lf\n", sum, degpos, diffdeg);
+}
 
 
 MAIN_CMD cmd_group[] = {
@@ -403,6 +430,7 @@ MAIN_CMD cmd_group[] = {
 	{"ip",ipchange_pp},
 	{ "tableGen2" ,tableGenerate2 },
 	{ "tv" , test_converter},
+	{ "deg" , degtest},
 };
 
 
