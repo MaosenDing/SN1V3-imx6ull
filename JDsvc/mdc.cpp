@@ -1,5 +1,5 @@
 #include "SN1V2_rtConfig.h"
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include <clockd_def.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -133,7 +133,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	JD_INFO_TIM jif;
+	MDC_INFO jif;
 
 	set_bound_rate(jif, argc, argv);
 

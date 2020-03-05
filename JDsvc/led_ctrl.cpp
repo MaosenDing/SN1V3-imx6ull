@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <thread>
 
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 
 using namespace std;
 
@@ -96,8 +96,9 @@ int led_get_red()
 	return led_status_red;
 }
 
-void led_svc_main(JD_INFO * pjif)
+void led_svc_main(JD_INFO * inpjif)
 {
+	MDC_INFO * pjif = (MDC_INFO *)inpjif;
 	led_init();
 	while (true) {
 		sleep(1);

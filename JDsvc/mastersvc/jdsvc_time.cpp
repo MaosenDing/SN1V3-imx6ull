@@ -1,4 +1,5 @@
 #include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include "jd_share.h"
 #include "svc.h"
 #include <sys/time.h>
@@ -18,7 +19,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		return ret > 0 ? ret : -ret;
 	}
 
-	int searchUncoplete(JD_INFO & jif)
+	int searchUncoplete(MDC_INFO & jif)
 	{
 		timeval tv;
 		gettimeofday(&tv, nullptr);
@@ -39,8 +40,9 @@ struct jdtimesvc :public JDAUTOSEND {
 	}
 
 
-	virtual int need_service(JD_INFO & jif) final
+	virtual int need_service(JD_INFO & injif) final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		if (searchUncoplete(jif) >= 0) {
 			return 1;
 		}
@@ -48,8 +50,10 @@ struct jdtimesvc :public JDAUTOSEND {
 	}
 
 
-	virtual void service_pro(JD_INFO & jif)final
+	virtual void service_pro(JD_INFO & injif)final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
+
 		int using_index = searchUncoplete(jif);
 		if (using_index < 0) {
 			return;
@@ -73,7 +77,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		JD_send(jif, jfr);
 	}
 
-	bool checkDeg(JD_INFO & jif)
+	bool checkDeg(MDC_INFO & jif)
 	{
 		for (auto & p : jif.mdcCtrl) {
 			double tmp = p.manual.manual_deg - p.sta.deg;
@@ -84,15 +88,17 @@ struct jdtimesvc :public JDAUTOSEND {
 		return true;
 	}
 
-	bool checkSta(JD_INFO & jif)
+	bool checkSta(MDC_INFO & jif)
 	{
 		return jif.JD_MOD == mdc_mode_table;
 	}
 
 
 
-	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
+	void trig_cpl(JD_INFO & injif, JD_FRAME & jfr)
 	{
+		MDC_INFO &jif = (MDC_INFO &)injif;
+
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
 
 		if (getIndex < 0) {

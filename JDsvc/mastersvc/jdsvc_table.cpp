@@ -1,4 +1,4 @@
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include "jd_share.h"
 #include "svc.h"
 #include <thread>
@@ -87,8 +87,9 @@ struct jdtablesvc :public JDAUTOSEND {
 	uint64_t last_send_tim;
 	int send_period_s = 5;
 
-	virtual int need_service(JD_INFO & jif) final
+	virtual int need_service(JD_INFO & injif) final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		if (jif.JD_MOD != mdc_mode_table) {
 			return 0;
 		}
@@ -110,8 +111,9 @@ struct jdtablesvc :public JDAUTOSEND {
 		return 0;
 	}
 
-	virtual void service_pro(JD_INFO & jif)final
+	virtual void service_pro(JD_INFO & injif)final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		std::unique_lock<std::mutex> lk(tableLock);
 		rm_back(timeset);
 		if (!timeset.empty()) {

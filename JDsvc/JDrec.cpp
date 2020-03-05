@@ -127,12 +127,6 @@ static int JD_default_response(JD_INFO & jif, JD_FRAME & jfr)
 JD_INFO::JD_INFO()
 {
 	default_err_cmd = JD_default_response;
-
-	mdcCtrl[0].addr = 0xaaaa << 8;
-	mdcCtrl[1].addr = 0xbbbb << 8;
-
-	mdcCtrl[0].parget.cpl_flag = 0;
-	mdcCtrl[1].parget.cpl_flag = 0;
 }
 
 void JD_pro_ctl(JD_INFO & jif,int cmd ,JD_INFO::JD_PRO profun, int ctl)

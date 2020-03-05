@@ -1,6 +1,6 @@
 #include <thread>
 #include "SN1V2_com.h"
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include "errHandle/errHandle.h"
 #include <fstream>
 using namespace  std;

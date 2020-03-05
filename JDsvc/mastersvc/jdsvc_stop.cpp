@@ -1,4 +1,4 @@
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include "jd_share.h"
 #include "svc.h"
 #include <thread>
@@ -14,8 +14,9 @@ struct jdsvc_stop :public JDAUTOSEND {
 	jdsvc_stop()
 	{}
 
-	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
+	void trig_cpl(JD_INFO & injif, JD_FRAME & jfr)
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
 
 		if (getIndex < 0) {
@@ -27,7 +28,7 @@ struct jdsvc_stop :public JDAUTOSEND {
 		ctl.cpl_flag = 1;
 	}
 	
-	inline int getUncpl(JD_INFO & jif)
+	inline int getUncpl(MDC_INFO & jif)
 	{
 		int using_index = -1;
 		for (auto &par : jif.mdcCtrl) {
@@ -41,8 +42,9 @@ struct jdsvc_stop :public JDAUTOSEND {
 	}
 
 
-	virtual int need_service(JD_INFO & jif) final
+	virtual int need_service(JD_INFO & injif) final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		if (jif.JD_MOD != mdc_mode_off) {
 			return 0;
 		}
@@ -54,8 +56,9 @@ struct jdsvc_stop :public JDAUTOSEND {
 	}
 
 
-	virtual void service_pro(JD_INFO & jif)final
+	virtual void service_pro(JD_INFO & injif)final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		int using_index = getUncpl(jif);
 
 		if (using_index < 0) {

@@ -1,4 +1,4 @@
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include "jd_share.h"
 #include "svc.h"
 #include <sys/time.h>
@@ -13,7 +13,7 @@ using namespace  std;
 struct jdcleanAlarm :public JDAUTOSEND {
 
 
-	int searchUncoplete(JD_INFO & jif)
+	inline int searchUncoplete(MDC_INFO & jif)
 	{
 		timeval tv;
 		gettimeofday(&tv, nullptr);
@@ -29,8 +29,9 @@ struct jdcleanAlarm :public JDAUTOSEND {
 	}
 
 
-	virtual int need_service(JD_INFO & jif) final
+	virtual int need_service(JD_INFO & injif) final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		if (searchUncoplete(jif) >= 0) {
 			return 1;
 		}
@@ -38,8 +39,9 @@ struct jdcleanAlarm :public JDAUTOSEND {
 	}
 
 
-	virtual void service_pro(JD_INFO & jif)final
+	virtual void service_pro(JD_INFO & injif)final
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		int using_index = searchUncoplete(jif);
 		if (using_index < 0) {
 			return;
@@ -58,8 +60,9 @@ struct jdcleanAlarm :public JDAUTOSEND {
 		JD_send(jif, jfr);
 	}
 
-	void trig_cpl(JD_INFO & jif, JD_FRAME & jfr)
+	void trig_cpl(JD_INFO & injif, JD_FRAME & jfr)
 	{
+		MDC_INFO& jif = (MDC_INFO &)injif;
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
 
 		if (getIndex < 0) {

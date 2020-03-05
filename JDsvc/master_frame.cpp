@@ -1,6 +1,5 @@
 
 #include "SN1V2_rtConfig.h"
-#include "JDcomhead.h"
 #include <clockd_def.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -9,7 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <JDcomhead.h>
+#include <mdc_ctrl.h>
 #include <stdio.h>
 #include <thread>
 #include <string.h>
@@ -83,7 +82,7 @@ JDPROSTRUCT JD_init_rec_group[] =
 	{ 0x18 | 0x80,JD_clean_alarm_rec},
 };
 
-void merge_data(JD_INFO * pjif, SCANF_DATA & dat);
+void merge_data(MDC_INFO * pjif, SCANF_DATA & dat);
 
 static void scan_file(void * p, const char * fil)
 {
@@ -95,7 +94,7 @@ static void scan_file(void * p, const char * fil)
 
 	auto dat = real_scan_file(fil);
 
-	merge_data(pjif, dat);
+	merge_data((MDC_INFO *)pjif, dat);
 }
 
 
@@ -118,8 +117,9 @@ int register_master_svc(JD_INFO& jif)
 }
 
 
-int JDAUTOSEND::findMdc_addr(JD_INFO & jif, int addr)
+int JDAUTOSEND::findMdc_addr(JD_INFO & injif, int addr)
 {
+	MDC_INFO & jif = (MDC_INFO &)injif;
 	int using_index = -1;
 	for (auto & p : jif.mdcCtrl) {
 		if (p.addr == addr) {

@@ -1,7 +1,7 @@
 #include <regex>
 #include <map>
 #include "SN1V2_com.h"
-#include "JDcomhead.h"
+#include "mdc_ctrl.h"
 #include <iostream>
 using namespace std;
 
@@ -242,7 +242,7 @@ SCANF_DATA real_scan_file(const char * fil)
 }
 
 
-void merge_data(JD_INFO * pjif, SCANF_DATA & dat)
+void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 {
 	//手动 自动 
 	printf("mod %d man %d\n", dat.JD_MOD, dat.manual_flag);
