@@ -21,7 +21,8 @@ add_subdirectory(timework)
 add_subdirectory(text)
 #CRE
 add_subdirectory(CRE)
-
+#CRE
+add_subdirectory(JD)
 
 
 target_link_libraries(comlib
@@ -32,6 +33,7 @@ CRE
 timework
 datapro
 errHandle
+JD
 "-Wl,--no-whole-archive"
 )
 

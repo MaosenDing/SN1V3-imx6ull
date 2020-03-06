@@ -117,8 +117,7 @@ struct jdtablesvc :public JDAUTOSEND {
 		std::unique_lock<std::mutex> lk(tableLock);
 		rm_back(timeset);
 		if (!timeset.empty()) {
-			auto &pp = (JD_INFO_TIM &)jif;
-			auto psn1 = pp.psn1;
+			auto psn1 = jif.psn1;
 			psn1->helo_status = psn1->Helo_not_ready;
 
 			if (jif.JD_MOD != mdc_mode_table) {

@@ -119,7 +119,6 @@ SN1_SHM * get_shared_cfg()
 	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
 	return psn1;
 }
-void init_auto_recoder(JD_INFO_TIM & jif);
 int register_master_svc(JD_INFO& jif);
 void init_led_svc(JD_INFO& jif);
 
@@ -155,7 +154,6 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 	jif.psn1 = psn1;
 
-	//init_auto_recoder(jif);
 	if (ChkifCMD(argc, argv, "-dbg")) {
 		jif_dbg_set(jif);
 
@@ -166,7 +164,6 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	}
 	register_master_svc(jif);
 	init_led_svc(jif);
-	//regist_timer_auto_flush(psn1);
 
 	//mdc poll will never return
 	int ret = JD_run_poll(jif, -1);

@@ -152,8 +152,7 @@ struct jdtimesvc :public JDAUTOSEND {
 		gettimeofday(&sta.last_tv, nullptr);
 
 		if (checkDeg(jif) && checkSta(jif)) {
-			auto &pp = (JD_INFO_TIM &)jif;
-			auto psn1 = pp.psn1;
+			auto psn1 = jif.psn1;
 			psn1->helo_status = psn1->Helo_ok;
 		}
 		printf(buff);

@@ -3,7 +3,7 @@
 
 
 #include "JDcomhead.h"
-
+#include "SN1V2_rtConfig.h"
 
 
 struct CTRL_BASE{
@@ -215,6 +215,7 @@ struct MDC_INFO :public JD_INFO_TIM {
 		mdcCtrl[0].parget.cpl_flag = 0;
 		mdcCtrl[1].parget.cpl_flag = 0;
 	}
+	SN1_SHM * psn1;
 	_JD_MOD JD_MOD;
 	MDC_CTRL mdcCtrl[2];
 };

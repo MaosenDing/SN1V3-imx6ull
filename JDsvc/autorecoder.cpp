@@ -7,7 +7,7 @@ using namespace  std;
 
 
 
-void auto_recoder_main(JD_INFO_TIM * pjif)
+void auto_recoder_main(MDC_INFO * pjif)
 {
 	while (true) {
 
@@ -33,7 +33,7 @@ void auto_recoder_main(JD_INFO_TIM * pjif)
 }
 
 
-void init_auto_recoder(JD_INFO_TIM & jif)
+void init_auto_recoder(MDC_INFO & jif)
 {
 	thread p(auto_recoder_main, &jif);
 	p.detach();

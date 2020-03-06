@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include <stdio.h>
-#include "SN1V2_rtConfig.h"
 #include <condition_variable>
 #include <sys/time.h>
 #define JD_OK 0
@@ -109,7 +108,7 @@ struct JD_INFO
 };
 
 struct JD_INFO_TIM : public JD_INFO {
-	SN1_SHM * psn1;
+
 	char dbg_shm_ret_printf = 0;
 	char dbg_tim_rec_printf = 0;
 	char dbg_cre_printf = 0;
