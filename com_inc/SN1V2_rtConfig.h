@@ -54,6 +54,19 @@ extern "C" {
 
 	}SN1_CFG;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define SHARE_KEY_PATH "/"
 #define SHARE_KEY_INT 0x2018
 	//share memory type

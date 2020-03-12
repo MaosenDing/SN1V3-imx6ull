@@ -33,6 +33,7 @@ add_subdirectory(comlib)
 
 add_subdirectory(capmain)
 add_subdirectory(JDsvc)
+add_subdirectory(wifiSVC)
 add_subdirectory(daemon)
 
 

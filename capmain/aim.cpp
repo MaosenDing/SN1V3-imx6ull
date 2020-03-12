@@ -421,6 +421,15 @@ int degtest(int argc, char * argv[])
 }
 
 
+#include "sn1v3cfg.h"
+void testpro();
+int scanftest(int argc, char * argv[])
+{
+	testpro();
+}
+
+
+
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
@@ -431,6 +440,7 @@ MAIN_CMD cmd_group[] = {
 	{ "tableGen2" ,tableGenerate2 },
 	{ "tv" , test_converter},
 	{ "deg" , degtest},
+	{"scanf",scanftest},
 };
 
 
