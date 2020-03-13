@@ -205,15 +205,15 @@ void printData2String(string & outstring, void * baseaddr, CFG_INFO * info)
 	case dateType::STRING16:
 	case dateType::STRING32:
 	case dateType::STRING64:
-		snprintf(tmpbuff, 64, "%s,%s\n", info->name,(char *)dataAddr);
+		snprintf(tmpbuff, 64, "%%%s,%s\n", info->name,(char *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
 	case dateType::FLOAT32:
-		snprintf(tmpbuff, 64, "%s,%f\n", info->name, *(float *)dataAddr);
+		snprintf(tmpbuff, 64, "%%%s,%f\n", info->name, *(float *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
 	case dateType::DOUBLE64:
-		snprintf(tmpbuff, 64, "%s,%lf\n", info->name, *(double *)dataAddr);
+		snprintf(tmpbuff, 64, "%%%s,%lf\n", info->name, *(double *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
 	default:
@@ -263,13 +263,13 @@ void testpro()
 {
 	
 	scanfAllTable(tb1);
-	printTable(&tb1, 0);
+	//printTable(&tb1, 0);
 
-	//string st;
+	string st;
 
-	//printTable2String(st, &tb1, "T1");
+	printTable2String(st, &tb1, "T1");
 
-	//cout <<"*********"<< st << endl;
+	cout << st << endl;
 }
 
 
