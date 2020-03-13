@@ -13,7 +13,7 @@
 
 using namespace std;
 
-
+T1_table tb1;
 
 
 static ERR_STA ScanfFile(const char * fileName, map<string, string>& dataGroup)
@@ -28,7 +28,7 @@ static ERR_STA ScanfFile(const char * fileName, map<string, string>& dataGroup)
 
 	//%ABC,dsofsii
 	//%CDF,-2948.3994
-	regex reg("%(\\w+),([\\w\\.:+-/]*)");
+	regex reg("%(\\w+),([\\w\\.:+\\-/]*)");
 	smatch match;
 
 	string::const_iterator star = stText.begin();
@@ -58,22 +58,41 @@ static ERR_STA ScanfFile(const char * fileName, map<string, string>& dataGroup)
 	return err_ok;
 }
 
+
+static int find_if_true(const char * st)
+{
+	const char  * truegroup[] = {
+	"t",
+	"T",
+	"True",
+	"true",
+	};
+
+	for (const char * tr_st : truegroup) {
+		if (!strcmp(st, tr_st)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
 static void writeData(void * addr, string & data, dateType typ, void(*default_value)(void *))
 {
 	switch (typ) {
-	case STRING16:
+	case dateType::STRING16:
 		strncpy((char *)addr, data.c_str(), 16);
 		break;
 
-	case STRING32:
+	case dateType::STRING32:
 		strncpy((char *)addr, data.c_str(), 32);
 		break;
 
-	case STRING64:
+	case dateType::STRING64:
 		strncpy((char *)addr, data.c_str(), 64);
 		break;
 
-	case FLOAT32:	
+	case dateType::FLOAT32:
 		float tmpfloat;
 		if (sscanf(data.c_str(), "%f", &tmpfloat) == 1) {
 			*(float *)addr = tmpfloat;
@@ -83,7 +102,7 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 		}	
 		break;
 
-	case DOUBLE64:
+	case dateType::DOUBLE64:
 		double tmpdouble;
 		if (sscanf(data.c_str(), "%lf", &tmpdouble) == 1) {
 			*(double *)addr = tmpdouble;
@@ -91,10 +110,43 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 			if (default_value) default_value(addr);
 		}
 		break;
+
+	case dateType::BOOLTYPE:
+		*(int *)addr = find_if_true(data.c_str());
+		break;
+
+	case dateType::INT32:
+		break;
 	default:
 		break;
 	}
+}
 
+
+void scanfOneTable(void * tableaddr, const char * tableName, map<string, string> &datamap)
+{
+	CFG_GROUP *group = find_group_name(tableName);
+
+	if ((!group) || (!tableaddr)) {
+		return;
+	}
+
+	CFG_INFO * info_group = group->group;
+	size_t sz = group->sz;
+
+	for (size_t datapos = 0; datapos < sz; datapos++) {
+		//cfg address
+		CFG_INFO * info = &info_group[datapos];
+		void * dataAddr = tableaddr + info->diff;
+
+		if (datamap.count(info->name) > 0) {
+			writeData(dataAddr, datamap[info->name], info->typ, info->default_value);
+		} else {
+			if (info->default_value) {
+				info->default_value(dataAddr);
+			}
+		}
+	}
 }
 
 
@@ -105,52 +157,36 @@ void scanfAllTable(T1_table & tb1)
 	//
 	//add more table
 	//
-	void * outPutCfg[] = {
-		&tb1,
-	};
-
-	for (size_t i = 0; i < max_group_cnt(); i++) {
-		CFG_GROUP *group = find_group(i);
-
-
-		CFG_INFO * info_group = group->group;
-		size_t sz = group->sz;
-		void * tableaddr = outPutCfg[i];
-
-		for (int datapos = 0; datapos < sz; datapos++) {
-			//cfg address
-			CFG_INFO * info = &info_group[datapos];
-			void * dataAddr = tableaddr + info->diff;
-
-			if (datamap.count(info->name) > 0) {
-				writeData(dataAddr, datamap[info->name], info->typ, info->default_value);
-			} else {
-				if (info->default_value) {
-					info->default_value(dataAddr);
-				}
-			}
-		}
-	}
+	scanfOneTable(&tb1, "T1", datamap);
 }
 
-void printData(void * baseaddr, CFG_INFO * info)
+static void printData(void * baseaddr, CFG_INFO * info)
 {
 	void * dataAddr = baseaddr + info->diff;
 
 	printf("cfgname = %s,", info->name);
 
 	switch (info->typ) {
-	case STRING16:
-	case STRING32:
-	case STRING64:
+	case dateType::STRING16:
+	case dateType::STRING32:
+	case dateType::STRING64:
 		printf("%s", (char *)dataAddr);
 		break;
-	case FLOAT32:
+	case dateType::FLOAT32:
 		printf("%f", *(float *)dataAddr);
 		break;
-	case DOUBLE64:
+	case dateType::DOUBLE64:
 		printf("%lf", *(double *)dataAddr);
 		break;
+
+	case dateType::INT32:
+		printf("%d", *(int32_t *)dataAddr);
+		break;
+
+	case dateType::LONG64:
+		printf("%ld", *(int64_t *)dataAddr);
+		break;
+
 	default:
 		printf("no type");
 		break;
@@ -158,16 +194,61 @@ void printData(void * baseaddr, CFG_INFO * info)
 	printf("\n");
 }
 
-void printTable(void * table , int groupID)
+void printData2String(string & outstring, void * baseaddr, CFG_INFO * info)
+{
+	void * dataAddr = baseaddr + info->diff;
+
+	char tmpbuff[64] = { 0 };
+
+
+	switch (info->typ) {
+	case dateType::STRING16:
+	case dateType::STRING32:
+	case dateType::STRING64:
+		snprintf(tmpbuff, 64, "%s,%s\n", info->name,(char *)dataAddr);
+		outstring.append(tmpbuff);
+		break;
+	case dateType::FLOAT32:
+		snprintf(tmpbuff, 64, "%s,%f\n", info->name, *(float *)dataAddr);
+		outstring.append(tmpbuff);
+		break;
+	case dateType::DOUBLE64:
+		snprintf(tmpbuff, 64, "%s,%lf\n", info->name, *(double *)dataAddr);
+		outstring.append(tmpbuff);
+		break;
+	default:
+		break;
+	}
+}
+
+void printTable2String(string & outstring, void * table, const char * tableName)
+{
+	CFG_GROUP * group = find_group_name(tableName);
+
+	if (!group) {
+		return;
+	}
+
+	CFG_INFO * info = group->group;
+	size_t sz = group->sz;
+
+	for (size_t datapos = 0; datapos < sz; datapos++) {
+		printData2String(outstring, table, &info[datapos]);
+	}
+}
+
+
+
+void printTable(void * table , size_t groupID)
 {	
 	if (groupID < max_group_cnt())
 	{
-		CFG_GROUP *group = find_group(groupID);
+		CFG_GROUP *group = find_group_index(groupID);
 
 		CFG_INFO * info = group->group;
 		size_t sz = group->sz;
 
-		for (int datapos = 0; datapos < sz; datapos++) {
+		for (size_t datapos = 0; datapos < sz; datapos++) {
 			printData(table, &info[datapos]);
 		}
 	}
@@ -180,9 +261,15 @@ void printTable(void * table , int groupID)
 
 void testpro()
 {
-	T1_table tb1;
+	
 	scanfAllTable(tb1);
 	printTable(&tb1, 0);
+
+	//string st;
+
+	//printTable2String(st, &tb1, "T1");
+
+	//cout <<"*********"<< st << endl;
 }
 
 
