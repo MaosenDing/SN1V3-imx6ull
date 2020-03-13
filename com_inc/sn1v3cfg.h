@@ -123,8 +123,11 @@ extern "C" {
 #define T3_Set_data(member,typ,def_method)      Set_data(T3_table,member,typ,def_method)
 
 
+	typedef struct {
+		T1_table t1;
+		T3_table t3;
+	}Tg_table;
 	
-
 
 #ifdef __cplusplus
 }

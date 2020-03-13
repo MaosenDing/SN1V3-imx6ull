@@ -13,7 +13,7 @@
 
 using namespace std;
 
-T1_table tb1;
+
 
 
 static ERR_STA ScanfFile(const char * fileName, map<string, string>& dataGroup)
@@ -92,14 +92,17 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 		strncpy((char *)addr, data.c_str(), 64);
 		break;
 
+	case dateType::STRING128:
+		strncpy((char *)addr, data.c_str(), 128);
+		break;
+
 	case dateType::FLOAT32:
 		float tmpfloat;
 		if (sscanf(data.c_str(), "%f", &tmpfloat) == 1) {
 			*(float *)addr = tmpfloat;
+		} else {
+			if (default_value) default_value(addr);
 		}
-		else {
-			if(default_value) default_value(addr);
-		}	
 		break;
 
 	case dateType::DOUBLE64:
@@ -110,13 +113,50 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 			if (default_value) default_value(addr);
 		}
 		break;
+	case dateType::INT32:
+		int32_t tmpint;
+		if (sscanf(data.c_str(), "%d", &tmpint) == 1) {
+			*(int32_t *)addr = tmpint;
+		} else {
+			if (default_value) default_value(addr);
+		}
+
+	case dateType::LONG64:
+		int64_t tmplong;
+		if (sscanf(data.c_str(), "%lld", &tmplong) == 1) {
+			*(int64_t *)addr = tmplong;
+		} else {
+			if (default_value) default_value(addr);
+		}
+		break;
+
+	case dateType::TIM16:
+
+
+		break;
+
+	case dateType::MAC:
+		int tmpmac[6];
+		if (sscanf(data.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x"
+			, &tmpmac[0]
+			, &tmpmac[1]
+			, &tmpmac[2]
+			, &tmpmac[3]
+			, &tmpmac[4]
+			, &tmpmac[5]
+		) == 6) {
+			for (int i = 0; i < 6; i++) {
+				*((unsigned int *)addr + i) = tmpmac[i];
+			}
+		} else {
+			if (default_value) default_value(addr);
+		}
+		break;
 
 	case dateType::BOOLTYPE:
 		*(int *)addr = find_if_true(data.c_str());
 		break;
 
-	case dateType::INT32:
-		break;
 	default:
 		break;
 	}
@@ -150,14 +190,15 @@ void scanfOneTable(void * tableaddr, const char * tableName, map<string, string>
 }
 
 
-void scanfAllTable(T1_table & tb1)
+void scanfAllTable(Tg_table & tb)
 {
 	map<string, string> datamap;
 	ScanfFile("table1", datamap);
 	//
 	//add more table
 	//
-	scanfOneTable(&tb1, "T1", datamap);
+	scanfOneTable(&tb.t1, "T1", datamap);
+	scanfOneTable(&tb.t3, "T3", datamap);
 }
 
 static void printData(void * baseaddr, CFG_INFO * info)
@@ -184,7 +225,7 @@ static void printData(void * baseaddr, CFG_INFO * info)
 		break;
 
 	case dateType::LONG64:
-		printf("%ld", *(int64_t *)dataAddr);
+		printf("%lld", *(int64_t *)dataAddr);
 		break;
 
 	default:
@@ -216,6 +257,19 @@ void printData2String(string & outstring, void * baseaddr, CFG_INFO * info)
 		snprintf(tmpbuff, 64, "%%%s,%lf\n", info->name, *(double *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
+
+	case dateType::MAC:
+		snprintf(tmpbuff, 64, "%%%s,%02x:%02x:%02x:%02x:%02x:%02x\n", info->name
+			, *((unsigned int *)dataAddr + 0)
+			, *((unsigned int *)dataAddr + 1)
+			, *((unsigned int *)dataAddr + 2)
+			, *((unsigned int *)dataAddr + 3)
+			, *((unsigned int *)dataAddr + 4)
+			, *((unsigned int *)dataAddr + 5)
+		);
+		outstring.append(tmpbuff);
+		break;
+
 	default:
 		break;
 	}
@@ -261,13 +315,15 @@ void printTable(void * table , size_t groupID)
 
 void testpro()
 {
-	
-	scanfAllTable(tb1);
+	Tg_table tg_table;
+
+
+	scanfAllTable(tg_table);
 	//printTable(&tb1, 0);
 
 	string st;
 
-	printTable2String(st, &tb1, "T1");
+	printTable2String(st, &tg_table.t1, "T1");
 
 	cout << st << endl;
 }
