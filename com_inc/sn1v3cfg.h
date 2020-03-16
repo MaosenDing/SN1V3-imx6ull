@@ -34,19 +34,6 @@ extern "C" {
 		void(*default_value)(void *);
 	}CFG_INFO;
 
-#define Set_Group(group)    {#group,group,sizeof(group)/sizeof(CFG_INFO)}
-
-
-	typedef struct {
-		const char * groupName;
-		CFG_INFO * group;
-		size_t sz;
-	}CFG_GROUP;
-
-	size_t max_group_cnt();
-	CFG_GROUP * find_group_index(size_t i);
-	CFG_GROUP * find_group_name(const char * groupName);
-
 #define Set_data(table,member,typ,def_method)    {#member,offsetof(table,member),typ,def_method}
 	
 	typedef struct {
@@ -72,6 +59,10 @@ extern "C" {
 	}T1_table;
 #define T1_Set_data(member,typ,def_method)      Set_data(T1_table,member,typ,def_method)
 
+	typedef struct {
+		float initSpeedx;
+	}T2_table;
+#define T2_Set_data(member,typ,def_method)      Set_data(T2_table,member,typ,def_method)
 
 
 	typedef struct {
@@ -122,12 +113,41 @@ extern "C" {
 	}T3_table;
 #define T3_Set_data(member,typ,def_method)      Set_data(T3_table,member,typ,def_method)
 
+	typedef struct {
+		char AP1[32];
+	}T4_table;
+#define T4_Set_data(member,typ,def_method)      Set_data(T4_table,member,typ,def_method)
 
 	typedef struct {
-		T1_table t1;
-		T3_table t3;
+		int SN1_P1;
+	}T6_table;
+#define T6_Set_data(member,typ,def_method)      Set_data(T6_table,member,typ,def_method)
+
+
+	typedef struct {
+		int scanftrueFlg[5] = {0};
+		T1_table T1;
+		T2_table T2;
+		T3_table T3;
+		T4_table T4;
+		T6_table T6;
 	}Tg_table;
 	
+#define Set_Group(group,seq)    {#group,offsetof(Tg_table,group),group,sizeof(group)/sizeof(CFG_INFO),seq}
+
+
+	typedef struct {
+		const char * groupName;
+		const size_t diff;
+		const CFG_INFO * group;
+		const size_t sz;
+		const int seq;
+	}CFG_GROUP;
+
+	size_t max_group_cnt();
+	const CFG_GROUP * find_group_index(size_t i);
+	const CFG_GROUP * find_group_name(const char * groupName);
+
 
 #ifdef __cplusplus
 }

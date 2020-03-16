@@ -163,21 +163,21 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 }
 
 
-void scanfOneTable(void * tableaddr, const char * tableName, map<string, string> &datamap)
+int scanfOneTable(const void * tableaddr, const char * tableName, map<string, string> &datamap)
 {
-	CFG_GROUP *group = find_group_name(tableName);
+	const CFG_GROUP *group = find_group_name(tableName);
 
 	if ((!group) || (!tableaddr)) {
-		return;
+		return -1;
 	}
 
-	CFG_INFO * info_group = group->group;
+	const CFG_INFO * info_group = group->group;
 	size_t sz = group->sz;
 
 	for (size_t datapos = 0; datapos < sz; datapos++) {
 		//cfg address
-		CFG_INFO * info = &info_group[datapos];
-		void * dataAddr = tableaddr + info->diff;
+		const CFG_INFO * info = &info_group[datapos];
+		void * dataAddr = (char *)tableaddr + info->diff;
 
 		if (datamap.count(info->name) > 0) {
 			writeData(dataAddr, datamap[info->name], info->typ, info->default_value);
@@ -187,7 +187,31 @@ void scanfOneTable(void * tableaddr, const char * tableName, map<string, string>
 			}
 		}
 	}
+	return 0;
 }
+
+void setfromDefault(const void * tableaddr, const char * tableName)
+{
+	const CFG_GROUP *group = find_group_name(tableName);
+
+	if ((!group) || (!tableaddr)) {
+		return;
+	}
+
+	const CFG_INFO * info_group = group->group;
+	size_t sz = group->sz;
+
+	for (size_t datapos = 0; datapos < sz; datapos++) {
+		//cfg address
+		const CFG_INFO * info = &info_group[datapos];
+		void * dataAddr = (char *)tableaddr + info->diff;
+
+		if (info->default_value) {
+			info->default_value(dataAddr);
+		}
+	}
+}
+
 
 
 void scanfAllTable(Tg_table & tb)
@@ -197,47 +221,15 @@ void scanfAllTable(Tg_table & tb)
 	//
 	//add more table
 	//
-	scanfOneTable(&tb.t1, "T1", datamap);
-	scanfOneTable(&tb.t3, "T3", datamap);
+	tb.scanftrueFlg[0] = scanfOneTable(&tb.T1, "T1", datamap);
+	tb.scanftrueFlg[3] = scanfOneTable(&tb.T3, "T3", datamap);
 }
 
-static void printData(void * baseaddr, CFG_INFO * info)
+
+
+void printData2String(string & outstring,const void * baseaddr,const CFG_INFO * info)
 {
-	void * dataAddr = baseaddr + info->diff;
-
-	printf("cfgname = %s,", info->name);
-
-	switch (info->typ) {
-	case dateType::STRING16:
-	case dateType::STRING32:
-	case dateType::STRING64:
-		printf("%s", (char *)dataAddr);
-		break;
-	case dateType::FLOAT32:
-		printf("%f", *(float *)dataAddr);
-		break;
-	case dateType::DOUBLE64:
-		printf("%lf", *(double *)dataAddr);
-		break;
-
-	case dateType::INT32:
-		printf("%d", *(int32_t *)dataAddr);
-		break;
-
-	case dateType::LONG64:
-		printf("%lld", *(int64_t *)dataAddr);
-		break;
-
-	default:
-		printf("no type");
-		break;
-	}
-	printf("\n");
-}
-
-void printData2String(string & outstring, void * baseaddr, CFG_INFO * info)
-{
-	void * dataAddr = baseaddr + info->diff;
+	void * dataAddr = (char *)baseaddr + info->diff;
 
 	char tmpbuff[64] = { 0 };
 
@@ -277,13 +269,13 @@ void printData2String(string & outstring, void * baseaddr, CFG_INFO * info)
 
 void printTable2String(string & outstring, void * table, const char * tableName)
 {
-	CFG_GROUP * group = find_group_name(tableName);
+	const CFG_GROUP * group = find_group_name(tableName);
 
 	if (!group) {
 		return;
 	}
 
-	CFG_INFO * info = group->group;
+	const CFG_INFO * info = group->group;
 	size_t sz = group->sz;
 
 	for (size_t datapos = 0; datapos < sz; datapos++) {
@@ -292,6 +284,40 @@ void printTable2String(string & outstring, void * table, const char * tableName)
 }
 
 
+#if 0
+static void printData(void * baseaddr, CFG_INFO * info)
+{
+	void * dataAddr = (char *)baseaddr + info->diff;
+
+	printf("cfgname = %s,", info->name);
+
+	switch (info->typ) {
+	case dateType::STRING16:
+	case dateType::STRING32:
+	case dateType::STRING64:
+		printf("%s", (char *)dataAddr);
+		break;
+	case dateType::FLOAT32:
+		printf("%f", *(float *)dataAddr);
+		break;
+	case dateType::DOUBLE64:
+		printf("%lf", *(double *)dataAddr);
+		break;
+
+	case dateType::INT32:
+		printf("%d", *(int32_t *)dataAddr);
+		break;
+
+	case dateType::LONG64:
+		printf("%lld", *(int64_t *)dataAddr);
+		break;
+
+	default:
+		printf("no type");
+		break;
+	}
+	printf("\n");
+}
 
 void printTable(void * table , size_t groupID)
 {	
@@ -310,20 +336,18 @@ void printTable(void * table , size_t groupID)
 		printf("groupID %d over max\n", groupID);
 	}		
 }
-
+#endif
 
 
 void testpro()
 {
 	Tg_table tg_table;
 
-
 	scanfAllTable(tg_table);
-	//printTable(&tb1, 0);
 
 	string st;
 
-	printTable2String(st, &tg_table.t1, "T1");
+	printTable2String(st, &tg_table.T1, "T1");
 
 	cout << st << endl;
 }
