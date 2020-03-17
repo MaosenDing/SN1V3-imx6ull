@@ -66,6 +66,7 @@ static int find_if_true(const char * st)
 	"T",
 	"True",
 	"true",
+	"TRUE",
 	};
 
 	for (const char * tr_st : truegroup) {
