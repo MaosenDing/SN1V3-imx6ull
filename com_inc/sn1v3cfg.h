@@ -23,7 +23,6 @@ extern "C" {
 		DOUBLE64,
 
 		INT32,
-		LONG64,
 
 		TIM16,
 		MAC,
@@ -148,6 +147,8 @@ extern "C" {
 		int32_t AP_SS;
 		int32_t Baudrate;
 		int32_t TransmitPower;
+		//ip在内存中使用小端格式 即
+		//5 50 168 192表示192.168.50.5
 		char ServerIP[4];
 		int32_t ServerPort;
 		char LocalIP[4];
@@ -207,15 +208,25 @@ extern "C" {
 		T6_table T6;
 	}Tg_table;
 	
-#define Set_Group(group,seq)    {#group,offsetof(Tg_table,group),group,sizeof(group)/sizeof(CFG_INFO),seq}
-
+#define Set_Group(group,mask,seq,TabelIndex)    {#group,#group".txt",mask,offsetof(Tg_table,group),group,sizeof(group)/sizeof(CFG_INFO),seq,TabelIndex}
+	enum CFGMASK {
+		Mask_T1 = 1 << 0,
+		Mask_T2 = 2 << 0,
+		Mask_T3 = 3 << 0,
+		Mask_T4 = 4 << 0,
+		Mask_T6 = 6 << 0,
+		Mask_All = Mask_T1 | Mask_T2| Mask_T3| Mask_T4| Mask_T6,
+	};
 
 	typedef struct {
 		const char * groupName;
+		const char * cfgName;
+		const int cfgMask;
 		const size_t diff;
 		const CFG_INFO * group;
 		const size_t sz;
 		const int seq;
+		const int cfgindex;
 	}CFG_GROUP;
 
 	size_t max_group_cnt();

@@ -7,18 +7,11 @@
 
 using namespace std;
 
-
-
-
-
 void stingDefault(void * addr)
 {
 	char * pos = (char *)addr;
 	*pos = 0;
 }
-
-
-
 
 void floatDefault(void * addr)
 {
@@ -70,8 +63,14 @@ void IPLocalDefault(void * addr)
 	reverse_copy(localip, localip + 4, pos);
 }
 
+void MACDefault(void * addr)
+{
+	//本地默认ip 192.168.50.111
+	const char localip[6] = {0x11,0x22,0x33,0x44,0x55,0xff};
 
-
+	char * pos = (char *)addr;
+	copy(localip, localip + 6, pos);
+}
 
 
 const CFG_INFO T1[] = {
@@ -82,7 +81,7 @@ const CFG_INFO T1[] = {
 	T1_Set_data(5,FWSensorM,dateType::STRING16,stingDefault),
 	T1_Set_data(6,FYSensorM,dateType::STRING16,stingDefault),
 	T1_Set_data(7,InstallTime,dateType::TIM16,nullptr),
-	T1_Set_data(8,PSN,dateType::MAC,nullptr),
+	T1_Set_data(8,PSN,dateType::MAC,MACDefault),
 	T1_Set_data(9,MDC2_SV_1,dateType::STRING16,stingDefault),
 	T1_Set_data(10,MDC2_SV_2,dateType::STRING16,stingDefault),
 	T1_Set_data(11,MDC2_SV_3,dateType::STRING16,stingDefault),
@@ -215,9 +214,9 @@ const CFG_INFO T6[] = {
 	T6_Set_data(19,SN2_P1,dateType::FLOAT32,floatDefault),//目标sn3相机坐标x
 	T6_Set_data(20,SN2_P2,dateType::FLOAT32,floatDefault),//目标sn3相机坐标y
 	T6_Set_data(21,SN2_P3,dateType::FLOAT32,floatDefault),//目标sn3相机坐标z
-	T6_Set_data(22,SN2_P4,dateType::INT32,setDefault(float ,0.95)),//SN2用T8表频率(行/秒)
-	T6_Set_data(23,SN2_P5,dateType::INT32,setDefault(float ,0.95)),//SN2用最大转角速度（度/秒）
-	T6_Set_data(24,SN2_P6,dateType::INT32,setDefault(float ,0.95)),//SN2用法线最大扫描距离（米）
+	T6_Set_data(22,SN2_P4,dateType::INT32,setDefault(int ,1)),//SN2用T8表频率(行/秒)
+	T6_Set_data(23,SN2_P5,dateType::FLOAT32,setDefault(float ,20)),//SN2用最大转角速度（度/秒）
+	T6_Set_data(24,SN2_P6,dateType::FLOAT32,setDefault(float ,1)),//SN2用法线最大扫描距离（米）
 
 	T6_Set_data(25,SaveOrg,dateType::BOOLTYPE,boolDefault),
 	T6_Set_data(26,SaveBin,dateType::BOOLTYPE,boolDefault),
@@ -226,11 +225,11 @@ const CFG_INFO T6[] = {
 
 
 const CFG_GROUP cfg_group[] = {
-	Set_Group(T1,0),
-	Set_Group(T2,1),
-	Set_Group(T3,2),
-	Set_Group(T4,3),
-	Set_Group(T6,4),
+	Set_Group(T1,Mask_T1,0,1),
+	Set_Group(T2,Mask_T2,1,2),
+	Set_Group(T3,Mask_T3,2,3),
+	Set_Group(T4,Mask_T4,3,4),
+	Set_Group(T6,Mask_T6,4,6),
 };
 
 size_t max_group_cnt()

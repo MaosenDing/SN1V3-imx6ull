@@ -39,7 +39,8 @@ add_subdirectory(daemon)
 
 #install scripts
 add_subdirectory(workscript)
-
+#update config file
+add_subdirectory(config_file)
 
 
 

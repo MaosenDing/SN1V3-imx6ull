@@ -1,0 +1,5 @@
+%HeliostatID,12345676
+%ReducerM,rm1
+%PutterM,pm1
+%DriveM,dm1
+%FWSensorM,fwm1

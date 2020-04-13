@@ -1,0 +1,13 @@
+%FWStartSpeed,100
+%FWMaxSpeed,200
+%FYStartSpeed,300
+%FYMaxSpeed,400
+%FWReductRt,500
+%PutterReductRt,600
+%PutterScrewPara,700
+%PutterMaxLen,800
+%PutterPara4,900
+%ServoControlCycle,1001
+%CompesatPara,1002
+%MaxMotorCurr,1003
+

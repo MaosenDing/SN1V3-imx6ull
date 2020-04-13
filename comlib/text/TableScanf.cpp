@@ -121,16 +121,6 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 		} else {
 			if (default_value) default_value(addr);
 		}
-
-	case dateType::LONG64:
-		int64_t tmplong;
-		if (sscanf(data.c_str(), "%lld", &tmplong) == 1) {
-			*(int64_t *)addr = tmplong;
-		} else {
-			if (default_value) default_value(addr);
-		}
-		break;
-
 	case dateType::TIM16:
 
 
@@ -158,6 +148,26 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 		*(int *)addr = find_if_true(data.c_str());
 		break;
 
+		//ip内存中使用小端格式
+	case dateType::IP:
+		int tmpIP[4];
+		if (sscanf(data.c_str(), "%d.%d.%d.%d"
+			, &tmpIP[0]
+			, &tmpIP[1]
+			, &tmpIP[2]
+			, &tmpIP[3]
+		) == 4) {
+			char * dat = (char *)addr;
+			dat[3] = tmpIP[0];
+			dat[2] = tmpIP[1];
+			dat[1] = tmpIP[2];
+			dat[0] = tmpIP[3];
+		} else {
+			if (default_value) default_value(addr);
+		}
+		break;
+
+		break;
 	default:
 		break;
 	}
@@ -214,21 +224,23 @@ void setfromDefault(const void * tableaddr, const char * tableName)
 }
 
 
-
-void scanfAllTable(Tg_table & tb)
+void scanfAllTable(Tg_table & tb,uint32_t table_mask)
 {
+	size_t maxcnt = max_group_cnt();
 	map<string, string> datamap;
-	ScanfFile("table1", datamap);
-	//
-	//add more table
-	//
-	tb.scanftrueFlg[0] = scanfOneTable(&tb.T1, "T1", datamap);
-	tb.scanftrueFlg[3] = scanfOneTable(&tb.T3, "T3", datamap);
+	for (size_t i = 0; i < maxcnt; i++) {
+		const CFG_GROUP * grp = find_group_index(i);		
+		if (grp->cfgMask & table_mask) {
+			ScanfFile(grp->cfgName, datamap);
+			scanfOneTable((char *)&tb + grp->diff, grp->groupName, datamap);
+			datamap.clear();
+		}
+	}
 }
 
 
 
-void printData2String(string & outstring,const void * baseaddr,const CFG_INFO * info)
+void printData2String(string & outstring, const void * baseaddr, const CFG_INFO * info)
 {
 	void * dataAddr = (char *)baseaddr + info->diff;
 
@@ -239,7 +251,7 @@ void printData2String(string & outstring,const void * baseaddr,const CFG_INFO * 
 	case dateType::STRING16:
 	case dateType::STRING32:
 	case dateType::STRING64:
-		snprintf(tmpbuff, 64, "%%%s,%s\n", info->name,(char *)dataAddr);
+		snprintf(tmpbuff, 64, "%%%s,%s\n", info->name, (char *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
 	case dateType::FLOAT32:
@@ -250,18 +262,46 @@ void printData2String(string & outstring,const void * baseaddr,const CFG_INFO * 
 		snprintf(tmpbuff, 64, "%%%s,%lf\n", info->name, *(double *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
-
-	case dateType::MAC:
-		snprintf(tmpbuff, 64, "%%%s,%02x:%02x:%02x:%02x:%02x:%02x\n", info->name
-			, *((unsigned int *)dataAddr + 0)
-			, *((unsigned int *)dataAddr + 1)
-			, *((unsigned int *)dataAddr + 2)
-			, *((unsigned int *)dataAddr + 3)
-			, *((unsigned int *)dataAddr + 4)
-			, *((unsigned int *)dataAddr + 5)
-		);
+	case dateType::INT32:
+		snprintf(tmpbuff, 64, "%%%s,%d\n", info->name, *(int *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
+	case dateType::MAC:
+	{
+		char * macDat = (char *)dataAddr;
+		snprintf(tmpbuff, 64, "%%%s,%02x:%02x:%02x:%02x:%02x:%02x\n", info->name
+			, macDat[0]
+			, macDat[1]
+			, macDat[2]
+			, macDat[3]
+			, macDat[4]
+			, macDat[5]
+		);
+		outstring.append(tmpbuff);
+	}
+	break;
+
+	case dateType::BOOLTYPE:
+		if (*(int *)dataAddr == 0) {
+			snprintf(tmpbuff, 64, "%%%s,false\n", info->name);
+		} else {
+			snprintf(tmpbuff, 64, "%%%s,true\n", info->name);
+		}
+		outstring.append(tmpbuff);
+		break;
+	case dateType::IP:
+	{
+		//ip内存中使用小端格式
+		char * IPdat = (char *)dataAddr;
+		snprintf(tmpbuff, 64, "%%%s,%d.%d.%d.%d\n", info->name
+			, IPdat[3]
+			, IPdat[2]
+			, IPdat[1]
+			, IPdat[0]
+		);
+		outstring.append(tmpbuff);
+	}
+	break;
 
 	default:
 		break;
@@ -285,72 +325,24 @@ void printTable2String(string & outstring, void * table, const char * tableName)
 }
 
 
-#if 0
-static void printData(void * baseaddr, CFG_INFO * info)
-{
-	void * dataAddr = (char *)baseaddr + info->diff;
-
-	printf("cfgname = %s,", info->name);
-
-	switch (info->typ) {
-	case dateType::STRING16:
-	case dateType::STRING32:
-	case dateType::STRING64:
-		printf("%s", (char *)dataAddr);
-		break;
-	case dateType::FLOAT32:
-		printf("%f", *(float *)dataAddr);
-		break;
-	case dateType::DOUBLE64:
-		printf("%lf", *(double *)dataAddr);
-		break;
-
-	case dateType::INT32:
-		printf("%d", *(int32_t *)dataAddr);
-		break;
-
-	case dateType::LONG64:
-		printf("%lld", *(int64_t *)dataAddr);
-		break;
-
-	default:
-		printf("no type");
-		break;
-	}
-	printf("\n");
-}
-
-void printTable(void * table , size_t groupID)
-{	
-	if (groupID < max_group_cnt())
-	{
-		CFG_GROUP *group = find_group_index(groupID);
-
-		CFG_INFO * info = group->group;
-		size_t sz = group->sz;
-
-		for (size_t datapos = 0; datapos < sz; datapos++) {
-			printData(table, &info[datapos]);
-		}
-	}
-	else {
-		printf("groupID %d over max\n", groupID);
-	}		
-}
-#endif
-
-
 void testpro()
 {
 	Tg_table tg_table;
 
-	scanfAllTable(tg_table);
+	scanfAllTable(tg_table, Mask_All);
 
-	string st;
 
-	printTable2String(st, &tg_table.T1, "T1");
-
-	cout << st << endl;
+	size_t maxcnt = max_group_cnt();
+	map<string, string> datamap;
+	for (size_t i = 0; i < maxcnt; i++) {
+		const CFG_GROUP * grp = find_group_index(i);
+		string st;
+		st.append("print:");
+		st.append(grp->groupName);
+		st.append("\n");
+		printTable2String(st, (char *)&tg_table + grp->diff, grp->groupName);
+		cout << st << endl;
+	}
 }
 
 
