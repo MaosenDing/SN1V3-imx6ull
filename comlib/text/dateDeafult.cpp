@@ -73,7 +73,7 @@ void MACDefault(void * addr)
 }
 
 
-const CFG_INFO T1[] = {
+CFG_INFO T1[] = {
 	T1_Set_data(1,HeliostatID,dateType::STRING16,stingDefault),
 	T1_Set_data(2,ReducerM,dateType::STRING16,stingDefault),
 	T1_Set_data(3,PutterM,dateType::STRING16,stingDefault),
@@ -103,7 +103,7 @@ const CFG_INFO T1[] = {
 	T1_Set_data(27,HeliostatPointZ,dateType::FLOAT32,floatDefault),
 };
 
-const CFG_INFO T2[] = {
+CFG_INFO T2[] = {
 	T2_Set_data(1,FWStartSpeed,dateType::INT32,int32Default),
 	T2_Set_data(2,FWMaxSpeed,dateType::INT32,int32Default),
 	T2_Set_data(3,FYStartSpeed,dateType::INT32,int32Default),
@@ -120,7 +120,7 @@ const CFG_INFO T2[] = {
 
 
 
-const CFG_INFO T3[] = {
+CFG_INFO T3[] = {
 	//sn1
 	T3_Set_data(1,SN1_e1,dateType::FLOAT32,floatDefault),
 	T3_Set_data(2,SN1_e2,dateType::FLOAT32,floatDefault),
@@ -170,8 +170,8 @@ const CFG_INFO T3[] = {
 
 
 
-const CFG_INFO T4[] = {
-	T4_Set_data(1,M_AP1,dateType::STRING32,stingDefault),
+CFG_INFO T4[] = {
+	T4_Set_data(1,M_AP1,dateType::STRING32,setDefaultString("test ap",32)),
 	T4_Set_data(2,B_AP2,dateType::STRING32,stingDefault),
 	T4_Set_data(3,D_AP0,dateType::STRING32,stingDefault),
 
@@ -189,7 +189,7 @@ const CFG_INFO T4[] = {
 	T4_Set_data(14,SinglePacketMax,dateType::INT32,int32Default),
 };
 
-const CFG_INFO T6[] = {
+CFG_INFO T6[] = {
 	T6_Set_data(1,SN1_P1,dateType::INT32,setDefault(int,1200)),
 	T6_Set_data(2,SN1_P2,dateType::INT32,setDefault(int ,1600)),
 	T6_Set_data(3,SN1_P3,dateType::FLOAT32,setDefault(float ,0)),
@@ -224,7 +224,7 @@ const CFG_INFO T6[] = {
 };
 
 
-const CFG_GROUP cfg_group[] = {
+CFG_GROUP cfg_group[] = {
 	Set_Group(T1,Mask_T1,0,1),
 	Set_Group(T2,Mask_T2,1,2),
 	Set_Group(T3,Mask_T3,2,3),

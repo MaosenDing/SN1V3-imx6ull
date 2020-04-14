@@ -78,31 +78,40 @@ static int find_if_true(const char * st)
 }
 
 
-static void writeData(void * addr, string & data, dateType typ, void(*default_value)(void *))
+static void writeData(void * addr, string & data, CFG_INFO  * info)
 {
+	dateType typ = info->typ;
+	auto default_value = info->default_value;
+
 	switch (typ) {
 	case dateType::STRING16:
 		strncpy((char *)addr, data.c_str(), 16);
+		info->dataStatus = dataFromTable;
 		break;
 
 	case dateType::STRING32:
 		strncpy((char *)addr, data.c_str(), 32);
+		info->dataStatus = dataFromTable;
 		break;
 
 	case dateType::STRING64:
 		strncpy((char *)addr, data.c_str(), 64);
+		info->dataStatus = dataFromTable;
 		break;
 
 	case dateType::STRING128:
 		strncpy((char *)addr, data.c_str(), 128);
+		info->dataStatus = dataFromTable;
 		break;
 
 	case dateType::FLOAT32:
 		float tmpfloat;
 		if (sscanf(data.c_str(), "%f", &tmpfloat) == 1) {
 			*(float *)addr = tmpfloat;
+			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
 		}
 		break;
 
@@ -110,16 +119,20 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 		double tmpdouble;
 		if (sscanf(data.c_str(), "%lf", &tmpdouble) == 1) {
 			*(double *)addr = tmpdouble;
+			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
 		}
 		break;
 	case dateType::INT32:
 		int32_t tmpint;
 		if (sscanf(data.c_str(), "%d", &tmpint) == 1) {
 			*(int32_t *)addr = tmpint;
+			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
 		}
 	case dateType::TIM16:
 
@@ -139,13 +152,16 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 			for (int i = 0; i < 6; i++) {
 				*((unsigned int *)addr + i) = tmpmac[i];
 			}
+			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
 		}
 		break;
 
 	case dateType::BOOLTYPE:
 		*(int *)addr = find_if_true(data.c_str());
+		info->dataStatus = dataFromTable;
 		break;
 
 		//ip内存中使用小端格式
@@ -162,8 +178,10 @@ static void writeData(void * addr, string & data, dateType typ, void(*default_va
 			dat[2] = tmpIP[1];
 			dat[1] = tmpIP[2];
 			dat[0] = tmpIP[3];
+			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
 		}
 		break;
 
@@ -182,19 +200,20 @@ int scanfOneTable(const void * tableaddr, const char * tableName, map<string, st
 		return -1;
 	}
 
-	const CFG_INFO * info_group = group->group;
+	CFG_INFO * info_group = group->group;
 	size_t sz = group->sz;
 
 	for (size_t datapos = 0; datapos < sz; datapos++) {
 		//cfg address
-		const CFG_INFO * info = &info_group[datapos];
+		CFG_INFO  * info = &info_group[datapos];
 		void * dataAddr = (char *)tableaddr + info->diff;
 
 		if (datamap.count(info->name) > 0) {
-			writeData(dataAddr, datamap[info->name], info->typ, info->default_value);
+			writeData(dataAddr, datamap[info->name], info);
 		} else {
 			if (info->default_value) {
 				info->default_value(dataAddr);
+				info->dataStatus = dataScanfNullSetDefault;
 			}
 		}
 	}
@@ -308,7 +327,35 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 	}
 }
 
-void printTable2String(string & outstring, void * table, const char * tableName)
+void printData2String(string & outstring, const void * baseaddr, const CFG_INFO * info, int wrMask)
+{
+	int writeflg = 0;
+	//写出扫描
+	if ((info->dataStatus == dataFromTable) && (wrMask & writeScanf)) {
+		writeflg = 1;
+	}
+	//写出默认部分
+	if ((info->dataStatus == dataTransFaultDefault) && (wrMask & writeDefault)) {
+		writeflg = 1;
+	}
+	if ((info->dataStatus == dataScanfNullSetDefault) && (wrMask & writeDefault)) {
+		writeflg = 1;
+	}
+	//写出修改部分
+	if ((info->dataStatus == dataChanged) && (wrMask & writeChanged)) {
+		writeflg = 1;
+	}
+
+	if (writeflg) {
+		printData2String(outstring, baseaddr, info);
+		if (wrMask & writeDataNote)
+		{
+		}
+	}
+}
+
+
+void printTable2String(string & outstring, void * table, const char * tableName, int writeMask)
 {
 	const CFG_GROUP * group = find_group_name(tableName);
 
@@ -320,7 +367,7 @@ void printTable2String(string & outstring, void * table, const char * tableName)
 	size_t sz = group->sz;
 
 	for (size_t datapos = 0; datapos < sz; datapos++) {
-		printData2String(outstring, table, &info[datapos]);
+		printData2String(outstring, table, &info[datapos], writeMask);
 	}
 }
 
@@ -340,7 +387,7 @@ void testpro()
 		st.append("print:");
 		st.append(grp->groupName);
 		st.append("\n");
-		printTable2String(st, (char *)&tg_table + grp->diff, grp->groupName);
+		printTable2String(st, (char *)&tg_table + grp->diff, grp->groupName, writeUseful);
 		cout << st << endl;
 	}
 }

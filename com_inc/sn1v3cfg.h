@@ -31,15 +31,37 @@ extern "C" {
 		IP,
 	};
 
+	enum DATASTATUS {
+		dataInit = 0,//数据未初始化
+		dataFromTable = 1,//数据从表初始化
+		dataTransFaultDefault = 2,//数据转化失败 默认初始化
+		dataScanfNullSetDefault = 3,//数据空  默认初始化
+		dataChanged = 4,//数据已修改
+	};
+
+	//写出标志位
+	enum WRITEOUTMETHOD {
+		writeScanf = 1 << 0,//写出扫描的部分
+		writeDefault = 1 << 1,//写出默认部分
+		writeChanged = 1 << 2,//写出修改部分
+
+		writeDataNote = 1 << 3,//写出注释
+
+		writeUseful = writeScanf | writeChanged,
+		writeAll = writeScanf | writeDefault | writeChanged | writeDataNote,
+	};
+
+
 	typedef struct {
 		const char * name;
 		size_t diff;
 		dateType typ;
 		void(*default_value)(void *);
 		size_t SeqInTable;
+		DATASTATUS dataStatus;
 	}CFG_INFO;
 
-#define Set_data(table,member,typ,def_method,seq)    {#member,offsetof(table,member),typ,def_method,seq}
+#define Set_data(table,member,typ,def_method,seq)    {#member,offsetof(table,member),typ,def_method,seq,dataInit}
 
 	typedef struct {
 		char HeliostatID[16];
@@ -198,6 +220,7 @@ extern "C" {
 #define T6_Set_data(seq,member,typ,def_method)      Set_data(T6_table,member,typ,def_method,seq)
 
 #define setDefault(type ,val) [](void *addr){*(type*)addr = val;}
+#define setDefaultString(str,maxlen) [](void *addr){strncpy((char *)addr, str, maxlen);}
 
 	typedef struct {
 		int scanftrueFlg[5] = {0};
@@ -209,12 +232,13 @@ extern "C" {
 	}Tg_table;
 	
 #define Set_Group(group,mask,seq,TabelIndex)    {#group,#group".txt",mask,offsetof(Tg_table,group),group,sizeof(group)/sizeof(CFG_INFO),seq,TabelIndex}
+	//扫描标志位
 	enum CFGMASK {
-		Mask_T1 = 1 << 0,
-		Mask_T2 = 2 << 0,
-		Mask_T3 = 3 << 0,
-		Mask_T4 = 4 << 0,
-		Mask_T6 = 6 << 0,
+		Mask_T1 = 1 << 1,
+		Mask_T2 = 1 << 2,
+		Mask_T3 = 1 << 3,
+		Mask_T4 = 1 << 4,
+		Mask_T6 = 1 << 5,
 		Mask_All = Mask_T1 | Mask_T2| Mask_T3| Mask_T4| Mask_T6,
 	};
 
@@ -223,7 +247,7 @@ extern "C" {
 		const char * cfgName;
 		const int cfgMask;
 		const size_t diff;
-		const CFG_INFO * group;
+		CFG_INFO * const group;
 		const size_t sz;
 		const int seq;
 		const int cfgindex;

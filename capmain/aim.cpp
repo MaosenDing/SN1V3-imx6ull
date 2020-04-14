@@ -389,7 +389,7 @@ int test_converter(int argc, char * argv[])
 	
 	printf("%d\n", tmpdeg);
 	
-	printf("from %f to %02x,%02x,%02x\n", &tmpdeg);
+	//printf("from %f to %02x,%02x,%02x\n", &tmpdeg);
 	return 0;
 }
 
@@ -402,7 +402,7 @@ static double getdeg(double len)
 
 int degtest(int argc, char * argv[])
 {
-	double degpos, diffdeg;
+	double degpos = 0, diffdeg = 0;
 	double difflen = 0.02;
 	int sum = 0;
 	{
@@ -418,6 +418,7 @@ int degtest(int argc, char * argv[])
 		}
 	}
 	printf("sum = %d , deg = %lf , diff = %lf\n", sum, degpos, diffdeg);
+	return 0;
 }
 
 
@@ -426,6 +427,7 @@ void testpro();
 int scanftest(int argc, char * argv[])
 {
 	testpro();
+	return 0;
 }
 
 
