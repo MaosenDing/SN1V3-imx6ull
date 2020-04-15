@@ -214,14 +214,11 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 }
 
 
-int scanfOneTable(const void * tableaddr, const CFG_GROUP * group, map<string, string> &datamap)
+int scanfOneTable(const void * tableaddr, CFG_INFO * info_group,const size_t sz, map<string, string> &datamap)
 {
-	if ((!group) || (!tableaddr)) {
+	if ((!info_group) || (!tableaddr)) {
 		return -1;
 	}
-
-	CFG_INFO * info_group = group->group;
-	size_t sz = group->sz;
 
 	for (size_t datapos = 0; datapos < sz; datapos++) {
 		//cfg address
@@ -263,15 +260,15 @@ void setfromDefault(const void * tableaddr, const char * tableName)
 }
 
 
-void scanfAllTable(Tg_table & tb,uint32_t table_mask)
+void scanfAllTable(Tg_table & tb, uint32_t table_mask)
 {
 	size_t maxcnt = max_group_cnt();
 	map<string, string> datamap;
 	for (size_t i = 0; i < maxcnt; i++) {
-		const CFG_GROUP * grp = find_group_index(i);		
+		const CFG_GROUP * grp = find_group_index(i);
 		if (grp->cfgMask & table_mask) {
 			ScanfFile(grp->cfgName, datamap);
-			scanfOneTable((char *)&tb + grp->diff, grp, datamap);
+			scanfOneTable((char *)&tb + grp->diff, grp->group, grp->sz, datamap);
 			datamap.clear();
 		}
 	}
@@ -389,16 +386,11 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 }
 
 
-void printTable2String(string & outstring, void * table, const char * tableName, int writeMask)
+void printTable2String(string & outstring, void * table, const CFG_INFO * info, size_t sz, int writeMask)
 {
-	const CFG_GROUP * group = find_group_name(tableName);
-
-	if (!group) {
+	if ((!table) || (!info)) {
 		return;
 	}
-
-	const CFG_INFO * info = group->group;
-	size_t sz = group->sz;
 
 	for (size_t datapos = 0; datapos < sz; datapos++) {
 		printData2String(outstring, table, &info[datapos], writeMask);
@@ -421,7 +413,7 @@ void testpro()
 		st.append("print:");
 		st.append(grp->groupName);
 		st.append("\n");
-		printTable2String(st, (char *)&tg_table + grp->diff, grp->groupName, writeUseful);
+		printTable2String(st, (char *)&tg_table + grp->diff, grp->group, grp->sz, writeUseful);
 		cout << st << endl;
 	}
 }

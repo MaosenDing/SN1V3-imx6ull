@@ -91,9 +91,9 @@ static void scan_file(void * p, const char * fil)
 	}
 	TimeInterval ttt("scanf:");
 	JD_INFO * pjif = (JD_INFO *)p;
-
+	printf("1111\n");
 	auto dat = real_scan_file(fil);
-
+	printf("2222\n");
 	merge_data((MDC_INFO *)pjif, dat);
 }
 

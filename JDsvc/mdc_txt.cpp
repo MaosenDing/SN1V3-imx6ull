@@ -6,317 +6,178 @@
 #include <iostream>
 using namespace std;
 
-static ERR_STA SDG(map<string, string> &sysData, const char * inkey, string & outData)
-{
-	try {
-		outData = sysData.at(inkey);
-	} catch (out_of_range & p) {
-		outData.clear();
-		return(err_conf_get_null);
-	}
-	return err_ok;
-}
-
-static ERR_STA SDG(map<string, string> &sysData,const char * inkey, char * outData)
-{
-	string st;
-	ERR_STA err = SDG(sysData, inkey, st);
-	if (err != err_ok) {
-		return err;
-	}
-	strcpy(outData, st.c_str());
-	return err_ok;
-}
-
-
-static ERR_STA SDG(map<string, string> &sysData,const char * inkey, int & outInt)
-{
-	string st;
-	ERR_STA err = SDG(sysData , inkey, st);
-
-	if (err != err_ok) {
-		return err;
-	}
-
-	if (sscanf(st.c_str(), "%d", &outInt) == 1) {
-		return err_ok;
-	} else {
-		return err_conf_tran_error;
-	}
-}
-
-static ERR_STA SDG(map<string, string> &sysData,const char * inkey, unsigned int & outInt)
-{
-	string st;
-	ERR_STA err = SDG(sysData,inkey, st);
-
-	if (err != err_ok) {
-		return err;
-	}
-
-	if (sscanf(st.c_str(), "%d", &outInt) == 1) {
-		return err_ok;
-	} else {
-		return err_conf_tran_error;
-	}
-}
-
-
-static ERR_STA SDG(map<string, string> &sysData,const char * inkey, float & outfloat)
-{
-	string st;
-	ERR_STA err = SDG(sysData, inkey, st);
-
-	if (err != err_ok) {
-		return err;
-	}
-
-	if (sscanf(st.c_str(), "%f", &outfloat) == 1) {
-		return err_ok;
-	} else {
-		return err_conf_tran_error;
-	}
-}
-
-static ERR_STA SDG(map<string, string> &sysData,const char * inkey, bool & outbool)
-{
-	string st;
-	ERR_STA err = SDG(sysData, inkey, st);
-
-	if (err != err_ok) {
-		return err;
-	}
-
-	transform(st.begin(), st.end(), st.begin(), ::tolower);
-
-	if (!strcmp(st.c_str(), "true")) {
-		outbool = true;
-		return err_ok;
-	}
-
-	if (!strcmp(st.c_str(), "false")) {
-		outbool = false;
-		return err_ok;
-	}
-	return	err_conf_tran_error;
-}
-
 void prinMap(map<string, string> & mdcdata)
 {
-	cout << "||||||||||||||||" << endl;
+	printf("||||||||||||||||");
 	map<string, string>::iterator iter;
 	iter = mdcdata.begin();
 	while (iter != mdcdata.end()) {
-		cout << iter->first << ":" << iter->second << endl;
+		printf("%s:%s\n", iter->first.c_str(), iter->second.c_str());
 		iter++;
 	}
 }
 
+#define SCANF_Set_data(member,typ)      Set_data(SCANF_DATA,member,typ,0,0)
+
+CFG_INFO mdc_info[] = {
+	SCANF_Set_data(mod,dateType::INT32),
+	SCANF_Set_data(manual0,dateType::FLOAT32),
+	SCANF_Set_data(manual1,dateType::FLOAT32),
+	SCANF_Set_data(correct0,dateType::FLOAT32),
+	SCANF_Set_data(correct1,dateType::FLOAT32),
+	SCANF_Set_data(initspeed0,dateType::INT32),
+	SCANF_Set_data(initspeed1,dateType::INT32),
+	SCANF_Set_data(maxspeed0,dateType::INT32),
+	SCANF_Set_data(maxspeed1,dateType::INT32),
+	SCANF_Set_data(phase0,dateType::INT32),
+	SCANF_Set_data(phase1,dateType::INT32),
+	SCANF_Set_data(period0,dateType::INT32),
+	SCANF_Set_data(period1,dateType::INT32),
+	SCANF_Set_data(current0,dateType::INT32),
+	SCANF_Set_data(current1,dateType::INT32),
+	SCANF_Set_data(ratio0,dateType::INT32),
+	SCANF_Set_data(ratio1, dateType::INT32),
+	SCANF_Set_data(getpar0,dateType::INT32),
+	SCANF_Set_data(getpar1,dateType::INT32),
+	SCANF_Set_data(cleanalarm0,dateType::INT32),
+	SCANF_Set_data(cleanalarm1,dateType::INT32),
+};
+
+static CFG_INFO & GetInfo(const char * key)
+{
+	static CFG_INFO failinfo = { "fail",0,dateType::INT32,nullptr,0,DATASTATUS::dataInit };
+	size_t maxsz = sizeof(mdc_info) / sizeof(CFG_INFO);
+
+	for (size_t i = 0; i < maxsz; i++) {
+		if (!strcmp(key, mdc_info[i].name)) {
+			return mdc_info[i];
+		}
+	}
+	return failinfo;
+}
 
 
 SCANF_DATA real_scan_file(const char * fil)
 {
 	SCANF_DATA out;
-	ERR_STA err;
 
-	out.JD_MOD = mdc_mode_table;
+	ERR_STA err;
 	map<string, string> mdcdata;
 	ScanfFile(fil, mdcdata);
+	scanfOneTable((char *)&out, mdc_info, sizeof(mdc_info) / sizeof(CFG_INFO), mdcdata);
 	prinMap(mdcdata);
-	int tmpmod = 0;
-	if ((err = SDG(mdcdata, "mod", tmpmod)) == err_ok) {
-		out.JD_MOD = (_JD_MOD)tmpmod;
-	} else {
-		out.JD_MOD = mdc_mode_table;
-	}
 
-	out.manual_flag = 0;
-	if ((err = SDG(mdcdata, "manual0", out.manual_deg[0])) == err_ok) {
-		out.manual_flag |= 1 << 0;
-	}
-
-	if ((err = SDG(mdcdata, "manual1", out.manual_deg[1])) == err_ok) {
-		out.manual_flag |= 1 << 1;
-	}
-
-	out.correct_flag = 0;
-	if ((err = SDG(mdcdata, "correct0", out.correct[0])) == err_ok) {
-		out.correct_flag |= 1 << 0;
-	}
-
-	if ((err = SDG(mdcdata, "correct1", out.correct[1])) == err_ok) {
-		out.correct_flag |= 1 << 1;
-	}
-
-
-
-	out.set_flg = 0;
-	if ((err = SDG(mdcdata, "initspeed0", out.initSpeed[0])) == err_ok) {
-		out.set_flg |= diff_init0;
-	}
-
-	if ((err = SDG(mdcdata, "initspeed1", out.initSpeed[1])) == err_ok) {
-		out.set_flg |= diff_init1;
-	}
-
-	if ((err = SDG(mdcdata, "maxspeed0", out.MaxSpeed[0])) == err_ok) {
-		out.set_flg |= diff_max0;
-	}
-
-	if ((err = SDG(mdcdata, "maxspeed1", out.MaxSpeed[1])) == err_ok) {
-		out.set_flg |= diff_max1;
-	}
-
-	if ((err = SDG(mdcdata, "phase0", out.Phase[0])) == err_ok) {
-		out.set_flg |= diff_phase0;
-	}
-
-	if ((err = SDG(mdcdata, "phase1", out.Phase[1])) == err_ok) {
-		out.set_flg |= diff_phase1;
-	}
-
-	if ((err = SDG(mdcdata, "period0", out.period[0])) == err_ok) {
-		out.set_flg |= diff_period0;
-	}
-
-	if ((err = SDG(mdcdata, "period1", out.period[1])) == err_ok) {
-		out.set_flg |= diff_period1;
-	}
-
-	if ((err = SDG(mdcdata, "current0", out.currect[0])) == err_ok) {
-		out.set_flg |= diff_currect0;
-	}
-	if ((err = SDG(mdcdata, "current1", out.currect[1])) == err_ok) {
-		out.set_flg |= diff_currect1;
-	}
-	if ((err = SDG(mdcdata, "ratio0", out.Ratio[0])) == err_ok) {
-		out.set_flg |= diff_ratio0;
-	}
-
-	if ((err = SDG(mdcdata, "ratio1", out.Ratio[1])) == err_ok) {
-		out.set_flg |= diff_ratio1;
-	}
-
-
-	out.get_flg = 0;
-	int tmpget = 0;
-	if ((err = SDG(mdcdata, "getpar0", tmpget)) == err_ok)
-	{
-		out.get_flg |= 1 << 0;
-	}
-	if ((err = SDG(mdcdata, "getpar1", tmpget)) == err_ok)
-	{
-		out.get_flg |= 1 << 1;
-	}
-
-	out.alarm_clean_flg = 0;
-	if ((err = SDG(mdcdata, "cleanalarm0", tmpget)) == err_ok) {
-		out.alarm_clean_flg |= 1 << 0;
-	}
-	if ((err = SDG(mdcdata, "cleanalarm1", tmpget)) == err_ok) {
-		out.alarm_clean_flg |= 1 << 1;
-	}
-
+	string st;
+	printTable2String(st, &out, mdc_info, sizeof(mdc_info) / sizeof(CFG_INFO), writeUseful);
+	printf("ttt\n%s\n", st.c_str());
 	return out;
 }
 
 
+
+
+
 void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 {
-	//手动 自动 
-	printf("mod %d man %d\n", dat.JD_MOD, dat.manual_flag);
-	if (dat.JD_MOD == mdc_mode_manual && dat.manual_flag) {
-		pjif->JD_MOD = mdc_mode_manual;
-		if (dat.manual_flag & (1 << 0)) {
-			pjif->mdcCtrl[0].manual.trig_set(dat.manual_deg[0]);
-		} else {
-			pjif->mdcCtrl[0].manual.cpl_flag = 1;
-		}
+	//dat.mod
+	if (GetInfo("mod").dataStatus == dataFromTable) {
+		//手动
+		printf("mod %d\n", dat.mod);
+		if (dat.mod == mdc_mode_manual) {
+			
+			pjif->JD_MOD = mdc_mode_manual;
 
-		if (dat.manual_flag & (1 << 1)) {
-			pjif->mdcCtrl[1].manual.trig_set(dat.manual_deg[1]);
-		} else {
-			pjif->mdcCtrl[1].manual.cpl_flag = 1;
-		}
+			if (GetInfo("manual0").dataStatus == dataFromTable) {
+				pjif->mdcCtrl[0].manual.trig_set(dat.manual0);
+			} else {
+				pjif->mdcCtrl[0].manual.cpl_flag = 1;
+			}
 
-	} else if (dat.JD_MOD == mdc_mode_off) {
-		pjif->mdcCtrl[0].stop.trig_set();
-		pjif->mdcCtrl[1].stop.trig_set();
-		pjif->JD_MOD = mdc_mode_off;
-	} else {
-		pjif->JD_MOD = mdc_mode_table;
+			if (GetInfo("manual1").dataStatus == dataFromTable) {
+				pjif->mdcCtrl[1].manual.trig_set(dat.manual1);
+			} else {
+				pjif->mdcCtrl[1].manual.cpl_flag = 1;
+			}
+		}
+		//暂停
+		else if (dat.mod == mdc_mode_off) {
+			pjif->mdcCtrl[0].stop.trig_set();
+			pjif->mdcCtrl[1].stop.trig_set();
+			pjif->JD_MOD = mdc_mode_off;
+		} else {
+			//自动
+			pjif->JD_MOD = mdc_mode_table;
+		}
 	}
 	//校正
-	if (dat.correct_flag & (1 << 0)) {
-		pjif->mdcCtrl[0].correct.trig_set(dat.correct[0]);
+	if (GetInfo("correct0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.correct0);
 	}
-	if (dat.correct_flag & (1 << 1)) {
-		pjif->mdcCtrl[1].correct.trig_set(dat.correct[1]);
+	if (GetInfo("correct1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.correct1);
 	}
-	if (dat.set_flg) {
-		for (auto & aim : pjif->mdcCtrl) {
-			aim.par.setflg = 0;
-			if (aim.parget.succ_flag == 0) {
-				aim.parget.retry_num = 0;
-			}
+
+
+	for (auto & aim : pjif->mdcCtrl) {
+		aim.par.setflg = 0;
+		if (aim.parget.succ_flag == 0) {
+			aim.parget.retry_num = 0;
 		}
 	}
 
 	//参数设置
-	if (dat.set_flg & diff_init0) {
-		pjif->mdcCtrl[0].par.trig_set_init(dat.initSpeed[0]);
+	if (GetInfo("initspeed0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.initspeed0);
+	}
+	if (GetInfo("initspeed1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.initspeed1);
+	}
+	if (GetInfo("maxspeed0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.maxspeed0);
+	}
+	if (GetInfo("maxspeed1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.maxspeed1);
 	}
 
-	if (dat.set_flg & diff_init1) {
-		pjif->mdcCtrl[1].par.trig_set_init(dat.initSpeed[1]);
+	if (GetInfo("phase0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.phase0);
+	}
+	if (GetInfo("phase1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.phase1);
 	}
 
-	if (dat.set_flg & diff_max0) {
-		pjif->mdcCtrl[0].par.trig_set_max(dat.MaxSpeed[0]);
+	if (GetInfo("period0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.period0);
+	}
+	if (GetInfo("period1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.period1);
 	}
 
-	if (dat.set_flg & diff_max1) {
-		pjif->mdcCtrl[1].par.trig_set_max(dat.MaxSpeed[1]);
+	if (GetInfo("current0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.current0);
+	}
+	if (GetInfo("current1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.current1);
 	}
 
-
-	if (dat.set_flg & diff_phase0) {
-		pjif->mdcCtrl[0].par.trig_set_pha(dat.Phase[0]);
+	if (GetInfo("ratio0").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[0].correct.trig_set(dat.ratio0);
 	}
-
-	if (dat.set_flg & diff_phase1) {
-		pjif->mdcCtrl[1].par.trig_set_pha(dat.Phase[1]);
-	}
-
-
-	if (dat.set_flg & diff_currect0) {
-		pjif->mdcCtrl[0].par.trig_set_cur(dat.currect[0]);
-	}
-
-	if (dat.set_flg & diff_currect1) {
-		pjif->mdcCtrl[1].par.trig_set_cur(dat.currect[1]);
-	}
-
-	if (dat.set_flg & diff_ratio0) {
-		pjif->mdcCtrl[0].par.trig_set_rat(dat.Ratio[0]);
-	}
-
-	if (dat.set_flg & diff_ratio1) {
-		pjif->mdcCtrl[1].par.trig_set_rat(dat.Ratio[1]);
+	if (GetInfo("ratio1").dataStatus == dataFromTable) {
+		pjif->mdcCtrl[1].correct.trig_set(dat.ratio1);
 	}
 	//参数查询
-	if (dat.get_flg & (1 << 0)) {
+	if (GetInfo("getpar0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].parget.trig_get();
 	}
-	if (dat.get_flg & (1 << 1)) {
+	if (GetInfo("getpar1").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[1].parget.trig_get();
 	}
 	//解除报警
-
-	if (dat.alarm_clean_flg & (1 << 0)) {
+	if (GetInfo("cleanalarm0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].alarm.trig();
 	}
-	if (dat.alarm_clean_flg & (1 << 1)) {
+	if (GetInfo("cleanalarm1").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[1].alarm.trig();
 	}
 }

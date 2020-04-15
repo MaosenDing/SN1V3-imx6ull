@@ -183,27 +183,29 @@ enum _JD_MOD {
 	mdc_mode_off = 2,
 };
 
-struct SCANF_DATA {
-	_JD_MOD JD_MOD;
-
-	int manual_flag = 0;
-	float manual_deg[2];
-
-	int correct_flag = 0;
-	float correct[2];
-
-	int set_flg = 0;
-	int initSpeed[2];
-	int MaxSpeed[2];
-	int Phase[2];
-	int period[2];
-	int currect[2];
-	int Ratio[2];
-
-	int get_flg = 0;
-
-	int alarm_clean_flg = 0;
-};
+typedef struct {
+	int mod;
+	float manual0;
+	float manual1;
+	float correct0;
+	float correct1;
+	int	initspeed0;
+	int	initspeed1;
+	int	maxspeed0;
+	int	maxspeed1;
+	int	phase0;
+	int	phase1;
+	int	period0;
+	int	period1;
+	int	current0;
+	int	current1;
+	int	ratio0;
+	int	ratio1;
+	int	getpar0;
+	int	getpar1;
+	int	cleanalarm0;
+	int	cleanalarm1;
+}SCANF_DATA;
 
 
 struct MDC_INFO :public JD_INFO_TIM {
