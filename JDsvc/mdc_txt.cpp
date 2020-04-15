@@ -2,6 +2,7 @@
 #include <map>
 #include "SN1V2_com.h"
 #include "mdc_ctrl.h"
+#include "configOperator.h"
 #include <iostream>
 using namespace std;
 
@@ -100,28 +101,6 @@ static ERR_STA SDG(map<string, string> &sysData,const char * inkey, bool & outbo
 	return	err_conf_tran_error;
 }
 
-
-
-
-static void regexFile(const char * fileName, map<string, string > &mdcData)
-{
-	string stText;
-	ERR_STA sta = loadFile((char *)fileName, stText);
-	if (sta != err_ok) {
-		return;
-	}
-
-	regex reg("%(\\w+\\d*),([\\w\\d\\\\.+-]+)");
-	smatch match;
-
-	string::const_iterator star = stText.begin();
-	string::const_iterator end = stText.end();
-	while (regex_search(star, end, match, reg)) {
-		auto ret = mdcData.emplace(match[1], match[2]);
-		star = match[0].second;
-	}
-}
-
 void prinMap(map<string, string> & mdcdata)
 {
 	cout << "||||||||||||||||" << endl;
@@ -142,7 +121,7 @@ SCANF_DATA real_scan_file(const char * fil)
 
 	out.JD_MOD = mdc_mode_table;
 	map<string, string> mdcdata;
-	regexFile(fil, mdcdata);
+	ScanfFile(fil, mdcdata);
 	prinMap(mdcdata);
 	int tmpmod = 0;
 	if ((err = SDG(mdcdata, "mod", tmpmod)) == err_ok) {

@@ -214,10 +214,8 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 }
 
 
-int scanfOneTable(const void * tableaddr, const char * tableName, map<string, string> &datamap)
+int scanfOneTable(const void * tableaddr, const CFG_GROUP * group, map<string, string> &datamap)
 {
-	const CFG_GROUP *group = find_group_name(tableName);
-
 	if ((!group) || (!tableaddr)) {
 		return -1;
 	}
@@ -273,7 +271,7 @@ void scanfAllTable(Tg_table & tb,uint32_t table_mask)
 		const CFG_GROUP * grp = find_group_index(i);		
 		if (grp->cfgMask & table_mask) {
 			ScanfFile(grp->cfgName, datamap);
-			scanfOneTable((char *)&tb + grp->diff, grp->groupName, datamap);
+			scanfOneTable((char *)&tb + grp->diff, grp, datamap);
 			datamap.clear();
 		}
 	}
@@ -311,7 +309,7 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 	case dateType::TIM16:
 	{
 		int * tim = (int *)dataAddr;
-		snprintf(tmpbuff, 64, "%%%d-%d-%d %d:%d\n", info->name
+		snprintf(tmpbuff, 64, "%%%s,%d-%d-%d %d:%d\n", info->name
 			, tim[0]
 			, tim[1]
 			, tim[2]
