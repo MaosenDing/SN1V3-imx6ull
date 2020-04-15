@@ -83,4 +83,7 @@ private:
 	void cap_ok();	
 };
 
+bool is_valid_date(int y, int m, int d);
+bool is_valid_daytim(int hour, int min, int sec);
+
 #endif

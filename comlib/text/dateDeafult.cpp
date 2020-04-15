@@ -72,6 +72,13 @@ void MACDefault(void * addr)
 	copy(localip, localip + 6, pos);
 }
 
+void InstallTimDefault(void * addr)
+{
+	//默认日期 2000-1-1 12:00
+	const int localip[5] = { 2000,1,1,12,0 };
+	int * pos = (int *)addr;
+	copy(localip, localip + 5, pos);
+}
 
 CFG_INFO T1[] = {
 	T1_Set_data(1,HeliostatID,dateType::STRING16,stingDefault),
@@ -80,7 +87,7 @@ CFG_INFO T1[] = {
 	T1_Set_data(4,DriveM,dateType::STRING16,stingDefault),
 	T1_Set_data(5,FWSensorM,dateType::STRING16,stingDefault),
 	T1_Set_data(6,FYSensorM,dateType::STRING16,stingDefault),
-	T1_Set_data(7,InstallTime,dateType::TIM16,nullptr),
+	T1_Set_data(7,InstallTime,dateType::TIM16,InstallTimDefault),
 	T1_Set_data(8,PSN,dateType::MAC,MACDefault),
 	T1_Set_data(9,MDC2_SV_1,dateType::STRING16,stingDefault),
 	T1_Set_data(10,MDC2_SV_2,dateType::STRING16,stingDefault),

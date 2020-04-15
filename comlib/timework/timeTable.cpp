@@ -17,19 +17,17 @@ using namespace std;
 
 
 
-#if 0
-static inline bool is_valid_data(int y, int m, int d)
+
+bool is_valid_date(int y, int m, int d)
 {
 	int month[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
-	if ((y % 4 == 0 && y % 100 != 0) || y % 400 == 0)
-	{
+	if ((y % 4 == 0 && y % 100 != 0) || y % 400 == 0) {
 		month[1] = 29;
 	}
 	return y > 1900 && y < 2030 && m > 0 && m <= 12 && d > 0 && d <= month[m - 1];
 }
-#endif
 
-static inline bool is_valid_daytim(int hour, int min, int sec)
+bool is_valid_daytim(int hour, int min, int sec)
 {
 	return hour >= 0 && hour < 24
 		&& min >= 0 && min < 60
@@ -45,7 +43,7 @@ static inline bool checkTime_type2(timTableSet & reftm)
 {
 	return 1
 		&& is_valid_daytim(reftm.tm_hour, reftm.tm_min, reftm.tm_sec) 
-		//&& is_valid_data(reftm.tm_year, reftm.tm_mon, reftm.tm_mday)
+		//&& is_valid_date(reftm.tm_year, reftm.tm_mon, reftm.tm_mday)
 		;
 }
 

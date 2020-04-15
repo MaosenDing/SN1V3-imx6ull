@@ -70,7 +70,7 @@ extern "C" {
 		char DriveM[16];
 		char FWSensorM[16];
 		char FYSensorM[16];
-		char InstallTime[16];
+		int InstallTime[5];//年月日时分
 		char PSN[6];
 		char MDC2_SV_1[16];
 		char MDC2_SV_2[16];

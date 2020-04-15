@@ -10,13 +10,13 @@
 #include <mutex>
 #include <regex>
 #include "sn1v3cfg.h"
-
+#include "tableWork.h"
 using namespace std;
 
 
 
 
-static ERR_STA ScanfFile(const char * fileName, map<string, string>& dataGroup)
+ERR_STA ScanfFile(const char * fileName, map<string, string>& dataGroup)
 {
 	string stText;
 	ERR_STA sta = loadFile((char *)fileName, stText);
@@ -135,8 +135,30 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			info->dataStatus = dataTransFaultDefault;
 		}
 	case dateType::TIM16:
+	{
+		int tim[5];
+		int ChkFlg = 0;
+		if (sscanf(data.c_str(), "%d-%d-%d %d:%d"
+			, tim + 0
+			, tim + 1
+			, tim + 2
+			, tim + 3
+			, tim + 4
+		) == 5) {
+			if (is_valid_date(tim[0],tim[1],tim[2]) && is_valid_daytim(tim[3],tim[4],0))
+			{
+				ChkFlg = 1;
+			}			
+		}
 
-
+		if (ChkFlg == 1) {
+			*(int32_t *)addr = tmpint;
+			info->dataStatus = dataFromTable;
+		} else {
+			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
+		}
+	}
 		break;
 
 	case dateType::MAC:
@@ -285,6 +307,20 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 		snprintf(tmpbuff, 64, "%%%s,%d\n", info->name, *(int *)dataAddr);
 		outstring.append(tmpbuff);
 		break;
+
+	case dateType::TIM16:
+	{
+		int * tim = (int *)dataAddr;
+		snprintf(tmpbuff, 64, "%%%d-%d-%d %d:%d\n", info->name
+			, tim[0]
+			, tim[1]
+			, tim[2]
+			, tim[3]
+			, tim[4]);
+		outstring.append(tmpbuff);
+	}
+		break;
+
 	case dateType::MAC:
 	{
 		char * macDat = (char *)dataAddr;
