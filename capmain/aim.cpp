@@ -431,6 +431,45 @@ int scanftest(int argc, char * argv[])
 }
 
 
+typedef struct {
+	const char * name;
+	const int value;
+}TEST;
+
+#define ppptest(val) {#val,val}
+static TEST ttt[]{
+	ppptest(1),
+	ppptest(2),
+	ppptest(3),
+	ppptest(4),
+	ppptest(5),
+};
+
+static const TEST * findttt(const char * name)
+{
+	auto p = find_if(begin(ttt), end(ttt)
+		, [name](TEST & p) {return !strcmp(name, p.name); });
+	if (p != end(ttt))
+	{
+		return p;
+	}
+	return NULL;
+}
+
+
+
+static int testfind(int argc, char * argv[])
+{
+	printf("1111111\n");
+	const TEST * p = findttt("8");
+	if (p) {
+		printf("p %d\n", p->value);
+	} else {
+		printf("p find error \n");
+	}
+	return 0;
+}
+
 
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
@@ -443,6 +482,7 @@ MAIN_CMD cmd_group[] = {
 	{ "tv" , test_converter},
 	{ "deg" , degtest},
 	{"scanf",scanftest},
+	{"testfind",testfind},
 };
 
 

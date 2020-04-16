@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <algorithm>
-
+#include <iterator>
 //定义和类型参考《LOC无线定日镜控制系统设计要求》
 
 using namespace std;
@@ -258,11 +258,21 @@ const CFG_GROUP * find_group_name(const char * groupName)
 	if (!groupName) {
 		return nullptr;
 	}
+#if 1
 	for (size_t i = 0; i < max_group_cnt(); i++) {
 		if (!strcmp(cfg_group[i].groupName, groupName)) {
 			return &cfg_group[i];
 		}
 	}
+#else
+	auto p = find_if(begin(cfg_group), end(cfg_group)
+		, [groupName](CFG_GROUP & p) {
+			return !strcmp(p.groupName, groupName);
+		});
+	if (p != end(cfg_group)) {
+		return p;
+	}
+#endif
 	return nullptr;
 }
 
