@@ -24,6 +24,7 @@
 #include <jd_share.h>
 #include <iostream>
 #include <math.h>
+#include "timeTableV2.h"
 using namespace std;
 
 
@@ -483,6 +484,7 @@ MAIN_CMD cmd_group[] = {
 	{ "deg" , degtest},
 	{"scanf",scanftest},
 	{"testfind",testfind},
+	{"testTimeTableV2",testTimeTableV2},
 };
 
 
