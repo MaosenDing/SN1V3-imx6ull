@@ -223,7 +223,7 @@
 		double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double (&EPEs)[8]);
 
 	//保存运营表
-	ERR_STA save_timTableSet(char * fdir, int year, int mon, int day, std::vector<timTableSet> & rts);
+	ERR_STA save_timTableSet(const char * fdir, int year, int mon, int day, std::vector<timTableSet> & rts);
 	//修正拍摄数据
 
 	enum res_filter_mode {

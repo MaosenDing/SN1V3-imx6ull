@@ -556,7 +556,7 @@ ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, in
 	return err_ok;
 }
 
-ERR_STA save_timTableSet(char * fdir, int year, int mon, int day, vector<timTableSet> & rts)
+ERR_STA save_timTableSet(const char * fdir, int year, int mon, int day, vector<timTableSet> & rts)
 {
 #if 1
 	FILE *sheetfile = fopen(fdir, "wb+");
