@@ -36,6 +36,12 @@ add_subdirectory(JDsvc)
 add_subdirectory(wifiSVC)
 add_subdirectory(daemon)
 
+#测试用
+IF (DEFINED  TABLE_TEST)
+add_subdirectory(tableTestFile)
+ENDIF()
+
+
 
 #install scripts
 add_subdirectory(workscript)

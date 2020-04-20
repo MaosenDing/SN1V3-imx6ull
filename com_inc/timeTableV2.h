@@ -12,9 +12,7 @@
 
 struct timTableSetV2 {
 	time_t tt;
-	int tm_hour;
-	int tm_min;
-	int tm_sec;
+
 	float ZxAng;
 	float YxAng;
 

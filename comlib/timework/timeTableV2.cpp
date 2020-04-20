@@ -6,7 +6,7 @@
 
 using namespace std;
 
-static inline bool checkTime_type2(timTableSet & reftm)
+static inline bool checkTime_type2(tm & reftm)
 {
 	return 1
 		&& is_valid_daytim(reftm.tm_hour, reftm.tm_min, reftm.tm_sec)
@@ -23,9 +23,9 @@ ERR_STA load_table(char * filename, std::list<timTableSetV2> & outTable)
 		string loadbin;
 
 		if ((err = loadFile(filename, loadbin)) == err_ok) {
-			//匹配 2018-5-14 15:14:13,-1.1,-2.2,-3.3,-4.4,-5.5
+			//匹配 15:14:13,-1.1,-2.2,3,4,5,6
 			//匹配年月日，但不使用 也不对其正确性做判断
-			regex reg("\\d{4}-\\d{1,2}-\\d{1,2} (\\d{1,2}):(\\d{1,2}):(\\d{1,2})((?:,-?\\d*(?:\\.\\d+)?){6})");
+			regex reg("\\d{1,2}:\\d{1,2}:\\d{1,2}(?:,-?\\d*(?:\\.\\d+)?){6}");
 			smatch match;
 
 
@@ -49,20 +49,26 @@ ERR_STA load_table(char * filename, std::list<timTableSetV2> & outTable)
 				*/
 #endif
 				timTableSetV2 rtm;
-				char *pos = (char *)&(*match[1].first);
+
+				tm  thisTm;
+				GetTim(thisTm);
+
+				char *pos = (char *)&(*match[0].first);
 				int cnt;
-				if ((cnt = sscanf(pos, "%d:%d:%d,%f,%f,%d,%d,%d"
-					, &rtm.tm_hour, &rtm.tm_min, &rtm.tm_sec
+				if ((cnt = sscanf(pos, "%d:%d:%d,%f,%f,%d,%d,%d,%d"
+					, &thisTm.tm_hour, &thisTm.tm_min, &thisTm.tm_sec
 					, &rtm.ZxAng, &rtm.YxAng
-					, &rtm.mdc_work_length, &rtm.mdc_mod, &rtm.weigth,&rtm.cap_reserve
+					, &rtm.mdc_work_length, &rtm.mdc_mod, &rtm.weigth, &rtm.cap_reserve
 				)) == 9) {
-					if (checkTime_type2(rtm)) {
+					if (checkTime_type2(thisTm)) {
+						rtm.tt = mktime(&thisTm);
 						outTable.emplace_back(rtm);
 					} else {
-						SN1V2_ERR_LOG("time check error,%d:%d : %d, %f, %f, %f, %f, %f"
-							, rtm.tm_hour, rtm.tm_min, rtm.tm_sec
+						SN1V2_ERR_LOG("time check error,%d:%d:%d,%f,%f,%d,%d,%d,%d"
+							, thisTm.tm_hour, thisTm.tm_min, thisTm.tm_sec
 							, rtm.ZxAng, rtm.YxAng
-							, rtm.RIx, rtm.RIy, rtm.RIz);
+							, rtm.mdc_work_length, rtm.mdc_mod, rtm.weigth, rtm.cap_reserve
+						);
 					}
 				} else {
 					SN1V2_ERR_LOG("scanf cnt = %d", cnt);
@@ -80,46 +86,61 @@ ERR_STA load_table(char * filename, std::list<timTableSetV2> & outTable)
 	return err;
 }
 
-static ERR_STA load_table_fixed(list<timTableSet> & outTable)
+void FixTimeTableV2(list<timTableSetV2> & outTable)
 {
-	tm  thisTm;
-	ERR_STA err = GetTim(thisTm);
+	outTable.sort([](timTableSetV2 & a, timTableSetV2 & b) {return a.tt < b.tt; });
 
-	thisTm.tm_hour = 0;
-	thisTm.tm_min = 0;
-	thisTm.tm_sec = 0;
 
-	time_t tms = mktime(&thisTm);
 
-	if (err == err_ok || tms > 0) {
-		for (auto &p : outTable) {
-			p.tt += tms;
-		}
 
-		std::sort(outTable.begin(), outTable.end(), [](const timTableSet & a, const timTableSet &  b) {return a.tt > b.tt; });
-#if 0
-		for (size_t i = 0; i < 5; i++) {
-			time_t tt = outTable.at(i).tt;
-			tm ref;
-			localtime_r(&tt, &ref);
 
-			fprintf(stdout, "year = %d,mon = % d,day = %d""hour = %d,min = % d,sec = %d\n"
-				, ref.tm_year + 1900, ref.tm_mon + 1, ref.tm_mday
-				, ref.tm_hour, ref.tm_min, ref.tm_sec);
-		}
-#endif
+}
 
-		return err_ok;
-	} else {
-		SN1V2_ERROR_CODE_RET(err_tim_data_error);
+
+void printTable(list<timTableSetV2> & reflist)
+{
+	for (auto &p : reflist) {
+		time_t tt = p.tt;
+		tm ref;
+		localtime_r(&tt, &ref);
+
+		printf("start tim %d:%d:%d  deg=%f,%f  worklen %d workmod %d weight %d cap %d\n ",
+			ref.tm_hour,ref.tm_min,ref.tm_sec,
+			p.ZxAng,p.YxAng,
+			p.mdc_work_length,p.mdc_mod,p.weigth,p.cap_reserve
+		);
 	}
 }
 
 int testTimeTableV2(int argc, char * argv[])
 {
-	list<timTableSetV2>  ppp;
-	
-	load_table("test.txt", ppp);
+	list<timTableSetV2>  b1;
+	load_table("test/b1.txt", b1);
+	printf("scanf p1\n");
+	printTable(b1);
+
+	list<timTableSetV2>  b2;
+	load_table("test/b2.txt", b2);
+	printf("scanf p2\n");
+	printTable(b2);
+
+	list<timTableSetV2>  b3;
+	load_table("test/b3.txt", b3);
+	printf("scanf p3\n");
+	printTable(b3);
+
+	list<timTableSetV2>  all;
+	all.merge(b1, [] (timTableSetV2 a, timTableSetV2 b){return true; });
+	all.merge(b2, [] (timTableSetV2 a, timTableSetV2 b){return true; });
+	all.merge(b3, [] (timTableSetV2 a, timTableSetV2 b){return true; });
+	printf("all\n");
+	printTable(all);
+
+
+
+	FixTimeTableV2(all);
+	printf("all fix 1\n");
+	printTable(all);
 
 
 
