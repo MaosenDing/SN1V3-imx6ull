@@ -86,14 +86,178 @@ ERR_STA load_table(char * filename, std::list<timTableSetV2> & outTable)
 	return err;
 }
 
-void FixTimeTableV2(list<timTableSetV2> & outTable)
+static void add2list(list<timTableSetV2> & inputlist, timTableSetV2 & NewNode);
+//itr 为 list 中下一个比较的节点
+//testNode为添加的节点
+//向后检测节点冲突
+static void listCheck(list<timTableSetV2> & inputlist, list<timTableSetV2>::iterator & itr, list<timTableSetV2>::iterator & testNode)
 {
-	outTable.sort([](timTableSetV2 & a, timTableSetV2 & b) {return a.tt < b.tt; });
+	if (itr == inputlist.end()) {
+		return;
+	}
+
+	int itrTim[2] = { itr->tt,itr->tt + itr->mdc_work_length };
+	int tesTim[2] = { testNode->tt,testNode->tt + testNode->mdc_work_length };
 
 
+	if (testNode->weigth > itr->weigth)
+	{
+		//添加的test 权重高
+		if (itrTim[1] > tesTim[1]) {		
+			//itr 时间长  仅需修改itr时间
+			itr->mdc_work_length = itrTim[1] - tesTim[1];
+			itr->tt = tesTim[1];
+			return;
+		} else {
+			//test 时间长 
+			//删除itr节点并迭代后续节点
+			auto next = itr;
+			next++;
+			inputlist.erase(itr);
+			listCheck(inputlist, next, testNode);
+			return;
+		}
+	}
+	else {
+		//添加的test 权重低
+		if (itrTim[1] > tesTim[1]) {
+			//itr 时间长  仅需修改test时间
+			testNode->mdc_work_length -= tesTim[1] - itrTim[0];
+			return;
+		} else {
+			//test 时间长 
+			//断裂 test节点 塞入itr并迭代
+			testNode->mdc_work_length -= tesTim[1] - itrTim[0];
+			
+			timTableSetV2 testpart2 = *testNode;
+			testpart2.tt = itrTim[1];
+			testpart2.mdc_work_length = tesTim[1] - itrTim[1];
+			add2list(inputlist, testpart2);
+			return;
+		}
+	}
+}
 
 
+static void add2list(list<timTableSetV2> & inputlist, timTableSetV2 & NewNode)
+{
+	if (inputlist.empty()) {
+		inputlist.emplace_back(NewNode);
+	}
 
+	list<timTableSetV2>::iterator first = inputlist.end();
+
+	while (--first != inputlist.end()) {
+		if (first->tt > NewNode.tt) {
+			continue;
+		}
+
+		int oldtt[2] = { first->tt,first->tt + first->mdc_work_length };
+		int newtt[2] = { NewNode.tt,NewNode.tt + NewNode.mdc_work_length };
+
+		//检测覆盖
+		if (oldtt[1] > newtt[0]) {
+			//一共12种情况
+			//1-6		旧权重高于新权重
+			//6-12		新权重高于旧权重
+
+			//1、2、3		7、8、9 不同一个起点
+			//4、5、6		10、11、12 新旧同一个起点
+
+			//1、4、7、10旧终点大于新终点
+			//2、5、8、11旧终点等于新终点
+			//3、6、9、12旧终点小于新终点
+
+
+			//有覆盖情况
+			//检测权重
+			if (first->weigth > NewNode.weigth) {
+				//情况1、2、4、5
+				//完全覆盖 不用添加节点
+				if (oldtt[1] >= newtt[1]) {
+					return;
+				}
+				//情况3、6
+				auto next = first;
+				next++;
+				NewNode.tt = oldtt[1];
+				NewNode.mdc_work_length = newtt[1] - oldtt[1];
+				auto chk = inputlist.insert(next, NewNode);
+				listCheck(inputlist, next, chk);
+				return;
+			} else {
+				if (oldtt[0] != newtt[0]) {
+					if (oldtt[1] > newtt[1]) {
+						//情况 7
+						//old 断开 插入new
+						//复制旧节点
+						timTableSetV2 oldpart2 = *first;
+						//调整旧节点
+						first->mdc_work_length -= (oldtt[1] - newtt[0]);
+						//插入新节点
+						auto next = first;
+						next++;
+						inputlist.insert(next, NewNode);
+						//调整旧节点part2
+						oldpart2.tt = newtt[1];
+						oldpart2.mdc_work_length = oldtt[1] - newtt[1];
+						inputlist.insert(next, oldpart2);
+						return;
+					} else {
+						//情况 8、9
+						//调整旧节点 
+						first->mdc_work_length -= (oldtt[1] - newtt[0]);
+						//插入新节点
+						auto next = first;
+						next++;
+						auto chk = inputlist.insert(next, NewNode);
+						if (newtt[1] != oldtt[1]) {
+							//情况9 需要向后审查
+							listCheck(inputlist, next, chk);
+						}
+						return;
+					}
+
+				} else {
+					if (newtt[1] < oldtt[1]) {
+						//情况10
+						//向前插入新节点
+						inputlist.insert(first, NewNode);
+						//修改旧节点
+						first->tt = newtt[1];
+						first->mdc_work_length = oldtt[1] - newtt[1];
+						return;
+					} else {
+						//情况11、12 直接覆盖
+						*first = NewNode;
+						if (newtt[1] != oldtt[1]) {
+							//情况12
+							auto next = first;
+							next++;
+							listCheck(inputlist, next, first);
+						}
+						return;
+					}
+				}
+			}
+		} else {
+			//没有覆盖
+			inputlist.emplace_back(NewNode);
+			return;
+		}
+	}
+}
+
+
+void FixTimeTableV2(list<timTableSetV2> & inputList)
+{
+	inputList.sort([](timTableSetV2 & a, timTableSetV2 & b) {return a.tt < b.tt; });
+
+	list<timTableSetV2> tmplist;
+	for (auto & p : inputList) {
+		add2list(tmplist, p);
+	}
+	swap(tmplist, inputList);
 }
 
 
@@ -105,12 +269,30 @@ void printTable(list<timTableSetV2> & reflist)
 		localtime_r(&tt, &ref);
 
 		printf("start tim %d:%d:%d  deg=%f,%f  worklen %d workmod %d weight %d cap %d\n ",
-			ref.tm_hour,ref.tm_min,ref.tm_sec,
-			p.ZxAng,p.YxAng,
-			p.mdc_work_length,p.mdc_mod,p.weigth,p.cap_reserve
+			ref.tm_hour, ref.tm_min, ref.tm_sec,
+			p.ZxAng, p.YxAng,
+			p.mdc_work_length, p.mdc_mod, p.weigth, p.cap_reserve
 		);
 	}
 }
+#if 1
+void testList()
+{
+	list<int> a;
+	a.push_back(1);
+	a.push_back(2);
+	a.push_back(3);
+
+	auto itr = a.end();
+
+	while (--itr != a.end()) {
+		printf("pp = %d\n", *itr);
+	}
+}
+
+
+
+#endif
 
 int testTimeTableV2(int argc, char * argv[])
 {
@@ -130,9 +312,10 @@ int testTimeTableV2(int argc, char * argv[])
 	printTable(b3);
 
 	list<timTableSetV2>  all;
-	all.merge(b1, [] (timTableSetV2 a, timTableSetV2 b){return true; });
-	all.merge(b2, [] (timTableSetV2 a, timTableSetV2 b){return true; });
-	all.merge(b3, [] (timTableSetV2 a, timTableSetV2 b){return true; });
+	auto _merg = [](timTableSetV2 a, timTableSetV2 b) {return true; };
+	all.merge(b1, _merg);
+	all.merge(b2, _merg);
+	all.merge(b3, _merg);
 	printf("all\n");
 	printTable(all);
 
@@ -142,7 +325,7 @@ int testTimeTableV2(int argc, char * argv[])
 	printf("all fix 1\n");
 	printTable(all);
 
-
+	//testList();
 
 	return 0;
 }
