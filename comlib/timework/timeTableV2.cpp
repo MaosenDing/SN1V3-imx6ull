@@ -99,41 +99,45 @@ static void listCheck(list<timTableSetV2> & inputlist, list<timTableSetV2>::iter
 	int itrTim[2] = { itr->tt,itr->tt + itr->mdc_work_length };
 	int tesTim[2] = { testNode->tt,testNode->tt + testNode->mdc_work_length };
 
-
-	if (testNode->weigth > itr->weigth)
-	{
+	//没有覆盖的情况  直接返回
+	if (itrTim[0] > tesTim[1]) {
+		return;
+	}
+	/*
+	一共4种情况
+	1、2 test权重大于itr3、4反之
+	1、3 itr结束时间大于test 3、4反之
+	*/
+	if (testNode->weigth > itr->weigth) {
 		//添加的test 权重高
-		if (itrTim[1] > tesTim[1]) {		
+		if (itrTim[1] > tesTim[1]) {
+			//情况1
 			//itr 时间长  仅需修改itr时间
 			itr->mdc_work_length = itrTim[1] - tesTim[1];
 			itr->tt = tesTim[1];
-			return;
 		} else {
+			//情况2
 			//test 时间长 
 			//删除itr节点并迭代后续节点
 			auto next = itr;
 			next++;
 			inputlist.erase(itr);
 			listCheck(inputlist, next, testNode);
-			return;
 		}
-	}
-	else {
+	} else {
 		//添加的test 权重低
-		if (itrTim[1] > tesTim[1]) {
-			//itr 时间长  仅需修改test时间
-			testNode->mdc_work_length -= tesTim[1] - itrTim[0];
-			return;
-		} else {
+		//itr 时间长  仅需修改test时间
+		//情况3、4
+		testNode->mdc_work_length = itrTim[0] - tesTim[0];
+		if (itrTim[1] < tesTim[1]) {
+			//情况4
 			//test 时间长 
-			//断裂 test节点 塞入itr并迭代
-			testNode->mdc_work_length -= tesTim[1] - itrTim[0];
-			
+			//断裂 test节点 塞入itr
 			timTableSetV2 testpart2 = *testNode;
 			testpart2.tt = itrTim[1];
 			testpart2.mdc_work_length = tesTim[1] - itrTim[1];
+			//使用特殊add2list 写入方式  解决后续节点覆盖问题
 			add2list(inputlist, testpart2);
-			return;
 		}
 	}
 }
@@ -172,18 +176,17 @@ static void add2list(list<timTableSetV2> & inputlist, timTableSetV2 & NewNode)
 			//有覆盖情况
 			//检测权重
 			if (first->weigth > NewNode.weigth) {
-				//情况1、2、4、5
-				//完全覆盖 不用添加节点
-				if (oldtt[1] >= newtt[1]) {
-					return;
+				if (oldtt[1] < newtt[1]) {
+					//情况3、6
+					auto next = first;
+					next++;
+					NewNode.tt = oldtt[1];
+					NewNode.mdc_work_length = newtt[1] - oldtt[1];
+					auto chk = inputlist.insert(next, NewNode);
+					listCheck(inputlist, next, chk);
 				}
-				//情况3、6
-				auto next = first;
-				next++;
-				NewNode.tt = oldtt[1];
-				NewNode.mdc_work_length = newtt[1] - oldtt[1];
-				auto chk = inputlist.insert(next, NewNode);
-				listCheck(inputlist, next, chk);
+				//情况1、2、4、5
+				//完全覆盖 直接跳过
 				return;
 			} else {
 				if (oldtt[0] != newtt[0]) {
@@ -193,7 +196,7 @@ static void add2list(list<timTableSetV2> & inputlist, timTableSetV2 & NewNode)
 						//复制旧节点
 						timTableSetV2 oldpart2 = *first;
 						//调整旧节点
-						first->mdc_work_length -= (oldtt[1] - newtt[0]);
+						first->mdc_work_length = newtt[0] - oldtt[0];
 						//插入新节点
 						auto next = first;
 						next++;
@@ -206,7 +209,7 @@ static void add2list(list<timTableSetV2> & inputlist, timTableSetV2 & NewNode)
 					} else {
 						//情况 8、9
 						//调整旧节点 
-						first->mdc_work_length -= (oldtt[1] - newtt[0]);
+						first->mdc_work_length = newtt[0]- oldtt[0];
 						//插入新节点
 						auto next = first;
 						next++;
