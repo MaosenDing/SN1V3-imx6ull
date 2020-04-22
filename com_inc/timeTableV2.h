@@ -24,6 +24,6 @@ struct timTableSetV2 {
 
 
 int testTimeTableV2(int argc, char * argv[]);
-
-
+void convertTimTable2V2(std::vector<timTableSet> &timeset, std::list<timTableSetV2> &outlist);
+void FixTimeTableV2(std::list<timTableSetV2> & inputList);
 #endif

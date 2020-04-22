@@ -7,18 +7,23 @@
 #include <iostream>
 #include <algorithm>
 #include <math.h>
+#include <list>
+#include "timeTableV2.h"
 using namespace std;
 
-static void rm_back(std::vector<timTableSet> & ts)
+//去除已经过去的时间节点
+static void rm_backV2(std::list<timTableSetV2> & ts)
 {
 	time_t tms = time(0);
-	while (true) {
-		if (ts.empty()) {
-			break;
-		}
-		time_t tmpt = ts.back().tt;
-		if (tmpt < tms) {
-			ts.pop_back();
+
+	auto itr = ts.begin();
+
+	while (itr != ts.end()) {
+		time_t thistime = itr->tt;
+		if (thistime < tms) {
+			auto tmpitr = itr;
+			itr++;
+			ts.erase(tmpitr);
 		} else {
 			break;
 		}
@@ -34,34 +39,25 @@ struct jdtablesvc :public JDAUTOSEND {
 		watch.detach();
 	}
 	std::mutex tableLock;
-	std::vector<timTableSet> timeset;
 
+	std::list<timTableSetV2> timsetV2;
 	void _scan_file(const char * fil)
 	{
 		std::unique_lock<std::mutex> lk(tableLock);
-		timeset.clear();
 		ERR_STA err;
+		//清空整张mdc运行表
+		timsetV2.clear();
+		//添加sn1表
+		std::vector<timTableSet> timeset;
 		if ((err = load_table(force_time_table_save_path, timeset)) != err_ok) {
 			cout << "fail to load " << endl;
 		} else {
-			cout << "succ to load ,size = " << timeset.size() << endl;
-
-			time_t now = time(0);
-			tm  reftm;
-			localtime_r(&now, &reftm);
-
-			for (auto &p : timeset) {
-				reftm.tm_hour = p.tm_hour;
-				reftm.tm_min = p.tm_min;
-				reftm.tm_sec = p.tm_sec;
-
-				p.tt = mktime(&reftm);
-			}
-
-			std::sort(timeset.begin(), timeset.end(), [](const timTableSet & a, const timTableSet &  b) {return a.tt > b.tt; });
-			rm_back(timeset);
-			cout << "table size = " << timeset.size() << endl;
+			cout << "sn1 load succ ,size = " << timeset.size() << endl;
+			//添加sn1表
+			convertTimTable2V2(timeset, timsetV2);
 		}
+		//添加其他类型表单
+		FixTimeTableV2(timsetV2);
 	}
 
 
@@ -97,7 +93,7 @@ struct jdtablesvc :public JDAUTOSEND {
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 
-		if (timeset.empty()) {
+		if (timsetV2.empty()) {
 			return 0;
 		}
 
@@ -115,8 +111,9 @@ struct jdtablesvc :public JDAUTOSEND {
 	{
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		std::unique_lock<std::mutex> lk(tableLock);
-		rm_back(timeset);
-		if (!timeset.empty()) {
+
+		rm_backV2(timsetV2);
+		if (!timsetV2.empty()) {
 			auto psn1 = jif.psn1;
 			psn1->helo_status = psn1->Helo_not_ready;
 
@@ -124,7 +121,7 @@ struct jdtablesvc :public JDAUTOSEND {
 				return;
 			}
 
-			float nextdeg[2] = { timeset.back().YxAng  , timeset.back().ZxAng };
+			float nextdeg[2] = { timsetV2.begin()->YxAng  , timsetV2.begin()->ZxAng };
 
 			for (int i = 0; i < 2; i++) {
 

@@ -69,17 +69,14 @@ static inline void getTmType_fullConfig(const char * pos, timTableSet & rtm)
 		);
 }
 
-
 ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 {
 	ERR_STA err = err_UNKNOWN;
 	cout << "load type 2" << endl;
-	if (filename)
-	{
+	if (filename) {
 		string loadbin;
 
-		if ((err = loadFile(filename, loadbin)) == err_ok)
-		{
+		if ((err = loadFile(filename, loadbin)) == err_ok) {
 			//匹配 2018-5-14 15:14:13,-1.1,-2.2,-3.3,-4.4,-5.5
 			//匹配年月日，但不使用 也不对其正确性做判断
 			regex reg("\\d{4}-\\d{1,2}-\\d{1,2} (\\d{1,2}):(\\d{1,2}):(\\d{1,2})((?:,-?\\d*(?:\\.\\d+)?){5})");
@@ -89,119 +86,63 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 			{
 				string::const_iterator star = loadbin.begin();
 				string::const_iterator end = loadbin.end();
-				while (regex_search(star, end, match, reg))
-				{
+				while (regex_search(star, end, match, reg)) {
 #if 0
 					int num = match.size();
 					cout << "size = " << num << endl;
-					for (int i = 0; i < num;i++)
-					{
+					for (int i = 0; i < num; i++) {
 						cout << match[i] << endl;
 					}
 					cout << "----------------------------" << endl;
-/* 典型值
-size = 5
-2018 - 05 - 14 05:14 : 50, 106.213, 80.263, -0.275194, 0.946397, 0.169119
-05
-14
-50
-, 106.213, 80.263, -0.275194, 0.946397, 0.169119
-*/
+					/* 典型值
+					size = 5
+					2018 - 05 - 14 05:14 : 50, 106.213, 80.263, -0.275194, 0.946397, 0.169119
+					05
+					14
+					50
+					, 106.213, 80.263, -0.275194, 0.946397, 0.169119
+					*/
 #endif
 					timTableSet rtm;
+					//当天时间0点
+					tm  thisTm;
+					GetTim(thisTm);
+					thisTm.tm_hour = 0;
+					thisTm.tm_min = 0;
+					thisTm.tm_sec = 0;
+					time_t tms = mktime(&thisTm);
+
 					char *pos = (char *)&(*match[1].first);
 					int cnt;
-					if((cnt = sscanf(pos, "%d:%d:%d,%f,%f,%f,%f,%f"
+					if ((cnt = sscanf(pos, "%d:%d:%d,%f,%f,%f,%f,%f"
 						, &rtm.tm_hour, &rtm.tm_min, &rtm.tm_sec
 						, &rtm.ZxAng, &rtm.YxAng
 						, &rtm.RIx, &rtm.RIy, &rtm.RIz
-						)) == 8)
-					{
-						if (checkTime_type2(rtm))
-						{
+					)) == 8) {
+						if (checkTime_type2(rtm)) {
+							rtm.tt = tms + rtm.tm_hour * 3600 + rtm.tm_min * 60 + rtm.tm_sec;
 							outTable.emplace_back(rtm);
-						}
-						else
-						{
+						} else {
 							SN1V2_ERR_LOG("time check error,%d:%d : %d, %f, %f, %f, %f, %f"
-								, rtm.tm_hour,rtm.tm_min, rtm.tm_sec
+								, rtm.tm_hour, rtm.tm_min, rtm.tm_sec
 								, rtm.ZxAng, rtm.YxAng
 								, rtm.RIx, rtm.RIy, rtm.RIz);
 						}
-					}
-					else
-					{
+					} else {
 						SN1V2_ERR_LOG("scanf cnt = %d", cnt);
 					}
 					star = match[0].second;
 				}
 			}
-		}
-		else
-		{
+		} else {
 			SN1V2_ERROR_MWSSAGE_WITH("load err", err);
 			return err;
 		}
-	}
-	else
-	{
+	} else {
 		SN1V2_ERROR_CODE_RET(err_inval_path);
 	}
 	return err;
 }
-
-
-static void rm_past_tm(vector<unsigned int> & table)
-{
-	tm  thisTm;
-	ERR_STA err = GetTim(thisTm);
-	time_t tms = mktime(&thisTm);
-
-	if (err != err_ok || tms < 0)
-	{
-		return;
-	}
-
-
-	auto size0 = table.size();
-
-	while (true)
-	{
-		if (table.empty())
-		{
-			cout << "break" << endl;
-			break;
-		}
-		time_t tmpt = table.back();
-		if (tmpt < tms)
-		{
-			//cout << "size=" << table.size() << endl;
-			table.pop_back();
-		}
-		else
-		{
-			break;
-		}
-	}
-	auto size1 = table.size();
-
-#if 0
-	auto & outTable = table;
-	for (size_t i = 0; i < 5; i++)
-	{
-		time_t tt = outTable.at(outTable.size() - 1 - i);
-		tm ref;
-		localtime_r(&tt, &ref);
-
-		fprintf(stdout, "year = %d,mon = % d,day = %d""hour = %d,min = % d,sec = %d\n"
-			, ref.tm_year + 1900, ref.tm_mon + 1, ref.tm_mday
-			, ref.tm_hour, ref.tm_min, ref.tm_sec);
-	}
-#endif
-	LOG(INFO) << "rm size = " << size0 - size1 << endl;
-}
-
-
 
 
 static ERR_STA load_table_fixed(vector<unsigned int> & outTable)
@@ -244,36 +185,6 @@ static ERR_STA load_table_fixed(vector<unsigned int> & outTable)
 	}
 }
 
-
-
-
-int timTableWork(vector<unsigned int> & table, tableWork & test)
-{
-	load_table_fixed(table);
-
-	rm_past_tm(table);
-
-	int sz = table.size();
-	LOG(INFO) << "table size =" << table.size() << endl;
-
-	while (!table.empty())
-	{
-		time_t captime = table.back();
-
-		ERR_STA err = TimDelayUntil(captime);
-
-		if (err == err_ok)
-		{
-			test.work(captime, 0);
-		}
-		else
-		{
-			test.work(captime, 1);
-		}
-		table.pop_back();
-	}
-	return sz;
-}
 //////////////////////////////////////////////////////////////////////////////////
 static void rm_past_tm(vector<timTableSet> & table)
 {
@@ -326,45 +237,22 @@ static void rm_past_tm(vector<timTableSet> & table)
 
 
 
-
 static ERR_STA load_table_fixed(vector<timTableSet> & outTable)
 {
-	tm  thisTm;
-	ERR_STA err = GetTim(thisTm);
-
-	thisTm.tm_hour = 0;
-	thisTm.tm_min = 0;
-	thisTm.tm_sec = 0;
-
-	time_t tms = mktime(&thisTm);
-
-	if (err == err_ok || tms > 0)
-	{
-		for (auto &p : outTable)
-		{
-			p.tt += tms;
-		}
-
-		std::sort(outTable.begin(), outTable.end(), [](const timTableSet & a, const timTableSet &  b) {return a.tt > b.tt; });
+	std::sort(outTable.begin(), outTable.end(), [](const timTableSet & a, const timTableSet &  b) {return a.tt > b.tt; });
 #if 0
-		for (size_t i = 0; i < 5; i++)
-		{
-			time_t tt = outTable.at(i).tt;
-			tm ref;
-			localtime_r(&tt, &ref);
+	for (size_t i = 0; i < 5; i++) {
+		time_t tt = outTable.at(i).tt;
+		tm ref;
+		localtime_r(&tt, &ref);
 
-			fprintf(stdout, "year = %d,mon = % d,day = %d""hour = %d,min = % d,sec = %d\n"
-				, ref.tm_year + 1900, ref.tm_mon + 1, ref.tm_mday
-				, ref.tm_hour, ref.tm_min, ref.tm_sec);
-		}
+		fprintf(stdout, "year = %d,mon = % d,day = %d""hour = %d,min = % d,sec = %d\n"
+			, ref.tm_year + 1900, ref.tm_mon + 1, ref.tm_mday
+			, ref.tm_hour, ref.tm_min, ref.tm_sec);
+	}
 #endif
 
-		return err_ok;
-	}
-	else
-	{
-		SN1V2_ERROR_CODE_RET(err_tim_data_error);
-	}
+	return err_ok;
 }
 
 
@@ -527,10 +415,6 @@ ERR_STA GetTableSet(char * fName, CREOBJ & creDate
 	{
 		cout << "make table" << endl;
 		TimeInterval ppp("make table:");
-
-		for (auto &p : timeset) {
-			p.tt = (p.tm_hour * 3600 + p.tm_min * 60 + p.tm_sec);
-		}
 
 		if ((rebuildFlag == true) && (SaveTimeTable > 0)) {
 			if ((err = save_timTableSet(fName, year, mon, day, timeset)) != err_ok)

@@ -201,11 +201,9 @@
 
 
 	//载入时间表
-	int load_table(char * filename, std::vector<unsigned int> & outTable , scanf_type intype = type_with_underline);
 	ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable);
 	//时间表裁剪
 	//void rm_past_tm(std::vector<unsigned int> &table);
-
 #define USING_DUMMY_CAP_SRC 0
 
 	//转换rgb文件

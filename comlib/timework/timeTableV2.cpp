@@ -251,7 +251,8 @@ static void add2list(list<timTableSetV2> & inputlist, timTableSetV2 & NewNode)
 	}
 }
 
-
+//表修正
+//时间排序+按权重去重
 void FixTimeTableV2(list<timTableSetV2> & inputList)
 {
 	inputList.sort([](timTableSetV2 & a, timTableSetV2 & b) {return a.tt < b.tt; });
@@ -271,13 +272,33 @@ void printTable(list<timTableSetV2> & reflist)
 		tm ref;
 		localtime_r(&tt, &ref);
 
-		printf("start tim %d:%d:%d  deg=%f,%f  worklen %d workmod %d weight %d cap %d\n ",
+		printf("start tim %d:%d:%d  deg=%f,%f  worklen %d workmod %d weight %d cap %d\n",
 			ref.tm_hour, ref.tm_min, ref.tm_sec,
 			p.ZxAng, p.YxAng,
 			p.mdc_work_length, p.mdc_mod, p.weigth, p.cap_reserve
 		);
 	}
 }
+
+void convertTimTable2V2(std::vector<timTableSet> &timeset, list<timTableSetV2> &outlist)
+{
+	for (auto & p: timeset)
+	{
+		timTableSetV2 tmpv2;
+		tmpv2.YxAng = p.YxAng;
+		tmpv2.ZxAng = p.ZxAng;
+
+		tmpv2.tt = p.tt;
+		tmpv2.mdc_work_length = 10;
+		tmpv2.mdc_mod = 1;
+		tmpv2.cap_reserve = 5;
+		tmpv2.weigth = 10000;
+
+		outlist.emplace_back(tmpv2);
+	}
+}
+
+
 #if 1
 void testList()
 {
@@ -292,9 +313,6 @@ void testList()
 		printf("pp = %d\n", *itr);
 	}
 }
-
-
-
 #endif
 
 int testTimeTableV2(int argc, char * argv[])
