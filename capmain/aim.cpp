@@ -471,6 +471,16 @@ static int testfind(int argc, char * argv[])
 	return 0;
 }
 
+ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
+	, const int horizenFlip, const int VeriFlip
+);
+
+static int loopcap(int argc, char * argv[])
+{
+	loop_cap2JPG(20, 20	, 0, 0);
+
+	return 0;
+}
 
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
@@ -485,6 +495,7 @@ MAIN_CMD cmd_group[] = {
 	{"scanf",scanftest},
 	{"testfind",testfind},
 	{"testTimeTableV2",testTimeTableV2},
+	{"loopcap",loopcap},
 };
 
 

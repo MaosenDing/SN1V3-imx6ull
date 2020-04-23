@@ -17,7 +17,7 @@
 
 int init_cap(const char * videoName);
 int set_gain_expose(int fd, int gain, int expose);
-
+int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFlip);
 using namespace std;
 
 
@@ -50,6 +50,32 @@ int rgb565_to_jpeg(unsigned char * rgbst, int pwidth, int pheigth, int fname)
 	}
 
 	return 0;
+}
+
+ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
+	, const int horizenFlip, const int VeriFlip
+)
+{
+	my_cap_init(gain, expo, horizenFlip, VeriFlip);
+
+	ERR_STA err;
+
+	if (video_fd < 0) {
+		SN1V2_ERROR_CODE_RET(err_sensor_open);
+	}
+	int ret = set_gain_expose(video_fd, gain, expo);
+
+	if (ret < 0) {
+		SN1V2_ERROR_CODE_RET(err_sensor_set);
+	}
+
+	while (true) {
+		shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
+
+		if (fram && fram->useFlag) {
+			SaveRGB565Jpg("/tmp/test.jpg", fram->startAddr, 1600, 1200);
+		}
+	}
 }
 
 ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gain, const unsigned int expo
