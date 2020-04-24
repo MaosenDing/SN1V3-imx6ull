@@ -477,7 +477,13 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 
 static int loopcap(int argc, char * argv[])
 {
-	loop_cap2JPG(20, 20	, 0, 0);
+	int gain = 20;
+	int expose = 100;
+	if (argc >= 3) {
+		gain = atoi(argv[2]);
+		expose = atoi(argv[3]);
+	}
+	loop_cap2JPG(gain, expose, 0, 0);
 
 	return 0;
 }
