@@ -84,8 +84,8 @@ void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 		//手动
 		printf("mod %d\n", dat.mod);
 		if (dat.mod == mdc_mode_manual) {
-			
-			pjif->JD_MOD = mdc_mode_manual;
+
+			pjif->work_mod = mdc_mode_manual;
 
 			if (GetInfo("manual0").dataStatus == dataFromTable) {
 				pjif->mdcCtrl[0].manual.trig_set(dat.manual0);
@@ -103,11 +103,13 @@ void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 		else if (dat.mod == mdc_mode_off) {
 			pjif->mdcCtrl[0].stop.trig_set();
 			pjif->mdcCtrl[1].stop.trig_set();
-			pjif->JD_MOD = mdc_mode_off;
+			pjif->work_mod = mdc_mode_off;
 		} else {
 			//自动
-			pjif->JD_MOD = mdc_mode_table;
+			pjif->work_mod = mdc_mode_table;
 		}
+	} else {
+		pjif->work_mod = mdc_mode_table;
 	}
 	//校正
 	if (GetInfo("correct0").dataStatus == dataFromTable) {
@@ -167,6 +169,7 @@ void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 		pjif->mdcCtrl[1].correct.trig_set(dat.ratio1);
 	}
 	//参数查询
+	printf("type = %d\n", GetInfo("getpar0").dataStatus);
 	if (GetInfo("getpar0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].parget.trig_get();
 	}

@@ -17,7 +17,6 @@ static void rm_backV2(std::list<timTableSetV2> & ts)
 	time_t tms = time(0);
 
 	auto itr = ts.begin();
-
 	while (itr != ts.end()) {
 		time_t thistime = itr->tt;
 		if (thistime < tms) {
@@ -84,12 +83,11 @@ struct jdtablesvc :public JDAUTOSEND {
 	int send_period_s = 5;
 
 	virtual int need_service(JD_INFO & injif) final
-	{
+	{		
 		MDC_INFO& jif = (MDC_INFO &)injif;
-		if (jif.JD_MOD != mdc_mode_table) {
+		if (jif.work_mod != mdc_mode_table) {
 			return 0;
 		}
-
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 
@@ -117,7 +115,7 @@ struct jdtablesvc :public JDAUTOSEND {
 			auto psn1 = jif.psn1;
 			psn1->helo_status = psn1->Helo_not_ready;
 
-			if (jif.JD_MOD != mdc_mode_table) {
+			if (jif.work_mod != mdc_mode_table) {
 				return;
 			}
 

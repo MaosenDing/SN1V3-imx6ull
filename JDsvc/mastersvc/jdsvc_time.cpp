@@ -90,7 +90,7 @@ struct jdtimesvc :public JDAUTOSEND {
 
 	bool checkSta(MDC_INFO & jif)
 	{
-		return jif.JD_MOD == mdc_mode_table;
+		return jif.work_mod == mdc_mode_table;
 	}
 
 

@@ -49,7 +49,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 	virtual int need_service(JD_INFO & injif) final
 	{
 		MDC_INFO& jif = (MDC_INFO &)injif;
-		if (jif.JD_MOD == mdc_mode_off) {
+		if (jif.work_mod == mdc_mode_off) {
 			return 0;
 		}
 		

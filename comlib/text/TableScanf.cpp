@@ -82,7 +82,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 {
 	dateType typ = info->typ;
 	auto default_value = info->default_value;
-
+	printf("name = %s typeid = %d\n", info->name, info->typ);
 	switch (typ) {
 	case dateType::STRING16:
 		strncpy((char *)addr, data.c_str(), 16);
@@ -134,6 +134,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			if (default_value) default_value(addr);
 			info->dataStatus = dataTransFaultDefault;
 		}
+		break;
 	case dateType::TIM16:
 	{
 		int tim[5];
@@ -205,8 +206,6 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			if (default_value) default_value(addr);
 			info->dataStatus = dataTransFaultDefault;
 		}
-		break;
-
 		break;
 	default:
 		break;

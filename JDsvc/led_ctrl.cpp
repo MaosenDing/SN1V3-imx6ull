@@ -14,10 +14,10 @@ using namespace std;
 static int led_status_green = 0;
 static int led_status_red = 0;
 
-char * green_name = "/sys/class/gpio/gpio198/value";
-char * red_name = "/sys/class/gpio/gpio199/value";
+const char * green_name = "/sys/class/gpio/gpio198/value";
+const char * red_name = "/sys/class/gpio/gpio199/value";
 
-static void led_ctrl(char * ledname, int status)
+static void led_ctrl(const char * ledname, int status)
 {
 	int fd = open(ledname, O_RDWR);
 

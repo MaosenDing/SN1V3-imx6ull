@@ -110,7 +110,7 @@ static void UARTx_Close(int fd)
 */
 static int UARTx_Set(int fd, portinfo_t uartinfo)
 {
-	int i = 0;
+	size_t i = 0;
 	int baudrate = 0, fctl = 0, databit = 0, stopbit = 0, parity = 0;
 
 	int   baudrate_arr[] = { B921600 , B576000 , B460800 , B230400 , B115200, B38400	,B19200, B9600, B4800, B2400, B1200, B300 };

@@ -156,8 +156,6 @@ struct MDC_STA :public CTRL_BASE {
 };
 
 
-
-
 struct MDC_CTRL
 {
 	int addr;
@@ -176,11 +174,16 @@ struct MDC_CTRL
 };
 
 
-
-enum _JD_MOD {
+//mdc 工作模式：按表工作，手动运动，停止模式
+enum MDC_WORK_MOD {
 	mdc_mode_table = 0,
 	mdc_mode_manual = 1,
 	mdc_mode_off = 2,
+};
+//mdc 运动模式：普通运动模式，sn2运动模式
+enum MDC_RUNNING_MOD {
+	mdc_run_mod_normal = 0,
+	mdc_run_mod_sn1 = 1,
 };
 
 typedef struct {
@@ -218,7 +221,7 @@ struct MDC_INFO :public JD_INFO_TIM {
 		mdcCtrl[1].parget.cpl_flag = 0;
 	}
 	SN1_SHM * psn1;
-	_JD_MOD JD_MOD;
+	MDC_WORK_MOD work_mod;
 	MDC_CTRL mdcCtrl[2];
 };
 
