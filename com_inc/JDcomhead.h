@@ -35,6 +35,12 @@
 #define JD_COMMAND_STAT (1)
 #define JD_COMMAND_GET_CRE (2)
 
+enum PROTOCOL_TYPE {
+	protocol_JD_motor = 0,
+	protocol_JD_WIFI = 1,
+	protocol_JD_tmp_motor_version = 2,
+};
+
 typedef union
 {
 	struct
@@ -132,7 +138,7 @@ int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
 void disp_x_buff(FILE * fp,unsigned char * buff, int num);
 
-int JD_run_poll(JD_INFO &, int timeoutMS);
+int JD_run_poll(JD_INFO& jif, int TimeOutMS, PROTOCOL_TYPE typ);
 
 //register or unregister method for jd callback
 void JD_pro_ctl(JD_INFO & jif, int cmd, JD_INFO::JD_PRO profun, int ctl);

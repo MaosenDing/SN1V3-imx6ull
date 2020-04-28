@@ -56,20 +56,27 @@ static CFG_INFO & GetInfo(const char * key)
 	return failinfo;
 }
 
+static void reset_info()
+{
+	for (auto & p : mdc_info) {
+		p.dataStatus = dataInit;
+	}
+}
 
 SCANF_DATA real_scan_file(const char * fil)
 {
 	SCANF_DATA out;
 
-	ERR_STA err;
 	map<string, string> mdcdata;
 	ScanfFile(fil, mdcdata);
+	reset_info();
 	scanfOneTable((char *)&out, mdc_info, sizeof(mdc_info) / sizeof(CFG_INFO), mdcdata);
+#if 0
 	prinMap(mdcdata);
-
 	string st;
 	printTable2String(st, &out, mdc_info, sizeof(mdc_info) / sizeof(CFG_INFO), writeUseful);
 	printf("ttt\n%s\n", st.c_str());
+#endif
 	return out;
 }
 

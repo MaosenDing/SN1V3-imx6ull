@@ -108,13 +108,14 @@ char * ChkCmdVal(int argc, char * argv[], const char *cmd)
 void SetWatchFile(const char * fil
 	, void(*profun)(void * priv, const char* fil), void * priv)
 {
+#define INF_BUF_LEN (1024)
 	int fd = inotify_init1(IN_NONBLOCK);
 
 	if (fd < 0) {
 		return;
 	}
 
-	char buff[64];
+	char buff[INF_BUF_LEN];
 	sprintf(buff, "touch %s", fil);
 
 	system(buff);
@@ -134,7 +135,7 @@ void SetWatchFile(const char * fil
 	while (true) {
 		if (0 >= poll(&ipollfd, 1, -1))
 			continue;
-		if (0 < (len = read(fd, buff, 128))) {
+		if (0 < (len = read(fd, buff, INF_BUF_LEN))) {
 			inotify_event * ievent;
 			for (char * ptr = buff; ptr < buff + len;
 				ptr += sizeof(inotify_event) + ievent->len

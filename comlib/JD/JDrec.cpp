@@ -186,7 +186,7 @@ static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
 	}
 }
 
-static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int *remove_len)
+static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int &remove_len)
 {
 	for (int i = 0; i < num; i++) {
 		int remainLen = num - i;
@@ -202,9 +202,7 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int *
 					int ret = JD_command_respon(jif, jfr);
 
 					if (ret == JD_UNKNOWN_COMMAND) {
-						if (remove_len) {
-							*remove_len = i + recpackLen;
-						}
+						remove_len = i + recpackLen;
 						continue;
 					}
 
@@ -223,16 +221,21 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int *
 
 
 
-int JD_run_poll(JD_INFO& jif, int TimeOutMS)
+int JD_run_poll(JD_INFO& jif, int TimeOutMS , PROTOCOL_TYPE typ)
 {
 	struct timeval tStart, tEnd;
 	gettimeofday(&tStart, nullptr);
 
 	enum {
-		MAX_RX_BUFF = 300,
+		MAX_RX_BUFF = 1024 * 10,
 		RX_MAX_ONCE = 256,
 	};
-	unsigned char rxbuf[MAX_RX_BUFF];
+	unsigned char  * rxbuf = new unsigned char[MAX_RX_BUFF];
+#if 0
+	shared_ptr<unsigned char> ppp(rxbuf, default_delete<unsigned char[]>());
+#else
+	unique_ptr<unsigned char[]> ppp(rxbuf, default_delete<unsigned char[]>());
+#endif
 	int rxlen = 0;
 
 	while (true) {
@@ -253,6 +256,7 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 		pfd[0].events = POLLIN;
 		int ret;
 		if ((ret = poll(pfd, 1, 20)) > 0) {
+#if 0
 			unsigned char newrxbuf[RX_MAX_ONCE];
 			int newReadLen = read(jif.fd, newrxbuf, RX_MAX_ONCE);
 
@@ -263,6 +267,12 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 				rxlen = cpNum;
 			}
 			memcpy(&rxbuf[rxlen], &newrxbuf[0], newReadLen);
+#else
+			int newReadLen = read(jif.fd, rxbuf + rxlen, MAX_RX_BUFF - rxlen);
+			if (newReadLen < 0) {
+				continue;
+			}
+#endif
 			rxlen += newReadLen;
 			timeval tv;
 			gettimeofday(&tv, nullptr);
@@ -273,7 +283,7 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS)
 
 			int removed_Len = 0;
 
-			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif, &removed_Len);
+			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif, removed_Len);
 
 			if (JD_CLOSE_FRAME == retPro) {
 				return JD_CLOSE_FRAME;

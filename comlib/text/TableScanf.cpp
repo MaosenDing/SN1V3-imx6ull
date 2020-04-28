@@ -360,7 +360,7 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 void printData2String(string & outstring, const void * baseaddr, const CFG_INFO * info, int wrMask)
 {
 	int writeflg = 0;
-	//写出扫描
+	//写出扫描的有效数据
 	if ((info->dataStatus == dataFromTable) && (wrMask & writeScanf)) {
 		writeflg = 1;
 	}

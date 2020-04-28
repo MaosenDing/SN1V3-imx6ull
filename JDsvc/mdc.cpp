@@ -166,7 +166,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	init_led_svc(jif);
 
 	//mdc poll will never return
-	int ret = JD_run_poll(jif, -1);
+	int ret = JD_run_poll(jif, -1,PROTOCOL_TYPE::protocol_JD_motor);
 	switch (ret) {
 	case JD_TIME_OUT:
 		printf("mdc timeout\n");
