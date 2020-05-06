@@ -43,7 +43,6 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 		DL = atof(tempR);
 		fscanf(ResFile, "%[^,]%*c", tempR);		// 单个面积
 		tmpSS = atof(tempR);
-		SumSS = SumSS + tmpSS;				// 总面积，求平均值用
 		fscanf(ResFile, "%[^,]%*c", tempR);		// 方位轴转角，弧度
 		tmpRES[0] = atof(tempR) / 180 * M_PI;
 		fscanf(ResFile, "%[^,]%*c", tempR);		// 俯仰轴转角，弧度
@@ -58,6 +57,7 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 		if ((RI[0] == RI[1]) && (RI[0] == RI[2]) && (RI[2] == RI[1]))
 			continue;
 
+		SumSS = SumSS + tmpSS;                          // 总面积，求平均值用
 		TMR[0] = DH * SPS; 		// 实际法线,nx
 		TMR[1] = -DL * SPS; 		// 实际法线,ny
 		TMR[2] = SFL;			// 实际法线,nz
