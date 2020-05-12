@@ -11,7 +11,7 @@ unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned int firs
 
 
 void disp_x_buff(FILE * fp, unsigned char * buff, int num);
-
+void disp_x_buff(unsigned char * buff, int num);
 
 
 int ChkifCMD(int argc, char *argv[], const char * cmd);

@@ -81,6 +81,13 @@ void disp_x_buff(FILE * fp, unsigned char * buff, int num)
 	fprintf(fp, "\n");
 }
 
+void disp_x_buff(unsigned char * buff, int num)
+{
+	for (int i = 0; i < num; i++) {
+		printf("%#02x ", buff[i]);
+	}
+	printf("\n");
+}
 
 int ChkifCMD(int argc, char *argv[], const char * cmd)
 {

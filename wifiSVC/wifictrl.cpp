@@ -15,6 +15,7 @@
 #include <fstream>
 #include <regex>
 #include <sys/wait.h>
+#include <thread>
 #include "errHandle/errHandle.h"
 #include "mem_share.h"
 #include "versions.h"
@@ -22,11 +23,9 @@
 #include "iostream"
 using namespace std;
 
+int WIFI_BASE_SESSION::index = 0;
 
-
-
-
-static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
+static int mdc_uart_init(int inrate, int argc, char ** argv)
 {
 	char * name = ChkCmdVal(argc, argv, "-s");
 	cout << "name " << name << endl;
@@ -34,16 +33,10 @@ static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
 		name = (char *)"/dev/ttyS6";
 	}
 
-	int rate = jit.rate ? jit.rate : 115200;
+	int rate = inrate ? inrate : 115200;
 	int fd = UARTX_Init(name, rate, 0, 8, 1, 0);
 	return fd;
 }
-
-int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
-
-
-
-
 
 
 static void bus_handle(int signo)
@@ -53,49 +46,9 @@ static void bus_handle(int signo)
 	exit(-1);
 }
 
-static void jif_dbg_set(JD_INFO_TIM &jif)
-{
-	jif.dbg_pri_snd_len = 1;
-	jif.dbg_pri_snd_word = 1;
-	jif.dbg_pri_rd_len = 1;
-	jif.dbg_pri_rd_word = 1;
-	jif.dbg_shm_ret_printf = 1;
-
-	jif.fake_check_flag = 1;
-	jif.dbg_pri_chk_flag = 2;
-	jif.dbg_pri_error_cmd = 1;
-}
-
-static void jif_dbgtim_set(JD_INFO_TIM &jif)
-{
-	jif.dbg_pri_snd_len = 0;
-	jif.dbg_pri_snd_word = 0;
-	jif.dbg_pri_rd_len = 0;
-	jif.dbg_pri_rd_word = 0;
-	jif.dbg_shm_ret_printf = 0;
-
-	jif.fake_check_flag = 0;
-	jif.dbg_pri_chk_flag = 2;
-	jif.dbg_pri_error_cmd = 1;
-	jif.dbg_tim_rec_printf = 1;
-}
 
 
-static void jif_normal_set(JD_INFO_TIM &jif)
-{
-	jif.dbg_pri_snd_len = 0;
-	jif.dbg_pri_snd_word = 0;
-	jif.dbg_pri_rd_len = 0;
-	jif.dbg_pri_rd_word = 0;
-	jif.dbg_shm_ret_printf = 0;
-
-	jif.fake_check_flag = 0;
-	jif.dbg_pri_chk_flag = 0;
-	jif.dbg_pri_error_cmd = 0;
-	jif.dbg_tim_rec_printf = 0;
-}
-
-static void set_bound_rate(JD_INFO_TIM &jif, int argc, char * argv[])
+static int set_bound_rate(int argc, char * argv[])
 {
 	char * rateVal = ChkCmdVal(argc, argv, "-r");
 
@@ -105,8 +58,10 @@ static void set_bound_rate(JD_INFO_TIM &jif, int argc, char * argv[])
 	}
 
 	if (rate) {
-		jif.rate = rate;
+		return rate;
 	}
+
+	return 0;
 }
 
 SN1_SHM * get_shared_cfg()
@@ -118,24 +73,24 @@ SN1_SHM * get_shared_cfg()
 	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
 	return psn1;
 }
-int register_master_svc(JD_INFO& jif);
-void init_led_svc(JD_INFO& jif);
+
 
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
 	signal(SIGBUS, bus_handle);
 
-	prctl(PR_SET_NAME, "mdc service");
+	prctl(PR_SET_NAME, "wifi service");
 	SN1_SHM *psn1 = get_shared_cfg();
 	if (nullptr == psn1) {
 		exit(EXIT_FAILURE);
 	}
 
 	WIFI_INFO jif;
+	jif.psn1 = psn1;
 
-	set_bound_rate(jif, argc, argv);
+	int boundrate = set_bound_rate(argc, argv);
 
-	int fd = mdc_uart_init(jif, argc, argv);
+	int fd = mdc_uart_init(boundrate, argc, argv);
 	if (fd < 0) {
 		printf("mdc uart open failed\n");
 		exit(EXIT_FAILURE);
@@ -143,47 +98,71 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		printf("mdc init\n");
 	}
 
-	jif.fd = fd;
-	jif.dbg_tim_rec_printf = 1;
+	//if (ChkifCMD(argc, argv, "-dbg")) {
+	//	jif_dbg_set(jif);
 
+	//} else if (ChkifCMD(argc, argv, "-dbgtim")) {
+	//	jif_dbgtim_set(jif);
+	//} else {
+	//	jif_normal_set(jif);
+	//}
 
-	jif.timesetFlag = JD_TIME_UNSET;
-
-	jif.fake_check_flag = JD_CRC_FACK_TEST;
-
-	jif.psn1 = psn1;
-
-	if (ChkifCMD(argc, argv, "-dbg")) {
-		jif_dbg_set(jif);
-
-	} else if (ChkifCMD(argc, argv, "-dbgtim")) {
-		jif_dbgtim_set(jif);
-	} else {
-		jif_normal_set(jif);
-	}
-	//register_master_svc(jif);
-	//init_led_svc(jif);
 
 	//mdc poll will never return
-	int ret = JD_run_poll(jif, -1 ,PROTOCOL_TYPE::protocol_JD_WIFI);
-	switch (ret) {
-	case JD_TIME_OUT:
-		printf("mdc timeout\n");
-		exit(0);
-		break;
-	case JD_CLOSE_FRAME:
-		printf("mdc com ok\n");
-		exit(0);
-		break;
-	default:
-		break;
-	}
+
 	exit(0);
 	printf("mdc com\n");
 
-	return ret;
+	return 0;
 }
 
+
+void test_rec_thread(WIFI_INFO * pinfo)
+{
+	while (true) {
+		printf("input num:");
+		int num = 0;
+		scanf("%d", &num);
+		{
+			unique_lock <timed_mutex> lck(pinfo->mtx_using_list);
+			
+			WIFI_RECEIVE_SESSION sec;
+			sec.session_id = num;
+
+			pinfo->rec_session_list.push_back(make_shared<WIFI_BASE_SESSION>(sec));
+
+			pinfo->enable_cv.notify_all(); // 唤醒所有线程.
+		}
+	}
+}
+
+
+void thread_test()
+{
+	WIFI_INFO info;
+
+	thread p(test_rec_thread, &info);
+
+	unique_lock<timed_mutex> lck(info.mtx_using_list);
+
+	while (true) {
+		while (info.rec_session_list.empty()) {
+			printf("before wait\n");
+			info.enable_cv.wait(lck);
+			printf("after wait\n");
+		}
+
+		if (!info.rec_session_list.empty()) {
+			shared_ptr<WIFI_BASE_SESSION> ppp = std::move(*info.rec_session_list.begin());
+			info.rec_session_list.pop_front();
+
+			printf("get session id = %d\n", ppp->session_id);
+			sleep(5);
+		} else {
+			printf("got empty\n");
+		}
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -194,6 +173,12 @@ int main(int argc, char **argv)
 			return 0;
 		}
 	}
+
+	if (ChkifCMD(argc, argv, "-test")) {
+		thread_test();
+	}
+
+
 	logInit("mdc", "./mdc", google::GLOG_WARNING);
 	return init_mdc_monitor_Service(argc, argv);
 }
