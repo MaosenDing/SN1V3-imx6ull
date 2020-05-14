@@ -32,6 +32,13 @@
 #include <sys/timerfd.h>
 using namespace std;
 
+enum
+{
+	MIN_PACK_SZ = 16,//最小包长度
+	MAX_PACK_SZ = 1000,//最大包长度
+};
+
+
 static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned int firstcrc, unsigned char *match_byte, WIFI_INFO * pwifi)
 {
 	unsigned int crc0, crc1;
@@ -68,44 +75,58 @@ static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned i
 		return 0;
 }
 
-
-static int wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi, int &remove_len)
+static inline shared_ptr<WIFI_BASE_SESSION> make_receive_session(unsigned char * rxbuff, int num)
 {
+	auto ret = make_shared<WIFI_BASE_SESSION>();
+
+	gettimeofday(&ret->tv, nullptr);
+
+	ret->code_num = rxbuff[2];
+
+	ret->seq_num = rxbuff[3];
+
+	ret->frame_index = rxbuff[12] | (rxbuff[13] << 8);
+
+	memcpy(ret->data, rxbuff, num - MIN_PACK_SZ);
+
+	return ret;
+}
+
+
+
+
+static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi, int &remove_len)
+{
+
 	for (int i = 0; i < num; i++) {
 		int remainLen = num - i;
 		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA)) {
-			if (remainLen > 7) {
-				int recpackLen = rxbuf[i + 7];
+			if (remainLen >= MIN_PACK_SZ) {
+				int recpackLen = rxbuf[i + 12] | (rxbuf[i + 13] << 8);
+				if (recpackLen >= MIN_PACK_SZ && recpackLen <= MAX_PACK_SZ && remainLen >= recpackLen) {
 
-				if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF, NULL, pwifi) == 1) {
-					if (pwifi->dbg_pri_chk_flag) printf("crc ok\n");
-					{
-						
+					if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF, NULL, pwifi) == 1) {
+						if (pwifi->dbg_pri_chk_flag) printf("crc ok\n");
 
+						auto pack = make_receive_session(rxbuf + i, recpackLen);
 
+						if (pack) {
+							unique_lock <timed_mutex> lck(pwifi->mtx_using_list);
+
+							pwifi->rec_session_list.push_back(std::move(pack));
+
+							pwifi->enable_cv.notify_all();
+						}
+						remove_len = i + recpackLen;
+					} else {
+						if (pwifi->dbg_pri_chk_flag) printf("crc error\n");
 					}
-					//JD_FRAME jfr;
-					//make_rec_pack(rxbuf + i, num - i, jfr);
-
-					//int ret = JD_command_respon(jif, jfr);
-
-					//if (ret == JD_UNKNOWN_COMMAND) {
-					//	remove_len = i + recpackLen;
-					//	continue;
-					//}
-
-					//if (ret == JD_CLOSE_FRAME) {
-					//	return JD_CLOSE_FRAME;
-					//}
-					return 0;
-				} else {
-					if (pwifi->dbg_pri_chk_flag) printf("crc error\n");
 				}
 			}
 		}
 	}
-	return 0;
 }
+
 
 
 
@@ -117,7 +138,6 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 
 	enum {
 		MAX_RX_BUFF = 1024 * 10,
-		RX_MAX_ONCE = 256,
 	};
 	unsigned char  * rxbuf = new unsigned char[MAX_RX_BUFF];
 	unique_ptr<unsigned char[]> ppp(rxbuf, default_delete<unsigned char[]>());
@@ -140,13 +160,13 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 			timeval tv;
 			gettimeofday(&tv, nullptr);
 
-			if (pwifi->dbg_pri_rd_len ) printf("rd len = %d time=%ld.%06ld\n", rxlen, tv.tv_sec, tv.tv_usec);
+			if (pwifi->dbg_pri_rd_len) printf("rd len = %d time=%ld.%06ld\n", rxlen, tv.tv_sec, tv.tv_usec);
 
-			if (pwifi->dbg_pri_rd_word )disp_x_buff(rxbuf, rxlen);
+			if (pwifi->dbg_pri_rd_word)disp_x_buff(rxbuf, rxlen);
 
 			int removed_Len = 0;
 
-			int retPro = wifi_pro_bare_buff(rxbuf, rxlen, pwifi, removed_Len);
+			wifi_pro_bare_buff(rxbuf, rxlen, pwifi, removed_Len);
 
 			if (removed_Len && removed_Len < rxlen) {
 				rxlen = rxlen - removed_Len;
@@ -156,5 +176,10 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 	}
 }
 
-
+void init_rec_pro(WIFI_INFO * pwifi)
+{
+	pwifi->recRunFlg = 1;
+	thread tp(Wifi_rec_thread, pwifi);
+	tp.detach();
+}
 

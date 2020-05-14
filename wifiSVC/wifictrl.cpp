@@ -21,9 +21,8 @@
 #include "versions.h"
 #include "jd_share.h"
 #include "iostream"
-using namespace std;
 
-int WIFI_BASE_SESSION::index = 0;
+using namespace std;
 
 static int mdc_uart_init(int inrate, int argc, char ** argv)
 {
@@ -85,17 +84,17 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	WIFI_INFO jif;
-	jif.psn1 = psn1;
+	WIFI_INFO wifi;
+	wifi.psn1 = psn1;
 
 	int boundrate = set_bound_rate(argc, argv);
 
 	int fd = mdc_uart_init(boundrate, argc, argv);
 	if (fd < 0) {
-		printf("mdc uart open failed\n");
+		printf("wifi uart open failed\n");
 		exit(EXIT_FAILURE);
 	} else {
-		printf("mdc init\n");
+		printf("wifi init\n");
 	}
 
 	//if (ChkifCMD(argc, argv, "-dbg")) {
@@ -109,59 +108,14 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 
 	//mdc poll will never return
+	
+	init_rec_pro(&wifi);
+
 
 	exit(0);
 	printf("mdc com\n");
 
 	return 0;
-}
-
-
-void test_rec_thread(WIFI_INFO * pinfo)
-{
-	while (true) {
-		printf("input num:");
-		int num = 0;
-		scanf("%d", &num);
-		{
-			unique_lock <timed_mutex> lck(pinfo->mtx_using_list);
-			
-			WIFI_RECEIVE_SESSION sec;
-			sec.session_id = num;
-
-			pinfo->rec_session_list.push_back(make_shared<WIFI_BASE_SESSION>(sec));
-
-			pinfo->enable_cv.notify_all(); // 唤醒所有线程.
-		}
-	}
-}
-
-
-void thread_test()
-{
-	WIFI_INFO info;
-
-	thread p(test_rec_thread, &info);
-
-	unique_lock<timed_mutex> lck(info.mtx_using_list);
-
-	while (true) {
-		while (info.rec_session_list.empty()) {
-			printf("before wait\n");
-			info.enable_cv.wait(lck);
-			printf("after wait\n");
-		}
-
-		if (!info.rec_session_list.empty()) {
-			shared_ptr<WIFI_BASE_SESSION> ppp = std::move(*info.rec_session_list.begin());
-			info.rec_session_list.pop_front();
-
-			printf("get session id = %d\n", ppp->session_id);
-			sleep(5);
-		} else {
-			printf("got empty\n");
-		}
-	}
 }
 
 int main(int argc, char **argv)
@@ -172,10 +126,6 @@ int main(int argc, char **argv)
 			printf("compile data = %s,%s\n", __DATE__, __TIME__);
 			return 0;
 		}
-	}
-
-	if (ChkifCMD(argc, argv, "-test")) {
-		thread_test();
 	}
 
 

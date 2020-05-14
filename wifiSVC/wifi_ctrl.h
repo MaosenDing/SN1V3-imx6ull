@@ -12,15 +12,6 @@
 #include <stdio.h>
 #include <condition_variable>
 #include <sys/time.h>
-enum {
-
-
-
-};
-
-
-
-
 
 
 enum CODE_ID {
@@ -34,37 +25,15 @@ enum CODE_ID {
 
 
 struct WIFI_BASE_SESSION {
-	static int index;
+	timeval tv;
+	int code_num = CODE_ERR;//命令编码 3 4 5
+	int seq_num = 0;//帧顺序码 防止重复
+	int frame_index;//帧编号
 
-	WIFI_BASE_SESSION()
-	{
-		thisIndex = index++;
-		printf("init index = %d\n", thisIndex);
-	}
-	~WIFI_BASE_SESSION()
-	{
-		printf("deinit index = %d\n", thisIndex);
-	}
-
-	int thisIndex;
-	CODE_ID code_num = CODE_ERR;//命令编码 3 4 5
-	int session_id= 0;//信件编码
-	int function_code = 0;//功能编码
-	char function_name[64] = { 0 };
-	int session_tatal_len = 0;
-	int session_using_pack_index = -1;
-	std::vector<char> data;
+	int data_len = 0;
+	unsigned char data[1000];
 };
 
-
-struct WIFI_RECEIVE_SESSION : WIFI_BASE_SESSION {
-	
-};
-
-
-struct WIFI_SEND_SESSION : WIFI_BASE_SESSION {
-
-};
 
 struct WIFI_INFO {
 	WIFI_INFO()
@@ -85,4 +54,5 @@ struct WIFI_INFO {
 	int dbg_pri_rd_word = 0;
 };
 
+void init_rec_pro(WIFI_INFO * pwifi);
 #endif
