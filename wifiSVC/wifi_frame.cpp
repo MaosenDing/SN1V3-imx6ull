@@ -55,17 +55,42 @@ int wifi_close(WIFI_INFO & wifi)
 
 shared_ptr < vector <unsigned int> > read_num(WIFI_INFO & wifi)
 {
-	auto ret = make_shared<vector <unsigned int>>();
-
 	WIFI_BASE_SESSION sec;
 
 	mk_read_num_session(wifi, sec);
 
+	transmit_session(wifi, sec);
 
+	auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ_NUM; }, wifi.max_delay_ms_ctrl);
 
-	return ret;
+	if (ret && ret->data_len == 4) {
+		unsigned int start = ret->data[0] | ret->data[1] << 8;
+		unsigned int end = ret->data[2] | ret->data[3] << 8;
+		if (end >= start) {
+			auto ret = make_shared<vector<unsigned int>>();
+			do {
+				ret->push_back(start);
+			} while (start++ < end);
+			return ret;
+		}
+	}
+	return shared_ptr<vector<unsigned int>>();
 }
 
+int read_message(WIFI_INFO & wifi, int message_id)
+{
+	WIFI_BASE_SESSION sec;
+
+	mk_read_session(wifi, sec, message_id);
+
+	transmit_session(wifi, sec);
+
+	auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
+
+
+
+	return 0;
+}
 
 int wifi_serivce(WIFI_INFO & wifi)
 {

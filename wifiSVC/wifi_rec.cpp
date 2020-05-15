@@ -127,11 +127,11 @@ static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi
 }
 
 
-shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &))
+shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds)
 {
 	unique_lock<timed_mutex> lck(wifi.mtx_using_list);
 
-	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_ctrl);
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds();
 
 	auto itr = wifi.rec_session_list.begin();
 

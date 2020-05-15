@@ -4,8 +4,10 @@
 #include "wifi_ctrl.h"
 
 void mk_read_num_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session);
+void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_id);
 
 
+int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session);
 
 
 

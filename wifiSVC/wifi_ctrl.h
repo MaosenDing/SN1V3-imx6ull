@@ -23,13 +23,23 @@ enum WIFI_ERR {
 
 
 enum CODE_ID {
-	CODE_INIT = 1 << 0,
-	CODE_READ_NUM = 1 << 1,
-	CODE_READ = 1 << 2,
-	CODE_WRITE = 1 << 3,
-	CODE_SELF_WRITE = 1 << 4,
-	CODE_ERR = 0,
+	CODE_INIT = 1,
+	CODE_READ_NUM = 2,
+	CODE_READ = 3,
+	CODE_WRITE = 4,
+	CODE_SELF_WRITE = 5,
+#if 0
+	CODE_INIT_MASK = 1 << (CODE_INIT + 1),
+	CODE_READ_NUM_MASK = 1 << (CODE_READ_NUM + 1),
+	CODE_READ_MASK = 1 << (CODE_READ + 1),
+	CODE_WRITE_MASK = 1 << (CODE_WRITE + 1),
+	CODE_SELF_WRITE_MASK = 1 << (CODE_SELF_WRITE + 1),
+#endif
+	CODE_ERR = -1,
 };
+
+
+
 
 
 struct WIFI_BASE_SESSION {
@@ -86,5 +96,5 @@ int close_rec_pro(WIFI_INFO * pwifi);
 int wifi_serivce(WIFI_INFO & wifi);
 
 
-std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &));
+std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds);
 #endif

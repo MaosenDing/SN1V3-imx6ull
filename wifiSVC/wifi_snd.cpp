@@ -37,9 +37,21 @@ void mk_read_num_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 {
 	session.code_num = CODE_READ_NUM;
 	session.frame_index = 0;
-	session.data_len = 0;
-	session.seq_num = wifi.send_seq;
+	session.seq_num = wifi.send_seq++;
 }
+
+void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_id)
+{
+	session.code_num = CODE_READ;
+	session.frame_index = 0;
+	session.seq_num = wifi.send_seq++;
+
+	session.data_len = 2;
+	session.data[0] = (message_id >> 0) & 0xff;
+	session.data[1] = (message_id >> 8) & 0xff;
+}
+
+
 
 
 int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
@@ -64,31 +76,4 @@ int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 
 	return write(wifi.uartFD, wifi.sndbuf, session.data_len + 16);
 }
-
-void exce_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
-{
-	switch (session.code_num) {
-	case CODE_INIT:
-
-		break;
-
-	case CODE_READ_NUM:
-		transmit_session(wifi, session);
-		wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool{return session.code_num & CODE_READ_NUM; });
-		
-		break;
-
-	case CODE_READ:
-		break;
-
-	case CODE_WRITE:
-		break;
-
-	case CODE_SELF_WRITE:
-		break;
-	default:
-		break;
-	}
-}
-
 
