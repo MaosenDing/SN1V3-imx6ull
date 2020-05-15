@@ -109,7 +109,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 	//mdc poll will never return
 	
-	init_rec_pro(&wifi);
+	wifi_serivce(wifi);
 
 
 	exit(0);

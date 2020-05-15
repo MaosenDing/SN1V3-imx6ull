@@ -97,7 +97,6 @@ static inline shared_ptr<WIFI_BASE_SESSION> make_receive_session(unsigned char *
 
 static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi, int &remove_len)
 {
-
 	for (int i = 0; i < num; i++) {
 		int remainLen = num - i;
 		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA)) {
@@ -128,7 +127,27 @@ static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi
 }
 
 
+shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &))
+{
+	unique_lock<timed_mutex> lck(wifi.mtx_using_list);
 
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_ctrl);
+
+	auto itr = wifi.rec_session_list.begin();
+
+	do {
+		while (itr != wifi.rec_session_list.end()) {
+
+			if ((*itr) && (itr->use_count()) && (ChkSession(**itr))) {
+				shared_ptr<WIFI_BASE_SESSION> ret(move(*itr));
+				wifi.rec_session_list.erase(itr);
+				return ret;
+			}
+		}
+	} while (cv_status::timeout != wifi.enable_cv.wait_until(lck, endpoint));
+
+	return shared_ptr<WIFI_BASE_SESSION>();
+}
 
 void Wifi_rec_thread(WIFI_INFO * pwifi)
 {
@@ -143,7 +162,7 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 	unique_ptr<unsigned char[]> ppp(rxbuf, default_delete<unsigned char[]>());
 	int rxlen = 0;
 
-	while (pwifi->recRunFlg) {
+	while (pwifi->recRunFlg == wifi_runing) {
 		pollfd pfd[1];
 		//receive fd
 		pfd[0].fd = pwifi->uartFD;
@@ -174,12 +193,25 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 			}
 		}
 	}
+	pwifi->recRunFlg = wifi_run_stop;
 }
 
 void init_rec_pro(WIFI_INFO * pwifi)
 {
-	pwifi->recRunFlg = 1;
+	pwifi->recRunFlg = wifi_runing;
 	thread tp(Wifi_rec_thread, pwifi);
 	tp.detach();
 }
 
+int close_rec_pro(WIFI_INFO * pwifi)
+{
+	pwifi->recRunFlg = wifi_run_try_stop;
+
+	for (int i = 0; i < 10; i++) {
+		this_thread::sleep_for(chrono::milliseconds(100));
+		if (pwifi->recRunFlg == wifi_run_stop) {
+			return 0;
+		}
+	}
+	return -1;
+}

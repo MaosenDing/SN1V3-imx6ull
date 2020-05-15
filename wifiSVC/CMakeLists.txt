@@ -1,7 +1,7 @@
 
 
 
-add_executable(wifictrl.exe wifictrl.cpp wifi_frame.cpp wifi_rec.cpp
+add_executable(wifictrl.exe wifictrl.cpp wifi_frame.cpp wifi_rec.cpp wifi_snd.cpp
 )
 
 
