@@ -9,9 +9,11 @@ include_directories("./")
 
 
 
-#add_subdirectory(mastersvc)
+add_subdirectory(svc)
 #target_link_libraries(wifictrl.exe PRIVATE mastersvc)
+
 target_link_libraries(wifictrl.exe PRIVATE comlib)
+target_link_libraries(wifictrl.exe PRIVATE wifisvc)
 
 INSTALL(TARGETS wifictrl.exe
        RUNTIME DESTINATION bin

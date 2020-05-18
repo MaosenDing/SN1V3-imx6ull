@@ -40,18 +40,16 @@ void mk_read_num_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 	session.seq_num = wifi.send_seq++;
 }
 
-void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_id)
+void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_id, int pack_index = 0)
 {
 	session.code_num = CODE_READ;
-	session.frame_index = 0;
+	session.frame_index = pack_index;
 	session.seq_num = wifi.send_seq++;
 
 	session.data_len = 2;
 	session.data[0] = (message_id >> 0) & 0xff;
 	session.data[1] = (message_id >> 8) & 0xff;
 }
-
-
 
 
 int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)

@@ -77,7 +77,7 @@ shared_ptr < vector <unsigned int> > read_num(WIFI_INFO & wifi)
 	return shared_ptr<vector<unsigned int>>();
 }
 
-int read_message(WIFI_INFO & wifi, int message_id)
+shared_ptr<WIFI_BASE_SESSION> read_first_message(WIFI_INFO & wifi, int message_id)
 {
 	WIFI_BASE_SESSION sec;
 
@@ -85,17 +85,51 @@ int read_message(WIFI_INFO & wifi, int message_id)
 
 	transmit_session(wifi, sec);
 
-	auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
-
-
-
-	return 0;
+	return wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
 }
+
+WIFI_PRO_STATUS wifi_test_read(WIFI_INFO & wifi, WIFI_BASE_SESSION & sec);
+int wifi_test_write(WIFI_INFO & wifi, WIFI_BASE_SESSION & sec);
+
+
+
+void exec_read_message(WIFI_INFO & wifi, int message_id)
+{
+	while (true) {
+		auto fst = read_first_message(wifi, message_id);
+
+		if (fst) {
+			WIFI_DATA_SUB_PROTOCOL *sub = (WIFI_DATA_SUB_PROTOCOL*)fst->data;
+			if (wifi.dbg_pri_rec_fun) {
+				printf("receive fun = %d\n", sub->function_id);
+			}
+
+			auto sta = wifi_test_read(wifi, *fst);
+
+			if (sta == WIFI_PRO_NEED_WRITE) {
+				wifi_test_write(wifi, *fst);
+
+
+			}
+		}
+	}
+}
+
+
 
 int wifi_serivce(WIFI_INFO & wifi)
 {
 
 	wifi_open(wifi);
+
+	auto rdvec = read_num(wifi);
+
+	for (auto & num : *rdvec)
+	{
+		
+	}
+
+
 
 
 

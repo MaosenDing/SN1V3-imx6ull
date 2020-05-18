@@ -32,11 +32,7 @@
 #include <sys/timerfd.h>
 using namespace std;
 
-enum
-{
-	MIN_PACK_SZ = 16,//最小包长度
-	MAX_PACK_SZ = 1000,//最大包长度
-};
+
 
 
 static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned int firstcrc, unsigned char *match_byte, WIFI_INFO * pwifi)

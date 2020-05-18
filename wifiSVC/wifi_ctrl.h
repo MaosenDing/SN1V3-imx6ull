@@ -38,9 +38,17 @@ enum CODE_ID {
 	CODE_ERR = -1,
 };
 
+enum WIFI_PRO_STATUS{
+	WIFI_PRO_ERR = -1,
+	WIFI_PRO_END = 0,
+	WIFI_PRO_NEED_WRITE = 1,
+};
 
-
-
+enum
+{
+	MIN_PACK_SZ = 16,//最小包长度
+	MAX_PACK_SZ = 1000,//最大包长度
+};
 
 struct WIFI_BASE_SESSION {
 	timeval tv;
@@ -51,6 +59,13 @@ struct WIFI_BASE_SESSION {
 	int data_len = 0;
 	unsigned char data[1000];
 };
+
+struct WIFI_DATA_SUB_PROTOCOL {
+	unsigned char function_id;
+	unsigned char function_data[0];
+};
+
+
 
 enum wifi_run_flg {
 	wifi_run_null = 0,
@@ -86,6 +101,7 @@ struct WIFI_INFO {
 	int dbg_pri_chk_flag = 0;
 	int dbg_pri_rd_len = 0;
 	int dbg_pri_rd_word = 0;
+	int dbg_pri_rec_fun = 0;
 };
 
 //开、关接收服务
