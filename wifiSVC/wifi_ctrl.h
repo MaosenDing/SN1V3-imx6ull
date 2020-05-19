@@ -74,6 +74,34 @@ enum wifi_run_flg {
 	wifi_runing = 1,
 };
 
+struct WIFI_INFO;
+
+struct WIFI_BASE_FUNCTION {
+	WIFI_BASE_FUNCTION(WIFI_INFO &INinfo) :info(INinfo) {}
+	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) = 0;
+	virtual WIFI_PRO_STATUS wifi_write(WIFI_BASE_SESSION & sec) = 0;
+
+	virtual void DESTORY_FIRST(WIFI_INFO & info) = 0;
+	virtual void DESTORY_WRITE(WIFI_INFO & info) = 0;
+
+	virtual const char * FUNCTION_NAME() = 0;
+
+	virtual ~WIFI_BASE_FUNCTION() {}
+	enum {
+		MASK_READ_NUM = 1 << 2,
+		MASK_READ = 1 << 3,
+		MASK_WRITE = 1 << 4,
+		MASK_SELF_WRITE = 1 << 5,
+	};
+
+
+	int GetFunctionID() { return functionID; }
+	int GetProMask() { return PRO_MASK; }
+private:
+	unsigned int PRO_MASK = 0;
+	int functionID = -1;
+	WIFI_INFO &info;
+};
 
 struct WIFI_INFO {
 	WIFI_INFO()
@@ -81,16 +109,23 @@ struct WIFI_INFO {
 	int uartFD = -1;
 	wifi_run_flg recRunFlg = wifi_run_null;
 	int max_delay_ms_ctrl = 5 * 1000;
-	int max_delay_ms_message = 10 * 1000;	
+	int max_delay_ms_message = 10 * 1000;
 
 	unsigned char this_id[4] = { 0x1, 0x2,0x3,0x4 };
 	const unsigned char server_id[4] = { 0x62,0x27,0x21,0x55 };
 
 	SN1_SHM * psn1;
 
+	WIFI_BASE_FUNCTION** svcGrp = nullptr;
+	int svcCnt = 0;
+
 	std::list<std::shared_ptr <WIFI_BASE_SESSION> > rec_session_list;
 	std::timed_mutex mtx_using_list;
 	std::condition_variable_any enable_cv;
+
+
+	std::list<WIFI_BASE_FUNCTION *> write_fun_list;
+	std::mutex mtx_write_fun_list;
 
 	//using in transmit
 	std::mutex send_mtx;
@@ -102,7 +137,21 @@ struct WIFI_INFO {
 	int dbg_pri_rd_len = 0;
 	int dbg_pri_rd_word = 0;
 	int dbg_pri_rec_fun = 0;
+
+	void delete_svc();
+
+	~WIFI_INFO()
+	{
+		delete_svc();
+	}
 };
+
+
+
+
+
+
+
 
 //开、关接收服务
 void init_rec_pro(WIFI_INFO * pwifi);
@@ -110,6 +159,9 @@ int close_rec_pro(WIFI_INFO * pwifi);
 
 
 int wifi_serivce(WIFI_INFO & wifi);
+void InitWIFI_svc(WIFI_INFO & wifi);
+WIFI_BASE_FUNCTION * FindFunction(WIFI_INFO & wifi, int funMask, int funid);
+
 
 
 std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds);

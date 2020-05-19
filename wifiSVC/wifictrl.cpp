@@ -108,7 +108,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 
 	//mdc poll will never return
-	
+	InitWIFI_svc(wifi);
 	wifi_serivce(wifi);
 
 

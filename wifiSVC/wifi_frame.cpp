@@ -88,50 +88,83 @@ shared_ptr<WIFI_BASE_SESSION> read_first_message(WIFI_INFO & wifi, int message_i
 	return wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
 }
 
-WIFI_PRO_STATUS wifi_test_read(WIFI_INFO & wifi, WIFI_BASE_SESSION & sec);
-int wifi_test_write(WIFI_INFO & wifi, WIFI_BASE_SESSION & sec);
-
 
 
 void exec_read_message(WIFI_INFO & wifi, int message_id)
 {
-	while (true) {
-		auto fst = read_first_message(wifi, message_id);
+	auto psec = read_first_message(wifi, message_id);
 
-		if (fst) {
-			WIFI_DATA_SUB_PROTOCOL *sub = (WIFI_DATA_SUB_PROTOCOL*)fst->data;
-			if (wifi.dbg_pri_rec_fun) {
-				printf("receive fun = %d\n", sub->function_id);
-			}
+	if (psec) {
+		WIFI_DATA_SUB_PROTOCOL *sub = (WIFI_DATA_SUB_PROTOCOL*)psec->data;
+		if (wifi.dbg_pri_rec_fun) {
+			printf("receive fun = %d\n", sub->function_id);
+		}
 
-			auto sta = wifi_test_read(wifi, *fst);
+		auto fun = FindFunction(wifi, WIFI_BASE_FUNCTION::MASK_READ, sub->function_id);
+
+		while (fun) {
+			auto sta = fun->wifi_read(*psec);
 
 			if (sta == WIFI_PRO_NEED_WRITE) {
-				wifi_test_write(wifi, *fst);
+				fun->wifi_write(*psec);
 
+				transmit_session(wifi, *psec);
 
+				psec = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
+			} else {
+				fun = nullptr;
 			}
 		}
 	}
 }
 
+void exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
+{
+	if (!fun) {
+		return;
+	}
+
+	WIFI_BASE_SESSION sec;
+
+	WIFI_PRO_STATUS sta;
+	do {
+		fun->wifi_write(sec);
+
+		transmit_session(wifi, sec);
+
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_WRITE; }, wifi.max_delay_ms_ctrl);
+
+		sta = fun->wifi_read(sec);
+	} while (sta == WIFI_PRO_NEED_WRITE);
+}
+
+
+
 
 
 int wifi_serivce(WIFI_INFO & wifi)
 {
-
 	wifi_open(wifi);
 
 	auto rdvec = read_num(wifi);
 
-	for (auto & num : *rdvec)
-	{
-		
+	for (auto & num : *rdvec) {
+		exec_read_message(wifi, num);
 	}
 
+	auto itr = wifi.write_fun_list.begin();
 
+	while (itr != wifi.write_fun_list.end()) {
+		exec_write_message(wifi, *itr);
 
-
-
+		auto tmp = itr;
+		itr++;
+		(*tmp)->DESTORY_WRITE(wifi);
+		wifi.write_fun_list.erase(tmp);
+	}
 	return 0;
 }
+
+
+
+
