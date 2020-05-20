@@ -97,7 +97,9 @@ struct WIFI_BASE_FUNCTION {
 
 	int GetFunctionID() { return functionID; }
 	int GetProMask() { return PRO_MASK; }
-private:
+
+	
+protected:
 	unsigned int PRO_MASK = 0;
 	int functionID = -1;
 	WIFI_INFO &info;

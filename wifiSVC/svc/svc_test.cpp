@@ -11,7 +11,7 @@ struct WIFI_TEST_FUNCTION :public WIFI_BASE_FUNCTION
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
 		//WIFI_DATA_SUB_PROTOCOL *sub = (WIFI_DATA_SUB_PROTOCOL*)sec.data;
-
+		
 		return WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
