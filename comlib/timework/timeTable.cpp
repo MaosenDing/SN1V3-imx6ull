@@ -104,13 +104,6 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 					*/
 #endif
 					timTableSet rtm;
-					//当天时间0点
-					tm  thisTm;
-					GetTim(thisTm);
-					thisTm.tm_hour = 0;
-					thisTm.tm_min = 0;
-					thisTm.tm_sec = 0;
-					time_t tms = mktime(&thisTm);
 
 					char *pos = (char *)&(*match[1].first);
 					int cnt;
@@ -120,7 +113,6 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 						, &rtm.RIx, &rtm.RIy, &rtm.RIz
 					)) == 8) {
 						if (checkTime_type2(rtm)) {
-							rtm.tt = tms + rtm.tm_hour * 3600 + rtm.tm_min * 60 + rtm.tm_sec;
 							outTable.emplace_back(rtm);
 						} else {
 							SN1V2_ERR_LOG("time check error,%d:%d : %d, %f, %f, %f, %f, %f"
@@ -410,6 +402,16 @@ ERR_STA GetTableSet(char * fName, CREOBJ & creDate
 
 		if ((err = load_table(fName, timeset)) != err_ok)
 			return err;
+	}
+
+	tm  thisTm;
+	GetTim(thisTm);
+	thisTm.tm_hour = 0;
+	thisTm.tm_min = 0;
+	thisTm.tm_sec = 0;
+	time_t tms = mktime(&thisTm);
+	for (auto & rtm : timeset) {
+		rtm.tt = tms + rtm.tm_hour * 3600 + rtm.tm_min * 60 + rtm.tm_sec;
 	}
 
 	{
