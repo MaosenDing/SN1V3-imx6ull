@@ -46,7 +46,7 @@ enum WIFI_PRO_STATUS{
 
 enum
 {
-	MIN_PACK_SZ = 16,//最小包长度
+	MIN_PACK_SZ = 18,//最小包长度
 	MAX_PACK_SZ = 1000,//最大包长度
 };
 
@@ -139,7 +139,7 @@ struct WIFI_INFO {
 	int dbg_pri_rd_len = 0;
 	int dbg_pri_rd_word = 0;
 	int dbg_pri_rec_fun = 0;
-
+	int dbg_pri_snd = 0;
 	void delete_svc();
 
 	~WIFI_INFO()

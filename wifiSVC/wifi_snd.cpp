@@ -55,7 +55,7 @@ void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_
 int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 {
 	std::unique_lock<std::mutex> lk(wifi.send_mtx);
-	
+
 	wifi.sndbuf[0] = 0xaa;
 	wifi.sndbuf[1] = 0xaa;
 	wifi.sndbuf[2] = session.code_num;
@@ -65,13 +65,26 @@ int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 	wifi.sndbuf[12] = session.frame_index;
 	wifi.sndbuf[13] = session.frame_index >> 8;
 
-	memcpy(wifi.sndbuf + 14, session.data, session.data_len);
+	int sndlen = session.data_len + MIN_PACK_SZ;
 
-	uint16_t crc0 = crc_make(wifi.sndbuf, session.data_len + 14, 0xffff);
+	wifi.sndbuf[14] = sndlen;
+	wifi.sndbuf[15] = sndlen >> 8;
 
-	wifi.sndbuf[14 + session.data_len] = crc0;
-	wifi.sndbuf[15 + session.data_len] = crc0 >> 8;
+	memcpy(wifi.sndbuf + 16, session.data, session.data_len);
 
-	return write(wifi.uartFD, wifi.sndbuf, session.data_len + 16);
+	uint16_t crc0 = crc_make(wifi.sndbuf, sndlen - 2, 0xffff);
+
+	wifi.sndbuf[sndlen - 2] = crc0;
+	wifi.sndbuf[sndlen - 1] = crc0 >> 8;
+
+	if (wifi.dbg_pri_snd) {
+		printf("len = %d \n", sndlen);
+
+		for (int i = 0; i < sndlen; i++) {
+			printf("0x%02X ", wifi.sndbuf[i]);
+		}
+		printf("\n");
+	}
+	return write(wifi.uartFD, wifi.sndbuf, sndlen);
 }
 

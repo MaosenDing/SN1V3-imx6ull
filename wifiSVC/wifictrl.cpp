@@ -32,7 +32,7 @@ static int mdc_uart_init(int inrate, int argc, char ** argv)
 		name = (char *)"/dev/ttyS6";
 	}
 
-	int rate = inrate ? inrate : 115200;
+	int rate = inrate ? inrate : 230400;
 	int fd = UARTX_Init(name, rate, 0, 8, 1, 0);
 	return fd;
 }
@@ -94,8 +94,14 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		printf("wifi uart open failed\n");
 		exit(EXIT_FAILURE);
 	} else {
+		wifi.uartFD = fd;
 		printf("wifi init\n");
+	}	
+
+	{
+		wifi.dbg_pri_snd = 1;
 	}
+
 
 	//if (ChkifCMD(argc, argv, "-dbg")) {
 	//	jif_dbg_set(jif);

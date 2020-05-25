@@ -83,7 +83,9 @@ static inline shared_ptr<WIFI_BASE_SESSION> make_receive_session(unsigned char *
 
 	ret->frame_index = rxbuff[12] | (rxbuff[13] << 8);
 
-	memcpy(ret->data, rxbuff, num - MIN_PACK_SZ);
+	ret->data_len = rxbuff[14] | (rxbuff[15] << 8);
+
+	memcpy(ret->data, rxbuff + 16, num - MIN_PACK_SZ);
 
 	return ret;
 }
@@ -97,7 +99,7 @@ static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi
 		int remainLen = num - i;
 		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA)) {
 			if (remainLen >= MIN_PACK_SZ) {
-				int recpackLen = rxbuf[i + 12] | (rxbuf[i + 13] << 8);
+				int recpackLen = rxbuf[i + 14] | (rxbuf[i + 15] << 8);
 				if (recpackLen >= MIN_PACK_SZ && recpackLen <= MAX_PACK_SZ && remainLen >= recpackLen) {
 
 					if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF, NULL, pwifi) == 1) {

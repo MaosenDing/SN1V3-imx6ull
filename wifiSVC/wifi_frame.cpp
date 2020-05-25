@@ -27,7 +27,7 @@
 using namespace std;
 
 
-
+int set_wifi_module(WIFI_INFO & wifi);
 
 int wifi_open(WIFI_INFO & wifi)
 {
@@ -35,6 +35,8 @@ int wifi_open(WIFI_INFO & wifi)
 	init_rec_pro(&wifi);
 	//上电
 
+	//设置
+	set_wifi_module(wifi);
 	//对时
 
 	//其他
