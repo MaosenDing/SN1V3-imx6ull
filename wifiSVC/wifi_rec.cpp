@@ -107,7 +107,7 @@ static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi
 
 						auto pack = make_receive_session(rxbuf + i, recpackLen);
 
-						if (pack) {
+						if (pack && (pack->code_num & 0xf0)) {
 							unique_lock <timed_mutex> lck(pwifi->mtx_using_list);
 
 							pwifi->rec_session_list.push_back(std::move(pack));
@@ -125,15 +125,15 @@ static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi
 }
 
 
-shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds)
+shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &), int milliseconds)
 {
 	unique_lock<timed_mutex> lck(wifi.mtx_using_list);
 
-	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds();
-
-	auto itr = wifi.rec_session_list.begin();
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(milliseconds);
 
 	do {
+		auto itr = wifi.rec_session_list.begin();
+
 		while (itr != wifi.rec_session_list.end()) {
 
 			if ((*itr) && (itr->use_count()) && (ChkSession(**itr))) {

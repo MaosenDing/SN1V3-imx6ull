@@ -73,6 +73,16 @@ SN1_SHM * get_shared_cfg()
 	return psn1;
 }
 
+void setDbg(WIFI_INFO & wifi)
+{
+	wifi.dbg_pri_snd = 1;
+
+
+	wifi.dbg_pri_rd_len = 1;
+	wifi.dbg_pri_rd_word = 1;
+}
+
+
 
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
@@ -96,15 +106,10 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	} else {
 		wifi.uartFD = fd;
 		printf("wifi init\n");
-	}	
-
-	{
-		wifi.dbg_pri_snd = 1;
 	}
 
-
-	//if (ChkifCMD(argc, argv, "-dbg")) {
-	//	jif_dbg_set(jif);
+	if (ChkifCMD(argc, argv, "-dbg"))
+		setDbg(wifi);
 
 	//} else if (ChkifCMD(argc, argv, "-dbgtim")) {
 	//	jif_dbgtim_set(jif);
