@@ -76,8 +76,6 @@ SN1_SHM * get_shared_cfg()
 void setDbg(WIFI_INFO & wifi)
 {
 	wifi.dbg_pri_snd = 1;
-
-
 	wifi.dbg_pri_rd_len = 1;
 	wifi.dbg_pri_rd_word = 1;
 }
@@ -111,12 +109,22 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	if (ChkifCMD(argc, argv, "-dbg"))
 		setDbg(wifi);
 
-	//} else if (ChkifCMD(argc, argv, "-dbgtim")) {
-	//	jif_dbgtim_set(jif);
-	//} else {
-	//	jif_normal_set(jif);
-	//}
+	if (ChkifCMD(argc, argv, "-dwr")) {
+		wifi.dbg_pri_snd = 1;
+	}		
 
+	if (ChkifCMD(argc, argv, "-drd")) {
+		wifi.dbg_pri_rd_len = 1;
+		wifi.dbg_pri_rd_word = 1;
+	}
+
+	if (ChkifCMD(argc, argv, "-duse")) {
+		wifi.dbg_pri_useful = 1;
+	}
+
+	if (ChkifCMD(argc, argv, "-dctrl")) {
+		wifi.dbg_pri_wifi_ctrl = 1;
+	}
 
 	//mdc poll will never return
 	InitWIFI_svc(wifi);

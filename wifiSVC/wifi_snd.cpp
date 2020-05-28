@@ -78,12 +78,8 @@ int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 	wifi.sndbuf[sndlen - 1] = crc0 >> 8;
 
 	if (wifi.dbg_pri_snd) {
-		printf("len = %d \n", sndlen);
-
-		for (int i = 0; i < sndlen; i++) {
-			printf("0x%02X ", wifi.sndbuf[i]);
-		}
-		printf("\n");
+		printf("snd len = %d,", sndlen);
+		disp_x_buff(wifi.sndbuf, sndlen);
 	}
 	return write(wifi.uartFD, wifi.sndbuf, sndlen);
 }

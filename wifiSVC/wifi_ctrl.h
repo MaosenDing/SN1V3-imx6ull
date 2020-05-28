@@ -110,7 +110,7 @@ struct WIFI_INFO {
 	{}
 	int uartFD = -1;
 	wifi_run_flg recRunFlg = wifi_run_null;
-	int max_delay_ms_ctrl = 5 * 1000;
+	int max_delay_ms_ctrl = 100;
 	int max_delay_ms_message = 10 * 1000;
 
 	unsigned char this_id[4] = { 0x1, 0x2,0x3,0x4 };
@@ -133,6 +133,8 @@ struct WIFI_INFO {
 	std::mutex send_mtx;
 	unsigned char sndbuf[1024];
 	unsigned char send_seq = 0;
+	//using retry
+#define MAX_RETRY_EXEC_CTRL (3)
 	//debug using
 	int fake_check_flag = 0;
 	int dbg_pri_chk_flag = 0;
@@ -140,6 +142,9 @@ struct WIFI_INFO {
 	int dbg_pri_rd_word = 0;
 	int dbg_pri_rec_fun = 0;
 	int dbg_pri_snd = 0;
+	int dbg_pri_useful = 0;
+	int dbg_pri_wifi_ctrl = 0;//wifi 控制事务
+	int dbg_pri_wifi_data = 0;//wifi 数据事务
 	void delete_svc();
 
 	~WIFI_INFO()

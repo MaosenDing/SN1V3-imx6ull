@@ -25,8 +25,8 @@
 #include <vector>
 #include "wifi_snd.h"
 #include <string.h>
+#include <chrono>
 using namespace std;
-
 
 shared_ptr<WIFI_BASE_SESSION> exec_wifi_ctrl(WIFI_INFO & wifi, int code, void *data, int datalen)
 {
@@ -48,11 +48,15 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_ctrl(WIFI_INFO & wifi, int code, void *d
 	sec.frame_index = 0;
 	sec.seq_num = 0;
 
-	transmit_session(wifi, sec);
-
-	auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
-
-	return ret;
+	for (int i = 0; i < MAX_RETRY_EXEC_CTRL; i++) {
+		transmit_session(wifi, sec);
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
+		if (ret && (ret->data[0] == (code | 0x80))) {
+			return ret;
+		}
+	}
+	//返回失败
+	return shared_ptr<WIFI_BASE_SESSION>();
 }
 
 int set_ssid(WIFI_INFO & wifi, int grpid, char * wifiname)
@@ -62,10 +66,14 @@ int set_ssid(WIFI_INFO & wifi, int grpid, char * wifiname)
 	strcpy(buff + 1, wifiname);
 	int sndlen = 1 + strlen(wifiname);
 	auto psec = exec_wifi_ctrl(wifi, 0x40, buff, 1 + strlen(wifiname));
-
+	if(wifi.dbg_pri_wifi_ctrl) printf("set grp %d ssid = '%s'", grpid, wifiname);
 	if (psec) {
+		//成功
+		if (wifi.dbg_pri_wifi_ctrl)printf(",success\n");
+		return 0;
 	}
-	return 0;
+	if (wifi.dbg_pri_wifi_ctrl)printf(",fail\n");
+	return -1;
 }
 
 int get_ssid(WIFI_INFO & wifi, int grpid, char * wifiname, int maxLen)
@@ -78,9 +86,12 @@ int get_ssid(WIFI_INFO & wifi, int grpid, char * wifiname, int maxLen)
 			int ascllen = psec->data_len - 2;
 			memcpy(wifiname, psec->data + 2, ascllen);
 			wifiname[psec->data_len] = 0;
+			if (wifi.dbg_pri_wifi_ctrl)printf("get grp %d ssid = '%s'\n", grpid, wifiname);
+			return 0;
 		}
 	}
-	return 0;
+	if (wifi.dbg_pri_wifi_ctrl)printf("get grp %d ssid fail\n", grpid);
+	return -1;
 }
 
 int set_server(WIFI_INFO & wifi, unsigned char * serverip, int port)
@@ -152,10 +163,6 @@ int set_wifi_module(WIFI_INFO & wifi)
 	char buff[32];
 
 	get_ssid(wifi, 0, buff, 32);
-
-	printf("get ssid = %s\n", buff);
-
-
 
 	exit(0);
 }

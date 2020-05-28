@@ -108,6 +108,11 @@ static void wifi_pro_bare_buff(unsigned char * rxbuf, int num, WIFI_INFO * pwifi
 						auto pack = make_receive_session(rxbuf + i, recpackLen);
 
 						if (pack && (pack->code_num & 0xf0)) {
+
+							if (pwifi->dbg_pri_useful) {
+								printf("useful buff len = %d,", recpackLen);
+								disp_x_buff(rxbuf + i, recpackLen);
+							}
 							unique_lock <timed_mutex> lck(pwifi->mtx_using_list);
 
 							pwifi->rec_session_list.push_back(std::move(pack));
@@ -185,7 +190,7 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 
 			wifi_pro_bare_buff(rxbuf, rxlen, pwifi, removed_Len);
 
-			if (removed_Len && removed_Len < rxlen) {
+			if (removed_Len && removed_Len <= rxlen) {
 				rxlen = rxlen - removed_Len;
 				memcpy(rxbuf, rxbuf + removed_Len, rxlen);
 			}
