@@ -150,6 +150,8 @@ int wifi_serivce(WIFI_INFO & wifi)
 
 	auto rdvec = read_num(wifi);
 
+	exit(0);
+
 	for (auto & num : *rdvec) {
 		exec_read_message(wifi, num);
 	}

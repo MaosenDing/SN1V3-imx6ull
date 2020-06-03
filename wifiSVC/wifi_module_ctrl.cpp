@@ -27,7 +27,7 @@
 #include <string.h>
 #include <chrono>
 using namespace std;
-
+#define MAX_SSID_GRP (3) //mcu 上最多有三组ssid
 shared_ptr<WIFI_BASE_SESSION> exec_wifi_ctrl(WIFI_INFO & wifi, int code, void *data, int datalen)
 {
 	WIFI_BASE_SESSION sec;
@@ -59,14 +59,18 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_ctrl(WIFI_INFO & wifi, int code, void *d
 	return shared_ptr<WIFI_BASE_SESSION>();
 }
 
-int set_ssid(WIFI_INFO & wifi, int grpid, char * wifiname)
+int set_ssid(WIFI_INFO & wifi, int grpid, const char * wifiname)
 {
 	char buff[64];
+	if (grpid >= MAX_SSID_GRP) {
+		return -2;
+	}
+
 	buff[0] = grpid;
 	strcpy(buff + 1, wifiname);
 	int sndlen = 1 + strlen(wifiname);
-	auto psec = exec_wifi_ctrl(wifi, 0x40, buff, 1 + strlen(wifiname));
-	if(wifi.dbg_pri_wifi_ctrl) printf("set grp %d ssid = '%s'", grpid, wifiname);
+	auto psec = exec_wifi_ctrl(wifi, 0x40, buff, sndlen);
+	if (wifi.dbg_pri_wifi_ctrl) printf("set grp %d ssid = '%s'", grpid, wifiname);
 	if (psec) {
 		//成功
 		if (wifi.dbg_pri_wifi_ctrl)printf(",success\n");
@@ -76,13 +80,40 @@ int set_ssid(WIFI_INFO & wifi, int grpid, char * wifiname)
 	return -1;
 }
 
+int set_pwd(WIFI_INFO & wifi, int grpid, const char * pwd)
+{
+	char buff[64];
+	if (grpid >= MAX_SSID_GRP) {
+		return -2;
+	}
+
+	buff[0] = grpid + MAX_SSID_GRP;
+	strcpy(buff + 1, pwd);
+	int sndlen = 1 + strlen(pwd);
+	auto psec = exec_wifi_ctrl(wifi, 0x40, buff, sndlen);
+	if (wifi.dbg_pri_wifi_ctrl) printf("set grp %d pwd = '%s'", grpid, pwd);
+	if (psec) {
+		//成功
+		if (wifi.dbg_pri_wifi_ctrl)printf(",success\n");
+		return 0;
+	}
+	if (wifi.dbg_pri_wifi_ctrl)printf(",fail\n");
+	return -1;
+}
+
+
 int get_ssid(WIFI_INFO & wifi, int grpid, char * wifiname, int maxLen)
 {
+	if (grpid >= MAX_SSID_GRP) {
+		return -2;
+	}
+
+
 	char c8id = grpid;
-	auto psec = exec_wifi_ctrl(wifi, 0x41, &c8id, 0);
+	auto psec = exec_wifi_ctrl(wifi, 0x41, &c8id, 1);
 
 	if (psec) {
-		if (psec->data_len >= 3) {
+		if (psec->data_len >= MAX_SSID_GRP) {
 			int ascllen = psec->data_len - 2;
 			memcpy(wifiname, psec->data + 2, ascllen);
 			wifiname[psec->data_len] = 0;
@@ -94,9 +125,33 @@ int get_ssid(WIFI_INFO & wifi, int grpid, char * wifiname, int maxLen)
 	return -1;
 }
 
+int get_pwd(WIFI_INFO & wifi, int grpid, char * pwd, int maxLen)
+{
+	if (grpid >= MAX_SSID_GRP) {
+		return -2;
+	}
+
+	char c8id = grpid;
+	auto psec = exec_wifi_ctrl(wifi, 0x41, &c8id, 1);
+
+	if (psec) {
+		if (psec->data_len >= MAX_SSID_GRP) {
+			int ascllen = psec->data_len - 2;
+			memcpy(pwd, psec->data + 2, ascllen);
+			pwd[psec->data_len] = 0;
+			if (wifi.dbg_pri_wifi_ctrl)printf("get grp %d pwd = '%s'\n", grpid, pwd);
+			return 0;
+		}
+	}
+	if (wifi.dbg_pri_wifi_ctrl)printf("get grp %d pwd fail\n", grpid);
+	return -1;
+}
+
+
+
 int set_server(WIFI_INFO & wifi, unsigned char * serverip, int port)
 {
-	unsigned char buff[6] = { serverip[0],serverip[1],serverip[2],serverip[3],(unsigned char)port ,(unsigned char)port >> 8 };
+	unsigned char buff[6] = { serverip[0],serverip[1],serverip[2],serverip[3],(unsigned char)port ,(unsigned char)(port >> 8) };
 
 	auto psec = exec_wifi_ctrl(wifi, 0x42, &buff, 6);
 	
@@ -158,13 +213,19 @@ int get_status(WIFI_INFO & wifi)
 
 int set_wifi_module(WIFI_INFO & wifi)
 {
-	set_ssid(wifi, 0, "123");
-
+	set_ssid(wifi, 0, "XINCHEN-2.4G");
+	set_pwd(wifi, 0, "1000000001");
 	char buff[32];
 
 	get_ssid(wifi, 0, buff, 32);
 
-	exit(0);
+	get_ssid(wifi, 1, buff, 32);
+
+
+
+
+
+	return 0;
 }
 
 
