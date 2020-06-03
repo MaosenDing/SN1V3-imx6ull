@@ -149,7 +149,7 @@ int get_pwd(WIFI_INFO & wifi, int grpid, char * pwd, int maxLen)
 
 
 
-int set_server(WIFI_INFO & wifi, unsigned char * serverip, int port)
+int set_server(WIFI_INFO & wifi,const unsigned char * serverip, int port)
 {
 	unsigned char buff[6] = { serverip[0],serverip[1],serverip[2],serverip[3],(unsigned char)port ,(unsigned char)(port >> 8) };
 
@@ -167,7 +167,6 @@ int set_server(WIFI_INFO & wifi, unsigned char * serverip, int port)
 			);
 			return 0;
 		}
-		printf("len = %d\n",datlen);
 	}
 	if (wifi.dbg_pri_wifi_ctrl)printf("set ip fail\n");
 	return -1;
@@ -192,25 +191,103 @@ int get_server(WIFI_INFO & wifi, unsigned char * serverip, int &port)
 			);
 			return 0;
 		}
-		printf("len = %d\n", datlen);
 	}
 	if (wifi.dbg_pri_wifi_ctrl)printf("get ip fail\n");
 	return -1;
 }
 
 
-int set_local(WIFI_INFO & wifi, unsigned char * serverip)
+int set_local_IP(WIFI_INFO & wifi
+	, const unsigned char * serverip
+	, const unsigned char * gateway
+	, const unsigned char * netmask)
 {
-	unsigned char buff[4] = { serverip[0],serverip[1],serverip[2],serverip[3] };
+	unsigned char buff[12];
 
-	auto psec = exec_wifi_ctrl(wifi, 0x43, &buff, 4);
+	memcpy(buff + 0, serverip, 4);
+	memcpy(buff + 4, gateway, 4);
+	memcpy(buff + 8, netmask, 4);
+
+	auto psec = exec_wifi_ctrl(wifi, 0x43, &buff, 12);
 
 	if (psec) {
-	}
+		int datlen = psec->data_len - 1;
+		if (datlen == 12) {
+			unsigned char * serverip = &psec->data[1];
+			if (wifi.dbg_pri_wifi_ctrl)printf("set local ip = %d:%d:%d:%d\n"
+				, serverip[0]
+				, serverip[1]
+				, serverip[2]
+				, serverip[3]
+			);
 
-	return 0;
+
+			if (wifi.dbg_pri_wifi_ctrl)printf("set gateway = %d:%d:%d:%d\n"
+				, gateway[0]
+				, gateway[1]
+				, gateway[2]
+				, gateway[3]
+			);
+
+
+			if (wifi.dbg_pri_wifi_ctrl)printf("set netmask = %d:%d:%d:%d\n"
+				, netmask[0]
+				, netmask[1]
+				, netmask[2]
+				, netmask[3]
+			);
+			return 0;
+		}
+	}
+	if (wifi.dbg_pri_wifi_ctrl)printf("set ip fail\n");
+	return -1;
 }
 
+
+int get_local_IP(WIFI_INFO & wifi
+	, unsigned char * outip
+	, unsigned char * outgateway
+	, unsigned char * outnetmask)
+{
+	auto psec = exec_wifi_ctrl(wifi, 0x43, nullptr, 0);
+
+	if (psec) {
+		int datlen = psec->data_len - 1;
+		if (datlen == 12) {
+			unsigned char * ip = &psec->data[1 + 0];
+			unsigned char * gateway = &psec->data[1 + 4];
+			unsigned char * netmask = &psec->data[1 + 8];
+
+			if (wifi.dbg_pri_wifi_ctrl)printf("get local ip = %d:%d:%d:%d\n"
+				, ip[0]
+				, ip[1]
+				, ip[2]
+				, ip[3]
+			);
+
+			if (wifi.dbg_pri_wifi_ctrl)printf("get gateway = %d:%d:%d:%d\n"
+				, gateway[0]
+				, gateway[1]
+				, gateway[2]
+				, gateway[3]
+			);
+
+			if (wifi.dbg_pri_wifi_ctrl)printf("get netmask = %d:%d:%d:%d\n"
+				, netmask[0]
+				, netmask[1]
+				, netmask[2]
+				, netmask[3]
+			);
+
+			memcpy(outip, ip, 4);
+			memcpy(outgateway, gateway, 4);
+			memcpy(outnetmask, netmask, 4);
+			return 0;
+		}
+	}
+	if (wifi.dbg_pri_wifi_ctrl)printf("get ip fail\n");
+	return -1;
+}
 
 int set_connect(WIFI_INFO & wifi)
 {
@@ -262,6 +339,15 @@ int set_wifi_module(WIFI_INFO & wifi)
 	unsigned char serverip[4];
 	int port;
 	get_server(wifi, serverip, port);
+
+
+	const unsigned char localip[] = { 192,168,1,228 };
+	const unsigned char netmask[] = { 255,255,255,0 };
+	const unsigned char gatway[] = { 192,168,1,250 };
+
+
+	set_local_IP(wifi, localip,gatway,netmask);
+	get_local_IP(wifi, ip, ip, ip);
 
 	return 0;
 }
