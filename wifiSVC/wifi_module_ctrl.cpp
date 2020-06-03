@@ -116,7 +116,7 @@ int get_ssid(WIFI_INFO & wifi, int grpid, char * wifiname, int maxLen)
 		if (psec->data_len >= 3) {
 			int ascllen = psec->data_len - 2;
 			memcpy(wifiname, psec->data + 2, ascllen);
-			wifiname[psec->data_len] = 0;
+			wifiname[ascllen] = 0;
 			if (wifi.dbg_pri_wifi_ctrl)printf("get grp %d ssid = '%s'\n", grpid, wifiname);
 			return 0;
 		}
@@ -138,7 +138,7 @@ int get_pwd(WIFI_INFO & wifi, int grpid, char * pwd, int maxLen)
 		if (psec->data_len >= 3) {
 			int ascllen = psec->data_len - 2;
 			memcpy(pwd, psec->data + 2, ascllen);
-			pwd[psec->data_len] = 0;
+			pwd[ascllen] = 0;
 			if (wifi.dbg_pri_wifi_ctrl)printf("get grp %d pwd = '%s'\n", grpid, pwd);
 			return 0;
 		}
@@ -214,7 +214,7 @@ int set_local_IP(WIFI_INFO & wifi
 		int datlen = psec->data_len - 1;
 		if (datlen == 12) {
 			unsigned char * serverip = &psec->data[1];
-			if (wifi.dbg_pri_wifi_ctrl)printf("set local ip = %d:%d:%d:%d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("set local ip = %d.%d.%d.%d\n"
 				, serverip[0]
 				, serverip[1]
 				, serverip[2]
@@ -222,7 +222,7 @@ int set_local_IP(WIFI_INFO & wifi
 			);
 
 
-			if (wifi.dbg_pri_wifi_ctrl)printf("set gateway = %d:%d:%d:%d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("set gateway = %d.%d.%d.%d\n"
 				, gateway[0]
 				, gateway[1]
 				, gateway[2]
@@ -230,7 +230,7 @@ int set_local_IP(WIFI_INFO & wifi
 			);
 
 
-			if (wifi.dbg_pri_wifi_ctrl)printf("set netmask = %d:%d:%d:%d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("set netmask = %d.%d.%d.%d\n"
 				, netmask[0]
 				, netmask[1]
 				, netmask[2]
@@ -258,21 +258,21 @@ int get_local_IP(WIFI_INFO & wifi
 			unsigned char * gateway = &psec->data[1 + 4];
 			unsigned char * netmask = &psec->data[1 + 8];
 
-			if (wifi.dbg_pri_wifi_ctrl)printf("get local ip = %d:%d:%d:%d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("get local ip = %d.%d.%d.%d\n"
 				, ip[0]
 				, ip[1]
 				, ip[2]
 				, ip[3]
 			);
 
-			if (wifi.dbg_pri_wifi_ctrl)printf("get gateway = %d:%d:%d:%d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("get gateway = %d.%d.%d.%d\n"
 				, gateway[0]
 				, gateway[1]
 				, gateway[2]
 				, gateway[3]
 			);
 
-			if (wifi.dbg_pri_wifi_ctrl)printf("get netmask = %d:%d:%d:%d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("get netmask = %d.%d.%d.%d\n"
 				, netmask[0]
 				, netmask[1]
 				, netmask[2]
@@ -291,19 +291,36 @@ int get_local_IP(WIFI_INFO & wifi
 
 int set_connect(WIFI_INFO & wifi)
 {
+	auto psec = exec_wifi_ctrl(wifi, 0x44, nullptr, 0);
+
+	if (psec) {
+		return 0;
+	}
+
+	return -1;
+}
+
+int set_disconnect(WIFI_INFO & wifi)
+{
 	auto psec = exec_wifi_ctrl(wifi, 0x45, nullptr, 0);
 
-	return 0;
+	if (psec) {
+		return 0;
+	}
+
+	return -1;
 }
+
 
 int set_sleep(WIFI_INFO & wifi)
 {
-	auto psec = exec_wifi_ctrl(wifi, 0x46, nullptr, 0);
+	auto psec = exec_wifi_ctrl(wifi, 0x47, nullptr, 0);
 
 	if (psec) {
+		return 0;
 	}
 
-	return 0 ;
+	return -1;
 }
 
 int get_cache(WIFI_INFO & wifi)
@@ -347,7 +364,8 @@ int set_wifi_module(WIFI_INFO & wifi)
 
 
 	set_local_IP(wifi, localip,gatway,netmask);
-	get_local_IP(wifi, ip, ip, ip);
+
+	set_connect(wifi);
 
 	return 0;
 }
