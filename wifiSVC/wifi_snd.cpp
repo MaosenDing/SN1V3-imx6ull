@@ -46,7 +46,7 @@ void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_
 	session.frame_index = pack_index;
 	session.seq_num = wifi.send_seq++;
 
-	session.data_len = 2;
+	session.pack_len = 2 ;
 	session.data[0] = (message_id >> 0) & 0xff;
 	session.data[1] = (message_id >> 8) & 0xff;
 }
@@ -65,12 +65,13 @@ int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 	wifi.sndbuf[12] = session.frame_index;
 	wifi.sndbuf[13] = session.frame_index >> 8;
 
-	int sndlen = session.data_len + MIN_PACK_SZ;
+	session.pack_len = session.data_len + MIN_PACK_SZ;
+	int sndlen = session.pack_len;
 
 	wifi.sndbuf[14] = sndlen;
 	wifi.sndbuf[15] = sndlen >> 8;
 
-	memcpy(wifi.sndbuf + 16, session.data, session.data_len);
+	memcpy(wifi.sndbuf + 16, session.data, session.pack_len);
 
 	uint16_t crc0 = crc_make(wifi.sndbuf, sndlen - 2, 0xffff);
 

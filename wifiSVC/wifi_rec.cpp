@@ -83,7 +83,9 @@ static inline shared_ptr<WIFI_BASE_SESSION> make_receive_session(unsigned char *
 
 	ret->frame_index = rxbuff[12] | (rxbuff[13] << 8);
 
-	ret->data_len = rxbuff[14] | (rxbuff[15] << 8);
+	ret->pack_len = rxbuff[14] | (rxbuff[15] << 8);
+
+	ret->data_len = ret->pack_len - MIN_PACK_SZ;
 
 	memcpy(ret->data, rxbuff + 16, num - MIN_PACK_SZ);
 

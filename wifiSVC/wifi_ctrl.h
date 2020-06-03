@@ -56,6 +56,7 @@ struct WIFI_BASE_SESSION {
 	int seq_num = 0;//帧顺序码 防止重复
 	int frame_index;//帧编号
 
+	int pack_len = 0;
 	int data_len = 0;
 	unsigned char data[1000];
 };

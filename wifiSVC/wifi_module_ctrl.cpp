@@ -113,7 +113,7 @@ int get_ssid(WIFI_INFO & wifi, int grpid, char * wifiname, int maxLen)
 	auto psec = exec_wifi_ctrl(wifi, 0x41, &c8id, 1);
 
 	if (psec) {
-		if (psec->data_len >= MAX_SSID_GRP) {
+		if (psec->data_len >= 3) {
 			int ascllen = psec->data_len - 2;
 			memcpy(wifiname, psec->data + 2, ascllen);
 			wifiname[psec->data_len] = 0;
@@ -131,11 +131,11 @@ int get_pwd(WIFI_INFO & wifi, int grpid, char * pwd, int maxLen)
 		return -2;
 	}
 
-	char c8id = grpid;
+	char c8id = grpid + MAX_SSID_GRP;
 	auto psec = exec_wifi_ctrl(wifi, 0x41, &c8id, 1);
 
 	if (psec) {
-		if (psec->data_len >= MAX_SSID_GRP) {
+		if (psec->data_len >= 3) {
 			int ascllen = psec->data_len - 2;
 			memcpy(pwd, psec->data + 2, ascllen);
 			pwd[psec->data_len] = 0;
@@ -154,12 +154,50 @@ int set_server(WIFI_INFO & wifi, unsigned char * serverip, int port)
 	unsigned char buff[6] = { serverip[0],serverip[1],serverip[2],serverip[3],(unsigned char)port ,(unsigned char)(port >> 8) };
 
 	auto psec = exec_wifi_ctrl(wifi, 0x42, &buff, 6);
-	
-	if (psec) {
-	}
 
-	return 0;
+	if (psec) {
+		int datlen = psec->data_len - 1;
+		if (datlen == 6) {
+			if (wifi.dbg_pri_wifi_ctrl)printf("set remote ip = %d:%d:%d:%d,port = %d\n"
+				, serverip[0]
+				, serverip[1]
+				, serverip[2]
+				, serverip[3]
+				,port				
+			);
+			return 0;
+		}
+		printf("len = %d\n",datlen);
+	}
+	if (wifi.dbg_pri_wifi_ctrl)printf("set ip fail\n");
+	return -1;
 }
+
+int get_server(WIFI_INFO & wifi, unsigned char * serverip, int &port)
+{
+	auto psec = exec_wifi_ctrl(wifi, 0x42, nullptr, 0);
+
+	if (psec) {
+		int datlen = psec->data_len - 1;
+		if (datlen == 6) {
+			unsigned char * serverip = &psec->data[1];
+			unsigned char * portpos = serverip + 4;
+			port = portpos[0] | portpos[1] << 8;
+			if (wifi.dbg_pri_wifi_ctrl)printf("get remote ip = %d:%d:%d:%d,port = %d\n"
+				, serverip[0]
+				, serverip[1]
+				, serverip[2]
+				, serverip[3]
+				, port
+			);
+			return 0;
+		}
+		printf("len = %d\n", datlen);
+	}
+	if (wifi.dbg_pri_wifi_ctrl)printf("get ip fail\n");
+	return -1;
+}
+
 
 int set_local(WIFI_INFO & wifi, unsigned char * serverip)
 {
@@ -216,14 +254,14 @@ int set_wifi_module(WIFI_INFO & wifi)
 	set_ssid(wifi, 0, "XINCHEN-2.4G");
 	set_pwd(wifi, 0, "1000000001");
 	char buff[32];
-
 	get_ssid(wifi, 0, buff, 32);
+	get_pwd(wifi, 0, buff, 32);
 
-	get_ssid(wifi, 1, buff, 32);
-
-
-
-
+	unsigned char ip[] = { 192,168,1,205 };
+	set_server(wifi, ip, 8888);
+	unsigned char serverip[4];
+	int port;
+	get_server(wifi, serverip, port);
 
 	return 0;
 }
