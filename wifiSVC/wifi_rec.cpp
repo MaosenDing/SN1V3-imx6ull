@@ -139,10 +139,7 @@ shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSessio
 	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(milliseconds);
 
 	do {
-		auto itr = wifi.rec_session_list.begin();
-
-		while (itr != wifi.rec_session_list.end()) {
-
+		for (auto itr = wifi.rec_session_list.begin(); itr != wifi.rec_session_list.end(); ++itr) {
 			if ((*itr) && (itr->use_count()) && (ChkSession(**itr))) {
 				shared_ptr<WIFI_BASE_SESSION> ret(move(*itr));
 				wifi.rec_session_list.erase(itr);

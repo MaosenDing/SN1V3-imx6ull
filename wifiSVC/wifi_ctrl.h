@@ -23,6 +23,7 @@ enum WIFI_ERR {
 
 
 enum CODE_ID {
+	CODE_CTRL = 0,
 	CODE_INIT = 1,
 	CODE_READ_NUM = 2,
 	CODE_READ = 3,

@@ -41,9 +41,9 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi)
 	for (int i = 0; i < MAX_RETRY_EXEC_CTRL; i++) {
 		transmit_session(wifi, sec);
 		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
-		if (ret && (ret->data[0] == (code | 0x80))) {
-			return ret;
-		}
+		//if (ret && (ret->data[0] == (code | 0x80))) {
+		//	return ret;
+		//}
 	}
 	//返回失败
 	return shared_ptr<WIFI_BASE_SESSION>();

@@ -32,7 +32,7 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_ctrl(WIFI_INFO & wifi, int code, void *d
 {
 	WIFI_BASE_SESSION sec;
 
-	sec.code_num = CODE_INIT;
+	sec.code_num = CODE_CTRL;
 
 	sec.data[0] = code;
 	unsigned char * datstar = &sec.data[1];
@@ -50,7 +50,7 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_ctrl(WIFI_INFO & wifi, int code, void *d
 
 	for (int i = 0; i < MAX_RETRY_EXEC_CTRL; i++) {
 		transmit_session(wifi, sec);
-		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_CTRL | 0x80); }, wifi.max_delay_ms_ctrl);
 		if (ret && (ret->data[0] == (code | 0x80))) {
 			return ret;
 		}
