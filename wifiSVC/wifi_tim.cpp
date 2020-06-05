@@ -29,7 +29,7 @@
 using namespace std;
 
 
-shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi)
+static shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi)
 {
 	WIFI_BASE_SESSION sec;
 
@@ -40,10 +40,19 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi)
 
 	for (int i = 0; i < MAX_RETRY_EXEC_CTRL; i++) {
 		transmit_session(wifi, sec);
-		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
-		//if (ret && (ret->data[0] == (code | 0x80))) {
-		//	return ret;
-		//}
+		shared_ptr<WIFI_BASE_SESSION>  ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
+		if (ret && (ret->data_len == 8)) {
+			if (wifi.dbg_pri_wifi_ctrl) printf("get tim ok = %d-%d-%d %d:%d:%d,%d\n",
+				ret->data[0], ret->data[1], ret->data[2],
+				ret->data[3], ret->data[4], ret->data[5],
+				ret->data[6] | (ret->data[7] << 8)
+			);
+			return ret;
+		}
+
+		if (ret && (ret->data_len == 0)) {
+			if (wifi.dbg_pri_wifi_ctrl) printf("get tim waiting ...\n");
+		}
 	}
 	//返回失败
 	return shared_ptr<WIFI_BASE_SESSION>();
@@ -52,7 +61,15 @@ shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi)
 
 int get_wifi_tim(WIFI_INFO & wifi)
 {
+	shared_ptr<WIFI_BASE_SESSION> ret;
+	
+	//do{
+		printf("test tim \n");
+		ret = exec_wifi_tim(wifi);
+	//} while (!ret);
 
+	exit(0);
+	
 
 	return 0;
 }

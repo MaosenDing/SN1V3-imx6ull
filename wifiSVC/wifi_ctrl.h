@@ -174,4 +174,6 @@ WIFI_BASE_FUNCTION * FindFunction(WIFI_INFO & wifi, int funMask, int funid);
 
 
 std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds);
+int set_wifi_module(WIFI_INFO & wifi);
+int get_wifi_tim(WIFI_INFO & wifi);
 #endif

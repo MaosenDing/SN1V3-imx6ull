@@ -27,8 +27,6 @@
 using namespace std;
 
 
-int set_wifi_module(WIFI_INFO & wifi);
-
 int wifi_open(WIFI_INFO & wifi)
 {
 	//启动接收服务
@@ -38,9 +36,9 @@ int wifi_open(WIFI_INFO & wifi)
 	//设置
 	set_wifi_module(wifi);
 	//对时
-
+	get_wifi_tim(wifi);
 	//其他
-	
+	exit(0);
 	return 0;
 }
 
@@ -149,8 +147,6 @@ int wifi_serivce(WIFI_INFO & wifi)
 	wifi_open(wifi);
 
 	auto rdvec = read_num(wifi);
-
-	exit(0);
 
 	for (auto & num : *rdvec) {
 		exec_read_message(wifi, num);
