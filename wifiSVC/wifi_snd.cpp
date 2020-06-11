@@ -59,7 +59,7 @@ int transmit_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session)
 	wifi.sndbuf[0] = 0xaa;
 	wifi.sndbuf[1] = 0xaa;
 	wifi.sndbuf[2] = session.code_num;
-	wifi.sndbuf[3] = session.seq_num;
+	wifi.sndbuf[3] = wifi.send_seq++;
 	memcpy(wifi.sndbuf + 4, wifi.server_id, 4);
 	memcpy(wifi.sndbuf + 8, wifi.this_id, 4);
 	wifi.sndbuf[12] = session.frame_index;

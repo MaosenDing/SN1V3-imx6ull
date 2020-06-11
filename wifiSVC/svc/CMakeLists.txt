@@ -7,5 +7,6 @@
 
 add_library(wifisvc STATIC 
 svc_sn2.cpp
+svc_query_single.cpp
 )
 target_link_directories(mastersvc PUBLIC "${PROJECT_SOURCE_DIR}/timework")

@@ -2,11 +2,13 @@
 
 
 WIFI_BASE_FUNCTION * GetSn2Center(WIFI_INFO & wifi);
+WIFI_BASE_FUNCTION * GetWIFI_QUERY_SINGLE_DATA(WIFI_INFO & wifi);
 typedef WIFI_BASE_FUNCTION * (* WIFIINT)(WIFI_INFO & wifi);
 
 WIFIINT wifigrp[] =
 {
 	GetSn2Center,
+	GetWIFI_QUERY_SINGLE_DATA,
 };
 
 
@@ -58,7 +60,12 @@ WIFI_BASE_FUNCTION * FindFunction(WIFI_INFO & wifi, int funMask, int funid)
 	return nullptr;
 }
 
+void WIFI_BASE_FUNCTION::ADD_FUN(WIFI_BASE_FUNCTION * pfun)
+{
+	std::unique_lock<std::mutex> lk(info.mtx_write_fun_list);
 
+	info.write_fun_list.push_back(pfun);
+}
 
 
 

@@ -172,18 +172,34 @@ void exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 	WIFI_PRO_STATUS sta;
 	do {
 		fun->wifi_write(sec);
-
+		sec.code_num = 0x04;
 		transmit_session(wifi, sec);
 
-		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool 
-			{return session.code_num == CODE_WRITE; }, wifi.max_delay_ms_muc_response);
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_WRITE | 0x80); }
+		, wifi.max_delay_ms_muc_response);
 
 		sta = fun->wifi_read(sec);
 	} while (sta == WIFI_PRO_NEED_WRITE);
 }
 
+void exec_write_stage(WIFI_INFO & wifi)
+{
+	auto itr = wifi.write_fun_list.begin();
 
-
+	while (itr != wifi.write_fun_list.end()) {
+		if ((*itr)->GetProMask() & WIFI_BASE_FUNCTION::MASK_WRITE) {
+			printf("exec write = %s\n", (*itr)->FUNCTION_NAME());
+			exec_write_message(wifi, *itr);
+			{
+				std::unique_lock<std::mutex> lk(wifi.mtx_write_fun_list);
+				auto tmp = itr;
+				itr++;
+				(*tmp)->DESTORY_WRITE(wifi);
+				wifi.write_fun_list.erase(tmp);
+			}
+		}
+	}
+}
 
 
 int wifi_serivce(WIFI_INFO & wifi)
@@ -192,7 +208,7 @@ int wifi_serivce(WIFI_INFO & wifi)
 		printf("wifi open fail\n");
 		exit(0);
 	}
-	
+
 	auto rdvec = read_num(wifi, wifi.max_delay_ms_session_response);
 
 	if (rdvec && rdvec->size()) {
@@ -206,17 +222,11 @@ int wifi_serivce(WIFI_INFO & wifi)
 	for (auto & num : *rdvec) {
 		exec_read_message(wifi, num);
 	}
+
+	exec_write_stage(wifi);
+
 	exit(0);
-	auto itr = wifi.write_fun_list.begin();
 
-	while (itr != wifi.write_fun_list.end()) {
-		exec_write_message(wifi, *itr);
-
-		auto tmp = itr;
-		itr++;
-		(*tmp)->DESTORY_WRITE(wifi);
-		wifi.write_fun_list.erase(tmp);
-	}
 	return 0;
 }
 

@@ -102,7 +102,7 @@ struct WIFI_BASE_FUNCTION {
 	int GetFunctionID() { return functionID; }
 	int GetProMask() { return PRO_MASK; }
 
-	
+	void ADD_FUN(WIFI_BASE_FUNCTION *);
 protected:
 	unsigned int PRO_MASK = 0;
 	int functionID = -1;

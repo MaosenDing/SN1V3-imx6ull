@@ -18,6 +18,7 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
+		read_pro_fun(sec);
 		return WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
@@ -39,7 +40,6 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 		destor_write_fun();
 	}
 
-	virtual WIFI_BASE_FUNCTION * create_write_fun() = 0;
 	virtual void destor_write_fun() = 0;
 
 	enum read_sta {
@@ -48,6 +48,7 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 	};
 
 	virtual void mk_write_session_data(WIFI_BASE_SESSION & sec) = 0;
+	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) = 0;
 };
 
 
