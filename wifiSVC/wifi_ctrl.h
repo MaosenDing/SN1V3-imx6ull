@@ -55,16 +55,18 @@ struct WIFI_BASE_SESSION {
 	timeval tv;
 	int code_num = CODE_ERR;//命令编码 3 4 5
 	int seq_num = 0;//帧顺序码 防止重复
-	int frame_index;//帧编号
+	int16_t frame_index;//帧编号
 
 	int pack_len = 0;
 	int data_len = 0;
-	unsigned char data[1000];
+	unsigned char data[1024];
 };
 
 struct WIFI_DATA_SUB_PROTOCOL {
-	unsigned char function_id;
-	unsigned char function_data[0];
+	uint16_t message_id = 0;
+	unsigned char function_id = 0;
+	unsigned char *function_data;
+	int datalen = 0;
 };
 
 
@@ -112,10 +114,10 @@ struct WIFI_INFO {
 	{}
 	int uartFD = -1;
 	wifi_run_flg recRunFlg = wifi_run_null;
-	int max_delay_ms_ctrl = 100;
-	int max_delay_ms_message = 10 * 1000;
+	int max_delay_ms_muc_response = 100;
+	int max_delay_ms_session_response = 20 * 1000;
 
-	unsigned char this_id[4] = { 0x1, 0x2,0x3,0x4 };
+	unsigned char this_id[4] = { 0x1,0x1,0x1,0x1 };
 	const unsigned char server_id[4] = { 0x62,0x27,0x21,0x55 };
 
 	SN1_SHM * psn1;
@@ -142,7 +144,6 @@ struct WIFI_INFO {
 	int dbg_pri_chk_flag = 0;
 	int dbg_pri_rd_len = 0;
 	int dbg_pri_rd_word = 0;
-	int dbg_pri_rec_fun = 0;
 	int dbg_pri_snd = 0;
 	int dbg_pri_useful = 0;
 	int dbg_pri_wifi_ctrl = 0;//wifi 控制事务
@@ -180,5 +181,8 @@ int get_cache(WIFI_INFO & wifi, int * buffsta);
 
 //重置wifi buffer
 int wifi_reset_buff_status(WIFI_INFO & wifi);
+
+
+int mk_WIFI_DATA_SUB_PROTOCOL(WIFI_BASE_SESSION & sesssion, WIFI_DATA_SUB_PROTOCOL & pro);
 
 #endif

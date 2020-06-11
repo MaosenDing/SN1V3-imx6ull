@@ -46,7 +46,7 @@ void mk_read_session(WIFI_INFO & wifi, WIFI_BASE_SESSION & session, int message_
 	session.frame_index = pack_index;
 	session.seq_num = wifi.send_seq++;
 
-	session.pack_len = 2 ;
+	session.data_len = 2 ;
 	session.data[0] = (message_id >> 0) & 0xff;
 	session.data[1] = (message_id >> 8) & 0xff;
 }

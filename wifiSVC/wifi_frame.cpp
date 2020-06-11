@@ -69,7 +69,7 @@ shared_ptr < vector <unsigned int> > read_num(WIFI_INFO & wifi, int Milliseconds
 
 		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {
 			return (session.code_num  == (CODE_READ_NUM | 0x80));
-			}, 100);
+			}, wifi.max_delay_ms_muc_response);
 
 		if (ret && ret->data_len == 4) {
 			unsigned int start = ret->data[0] | ret->data[1] << 8;
@@ -91,37 +91,66 @@ shared_ptr < vector <unsigned int> > read_num(WIFI_INFO & wifi, int Milliseconds
 		if (!ret) {
 			if (wifi.dbg_pri_wifi_ctrl) printf("index get no response\n");
 		}
-
-		this_thread::sleep_for(chrono::milliseconds(500));
+		this_thread::sleep_for(chrono::milliseconds(wifi.max_delay_ms_muc_response));
 	} while (chrono::system_clock::now() < endpoint);
 
 	return shared_ptr<vector<unsigned int>>();
 }
 
-shared_ptr<WIFI_BASE_SESSION> read_first_message(WIFI_INFO & wifi, int message_id)
+shared_ptr<WIFI_BASE_SESSION> read_first_message(WIFI_INFO & wifi, int message_id, int Milliseconds)
 {
 	WIFI_BASE_SESSION sec;
 
 	mk_read_session(wifi, sec, message_id);
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(Milliseconds);
 
-	transmit_session(wifi, sec);
+	do {
+		transmit_session(wifi, sec);
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_READ | 0x80); }
+		, wifi.max_delay_ms_muc_response);
 
-	return wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
+		if (ret && ret->data_len >= 2) {
+			if (ret->frame_index == -2) {
+			}
+			if (ret->frame_index >= -1) {
+				return ret;
+			}
+		}
+		this_thread::sleep_for(chrono::milliseconds(wifi.max_delay_ms_muc_response));
+	} while (chrono::system_clock::now() < endpoint);
+	return make_shared<WIFI_BASE_SESSION>();
 }
 
+int mk_WIFI_DATA_SUB_PROTOCOL(WIFI_BASE_SESSION & sesssion, WIFI_DATA_SUB_PROTOCOL & pro)
+{
+	if (sesssion.data_len < 3) {
+		return -1;
+	}
 
+	pro.message_id = sesssion.data[0] | (sesssion.data[1] << 8);
+	pro.function_id = sesssion.data[2];
+	if (sesssion.data_len > 3) {
+		pro.function_data = &sesssion.data[3];
+		pro.datalen = sesssion.data_len - 3;
+	}
+
+	return 0;
+}
 
 void exec_read_message(WIFI_INFO & wifi, int message_id)
 {
-	auto psec = read_first_message(wifi, message_id);
+	auto psec = read_first_message(wifi, message_id, wifi.max_delay_ms_session_response);
 
 	if (psec) {
-		WIFI_DATA_SUB_PROTOCOL *sub = (WIFI_DATA_SUB_PROTOCOL*)psec->data;
-		if (wifi.dbg_pri_rec_fun) {
-			printf("receive fun = %d\n", sub->function_id);
+		WIFI_DATA_SUB_PROTOCOL sub;
+		if (0 == mk_WIFI_DATA_SUB_PROTOCOL(*psec, sub)) {
+			if (wifi.dbg_pri_wifi_data) {
+				printf("msg id = %d ,receive fun = %d,datlen = %d\n"
+					, sub.message_id, sub.function_id, sub.datalen);
+			}
 		}
 
-		auto fun = FindFunction(wifi, WIFI_BASE_FUNCTION::MASK_READ, sub->function_id);
+		auto fun = FindFunction(wifi, WIFI_BASE_FUNCTION::MASK_READ, sub.function_id);
 
 		while (fun) {
 			auto sta = fun->wifi_read(*psec);
@@ -131,7 +160,7 @@ void exec_read_message(WIFI_INFO & wifi, int message_id)
 
 				transmit_session(wifi, *psec);
 
-				psec = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_ctrl);
+				psec = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_muc_response);
 			} else {
 				fun = nullptr;
 			}
@@ -153,7 +182,8 @@ void exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 
 		transmit_session(wifi, sec);
 
-		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_WRITE; }, wifi.max_delay_ms_ctrl);
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool 
+			{return session.code_num == CODE_WRITE; }, wifi.max_delay_ms_muc_response);
 
 		sta = fun->wifi_read(sec);
 	} while (sta == WIFI_PRO_NEED_WRITE);
@@ -171,14 +201,14 @@ int wifi_serivce(WIFI_INFO & wifi)
 	}
 
 	
-	auto rdvec = read_num(wifi, 10 * 1000);
+	auto rdvec = read_num(wifi, wifi.max_delay_ms_session_response);
 
 	if (rdvec && rdvec->size()) {
 		for (auto p : *rdvec) {
-			if (wifi.dbg_pri_wifi_ctrl) printf("get message = %d\n", p);
+			if (wifi.dbg_pri_wifi_data) printf("get message = %d\n", p);
 		}
 	} else {
-		if (wifi.dbg_pri_wifi_ctrl) printf("get no message\n");
+		if (wifi.dbg_pri_wifi_data) printf("get no message\n");
 	}
 
 	for (auto & num : *rdvec) {

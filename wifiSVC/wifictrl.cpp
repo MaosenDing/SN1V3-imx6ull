@@ -126,6 +126,11 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		wifi.dbg_pri_wifi_ctrl = 1;
 	}
 
+	if (ChkifCMD(argc, argv, "-ddat")) {
+		wifi.dbg_pri_wifi_data = 1;
+	}
+
+
 	//mdc poll will never return
 	InitWIFI_svc(wifi);
 	wifi_serivce(wifi);

@@ -42,7 +42,7 @@ static shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi, int maxMS)
 
 	do {
 		transmit_session(wifi, sec);
-		shared_ptr<WIFI_BASE_SESSION>  ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_ctrl);
+		shared_ptr<WIFI_BASE_SESSION>  ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_muc_response);
 		if (ret && (ret->data_len == 8)) {
 			if (wifi.dbg_pri_wifi_ctrl) printf("get tim ok = %d-%d-%d %d:%d:%d,%d\n",
 				ret->data[0], ret->data[1], ret->data[2],
@@ -59,7 +59,7 @@ static shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi, int maxMS)
 		if (ret && (ret->data_len == 0)) {
 			if (wifi.dbg_pri_wifi_ctrl) printf("get tim waiting ...\n");
 		}
-		this_thread::sleep_for(chrono::milliseconds(500));
+		this_thread::sleep_for(chrono::milliseconds(wifi.max_delay_ms_muc_response));
 	} while (chrono::system_clock::now() < endpoint);
 	//返回失败
 	return shared_ptr<WIFI_BASE_SESSION>();
@@ -71,7 +71,7 @@ int get_wifi_tim(WIFI_INFO & wifi)
 	shared_ptr<WIFI_BASE_SESSION> ret;
 
 	printf("test tim \n");
-	ret = exec_wifi_tim(wifi, 60 * 1000);
+	ret = exec_wifi_tim(wifi, wifi.max_delay_ms_session_response);
 	if (ret) {
 		printf("tim get ok\n");
 		return 0;
