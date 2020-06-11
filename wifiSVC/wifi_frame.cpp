@@ -152,18 +152,11 @@ void exec_read_message(WIFI_INFO & wifi, int message_id)
 
 		auto fun = FindFunction(wifi, WIFI_BASE_FUNCTION::MASK_READ, sub.function_id);
 
-		while (fun) {
-			auto sta = fun->wifi_read(*psec);
-
-			if (sta == WIFI_PRO_NEED_WRITE) {
-				fun->wifi_write(*psec);
-
-				transmit_session(wifi, *psec);
-
-				psec = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ; }, wifi.max_delay_ms_muc_response);
-			} else {
-				fun = nullptr;
+		if (fun) {
+			if (wifi.dbg_pri_msg && fun->FUNCTION_NAME()) {
+				printf("rec fun name = %s\n", fun->FUNCTION_NAME());
 			}
+			fun->wifi_read(*psec);
 		}
 	}
 }
@@ -199,7 +192,6 @@ int wifi_serivce(WIFI_INFO & wifi)
 		printf("wifi open fail\n");
 		exit(0);
 	}
-
 	
 	auto rdvec = read_num(wifi, wifi.max_delay_ms_session_response);
 

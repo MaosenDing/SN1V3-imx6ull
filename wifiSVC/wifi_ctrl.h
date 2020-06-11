@@ -148,6 +148,8 @@ struct WIFI_INFO {
 	int dbg_pri_useful = 0;
 	int dbg_pri_wifi_ctrl = 0;//wifi 控制事务
 	int dbg_pri_wifi_data = 0;//wifi 数据事务
+
+	int dbg_pri_msg = 0;//上层事务
 	void delete_svc();
 
 	~WIFI_INFO()

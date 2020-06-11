@@ -1,13 +1,12 @@
 #include "wifi_ctrl.h"
 
 
-WIFI_BASE_FUNCTION * GetTEST(WIFI_INFO & wifi);
-
+WIFI_BASE_FUNCTION * GetSn2Center(WIFI_INFO & wifi);
 typedef WIFI_BASE_FUNCTION * (* WIFIINT)(WIFI_INFO & wifi);
 
 WIFIINT wifigrp[] =
 {
-	GetTEST,
+	GetSn2Center,
 };
 
 
