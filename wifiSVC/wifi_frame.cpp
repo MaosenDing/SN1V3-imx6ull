@@ -36,9 +36,10 @@ int wifi_open(WIFI_INFO & wifi)
 	//设置
 	set_wifi_module(wifi);
 	//对时
-	get_wifi_tim(wifi);
+	if (0 != get_wifi_tim(wifi)) {
+		return -3;
+	}
 	//其他
-	exit(0);
 	return 0;
 }
 
@@ -53,27 +54,47 @@ int wifi_close(WIFI_INFO & wifi)
 	return 0;
 }
 
-shared_ptr < vector <unsigned int> > read_num(WIFI_INFO & wifi)
+shared_ptr < vector <unsigned int> > read_num(WIFI_INFO & wifi, int Milliseconds)
 {
 	WIFI_BASE_SESSION sec;
+	wifi_reset_buff_status(wifi);
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(Milliseconds);
+	if (wifi.dbg_pri_wifi_ctrl) printf("index get start ...\n");
+	do {
+		mk_read_num_session(wifi, sec);
 
-	mk_read_num_session(wifi, sec);
+		transmit_session(wifi, sec);
 
-	transmit_session(wifi, sec);
+		if (wifi.dbg_pri_wifi_ctrl) printf("index get wait ...\n");
 
-	auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == CODE_READ_NUM; }, wifi.max_delay_ms_ctrl);
+		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {
+			return (session.code_num  == (CODE_READ_NUM | 0x80));
+			}, 100);
 
-	if (ret && ret->data_len == 4) {
-		unsigned int start = ret->data[0] | ret->data[1] << 8;
-		unsigned int end = ret->data[2] | ret->data[3] << 8;
-		if (end >= start) {
-			auto ret = make_shared<vector<unsigned int>>();
-			do {
-				ret->push_back(start);
-			} while (start++ < end);
-			return ret;
+		if (ret && ret->data_len == 4) {
+			unsigned int start = ret->data[0] | ret->data[1] << 8;
+			unsigned int end = ret->data[2] | ret->data[3] << 8;
+			if (end >= start) {
+				if (wifi.dbg_pri_wifi_ctrl) printf("index get OK\n");
+				auto ret = make_shared<vector<unsigned int>>();
+				do {
+					ret->push_back(start);
+				} while (start++ < end);
+				return ret;
+			}
 		}
-	}
+
+		if (ret && ret->data_len == 0) {
+			if (wifi.dbg_pri_wifi_ctrl) printf("index get NULL\n");
+		}
+
+		if (!ret) {
+			if (wifi.dbg_pri_wifi_ctrl) printf("index get no response\n");
+		}
+
+		this_thread::sleep_for(chrono::milliseconds(500));
+	} while (chrono::system_clock::now() < endpoint);
+
 	return shared_ptr<vector<unsigned int>>();
 }
 
@@ -144,14 +165,26 @@ void exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 
 int wifi_serivce(WIFI_INFO & wifi)
 {
-	wifi_open(wifi);
+	if (0 != wifi_open(wifi)) {
+		printf("wifi open fail\n");
+		exit(0);
+	}
 
-	auto rdvec = read_num(wifi);
+	
+	auto rdvec = read_num(wifi, 10 * 1000);
+
+	if (rdvec && rdvec->size()) {
+		for (auto p : *rdvec) {
+			if (wifi.dbg_pri_wifi_ctrl) printf("get message = %d\n", p);
+		}
+	} else {
+		if (wifi.dbg_pri_wifi_ctrl) printf("get no message\n");
+	}
 
 	for (auto & num : *rdvec) {
 		exec_read_message(wifi, num);
 	}
-
+	exit(0);
 	auto itr = wifi.write_fun_list.begin();
 
 	while (itr != wifi.write_fun_list.end()) {

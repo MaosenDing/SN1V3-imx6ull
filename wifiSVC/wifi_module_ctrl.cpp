@@ -323,13 +323,17 @@ int set_sleep(WIFI_INFO & wifi)
 	return -1;
 }
 
-int get_cache(WIFI_INFO & wifi)
+int get_cache(WIFI_INFO & wifi, int * buffsta)
 {
 	auto psec = exec_wifi_ctrl(wifi, 0x48, nullptr, 0);
 
-	if (psec) {
+	if (psec && psec->data_len == 3 && buffsta) {
+		buffsta[0] = psec->data[0];
+		buffsta[1] = psec->data[1];
+		buffsta[2] = psec->data[2];
+		return 0;
 	}
-	return 0;
+	return -1;
 }
 
 
@@ -342,6 +346,17 @@ int get_status(WIFI_INFO & wifi)
 	return 0;
 }
 
+int wifi_reset_buff_status(WIFI_INFO & wifi)
+{
+	auto psec = exec_wifi_ctrl(wifi, 0x4a, nullptr, 0);
+
+	if (psec) {
+		printf("clean ok \n");
+		return 0;
+	}
+
+	return -1;
+}
 
 int set_wifi_module(WIFI_INFO & wifi)
 {
@@ -351,7 +366,7 @@ int set_wifi_module(WIFI_INFO & wifi)
 	get_ssid(wifi, 0, buff, 32);
 	get_pwd(wifi, 0, buff, 32);
 
-	unsigned char ip[] = { 192,168,1,205 };
+	unsigned char ip[] = { 192,168,1,107 };
 	set_server(wifi, ip, 8888);
 	unsigned char serverip[4];
 	int port;
