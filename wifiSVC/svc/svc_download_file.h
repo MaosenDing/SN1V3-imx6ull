@@ -1,6 +1,5 @@
 #include "../wifi_svc.h"
 #include "../wifi_ctrl.h"
-#include <mutex>
 using namespace  std;
 //单次接收发送模板
 
@@ -16,20 +15,6 @@ struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 
 	}
 
-	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
-	{
-
-		return WIFI_PRO_STATUS::WIFI_PRO_END;
-	}
-
-
-	virtual WIFI_PRO_STATUS wifi_write(WIFI_BASE_SESSION & sec) final
-	{
-
-
-
-		return  WIFI_PRO_STATUS::WIFI_PRO_END;
-	}
 
 	virtual void DESTORY_FIRST(WIFI_INFO & info) final
 	{
@@ -41,17 +26,11 @@ struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 		destor_write_fun();
 	}
 
-	virtual WIFI_BASE_FUNCTION * create_write_fun() = 0;
 	virtual void destor_write_fun() = 0;
-
-	enum read_sta {
-		sta_need_write = 1,
-		sta_end = 2,
-	};
-
-	virtual read_sta read_pro_fun(WIFI_BASE_SESSION & sec) = 0;
-
+#if 0
+	virtual int read_pro_fun(WIFI_BASE_SESSION & sec) = 0;
 	virtual void mk_download_head_data(WIFI_BASE_SESSION & sec) = 0;
+#endif
 };
 
 

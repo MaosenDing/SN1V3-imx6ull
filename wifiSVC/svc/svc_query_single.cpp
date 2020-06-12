@@ -42,11 +42,14 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 	virtual void mk_write_session_data(WIFI_BASE_SESSION & sec) final
 	{
 		sec = thissec;
-		sec.data_len += 1;
+		sec.data_len += 4;
 
 		WIFI_DATA_SUB_PROTOCOL sub;
 		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
 		sub.function_data[2] = 5;
+		sub.function_data[3] = 6;
+		sub.function_data[4] = 7;
+		sub.function_data[5] = 8;
 	}
 
 	virtual void destor_write_fun()final
