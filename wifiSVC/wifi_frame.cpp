@@ -161,10 +161,12 @@ void exec_read_message(WIFI_INFO & wifi, int message_id)
 	}
 }
 
-void exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
+int exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 {
 	if (!fun) {
-		return;
+		//发送节点有问题
+		//删除
+		return 0;
 	}
 
 	WIFI_BASE_SESSION sec;
@@ -173,13 +175,28 @@ void exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 	do {
 		fun->wifi_write(sec);
 		sec.code_num = 0x04;
-		transmit_session(wifi, sec);
+		chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_session_response);
+		shared_ptr<WIFI_BASE_SESSION> ret;
+		do {
+			transmit_session(wifi, sec);
+			ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_WRITE | 0x80); }
+			, wifi.max_delay_ms_muc_response);
 
-		auto ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_WRITE | 0x80); }
-		, wifi.max_delay_ms_muc_response);
+			if (ret && ret->frame_index > -2) {
+				break;
+			}
+			this_thread::sleep_for(chrono::milliseconds(wifi.max_delay_ms_muc_response));
+		} while (chrono::system_clock::now() < endpoint);
 
-		sta = fun->wifi_read(sec);
+		if (ret && ret->frame_index <= -2) {
+			//发送错误  下次再发送
+			return -1;
+		}
+		sta = fun->wifi_read(*ret);
 	} while (sta == WIFI_PRO_NEED_WRITE);
+	//完成
+	//删除
+	return 0;
 }
 
 void exec_write_stage(WIFI_INFO & wifi)
@@ -189,13 +206,14 @@ void exec_write_stage(WIFI_INFO & wifi)
 	while (itr != wifi.write_fun_list.end()) {
 		if ((*itr)->GetProMask() & WIFI_BASE_FUNCTION::MASK_WRITE) {
 			printf("exec write = %s\n", (*itr)->FUNCTION_NAME());
-			exec_write_message(wifi, *itr);
-			{
+			if (0 == exec_write_message(wifi, *itr)) {
 				std::unique_lock<std::mutex> lk(wifi.mtx_write_fun_list);
 				auto tmp = itr;
-				itr++;
+				++itr;
 				(*tmp)->DESTORY_WRITE(wifi);
 				wifi.write_fun_list.erase(tmp);
+			} else {
+				++itr;
 			}
 		}
 	}
