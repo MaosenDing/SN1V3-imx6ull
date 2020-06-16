@@ -67,8 +67,12 @@ static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned i
 	}
 	if (crc0 == crc1)
 		return 1;
-	else
+	else {
+		printf("len = %d\n", len);
+		disp_x_buff(Buff, len);
+		printf("crc0 = %x , crc1 = %x\n", crc0, crc1);
 		return 0;
+	}
 }
 
 static inline shared_ptr<WIFI_BASE_SESSION> make_receive_session(unsigned char * rxbuff, int num)
@@ -159,6 +163,7 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 
 	enum {
 		MAX_RX_BUFF = 1024 * 10,
+		MAX_ALARM_BUFF_LEN = 1024 * 8,
 	};
 	unsigned char  * rxbuf = new unsigned char[MAX_RX_BUFF];
 	unique_ptr<unsigned char[]> ppp(rxbuf, default_delete<unsigned char[]>());
@@ -188,6 +193,12 @@ void Wifi_rec_thread(WIFI_INFO * pwifi)
 			int removed_Len = 0;
 
 			wifi_pro_bare_buff(rxbuf, rxlen, pwifi, removed_Len);
+
+			if (rxlen > MAX_ALARM_BUFF_LEN) {
+				rxlen = 0;
+				continue;
+			}
+
 
 			if (removed_Len && removed_Len <= rxlen) {
 				rxlen = rxlen - removed_Len;

@@ -48,7 +48,7 @@ enum WIFI_PRO_STATUS{
 enum
 {
 	MIN_PACK_SZ = 18,//最小包长度
-	MAX_PACK_SZ = 1000,//最大包长度
+	MAX_PACK_SZ = 1024,//最大包长度
 };
 
 struct WIFI_BASE_SESSION {

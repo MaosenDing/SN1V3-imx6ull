@@ -8,7 +8,7 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
 		functionID = 0x83;
 	}
-	
+
 	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info, int downloadindex) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
 	{
 		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD;
@@ -19,6 +19,7 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 	uint16_t crc;
 	uint32_t len;
 	int usingindex = 0;
+
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
 		WIFI_DATA_SUB_PROTOCOL sub;
@@ -45,22 +46,34 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 				len |= pdat[3] << 8;
 				len |= pdat[4] << 16;
 				len |= pdat[5] << 24;
-
+				usingindex++;
 				if (info.dbg_pri_msg) {
-					printf("need downfile index = %d,len = %d , crc = %x,\n"
+					printf("need downfile file index = %d,len = %d , crc = %x,\n"
 						, sec.data[1]
 						, len
 						, crc
 					);
 				}
-			} else {
+			} else if (sec.frame_index == -1) {
+				if (info.dbg_pri_msg)
+					printf("waiting...len = %d\n", sec.data_len);
+			} else if (sec.frame_index == -3) {
+				//完成标志
+				return WIFI_PRO_STATUS::WIFI_PRO_END;
+			}else if (sec.frame_index == usingindex) {
+				//获取到数据
 				if (info.dbg_pri_msg) {
 					printf("get frame index = %d\n"
 						, sec.frame_index
 					);
 				}
+				usingindex++;
+			} else {
+				//其他错误信息
+				if (info.dbg_pri_msg) {
+					printf("get frame index error = %d\n", sec.frame_index);
+				}
 			}
-			usingindex++;
 		}
 		return WIFI_PRO_STATUS::WIFI_PRO_NEED_WRITE;
 	}

@@ -214,7 +214,7 @@ int exec_download_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 	do {
 		fun->wifi_write(sec);
 		sec.code_num = 0x05;
-		chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_session_response);
+		chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_session_response*1000);
 		shared_ptr<WIFI_BASE_SESSION> ret;
 		do {
 			transmit_session(wifi, sec);

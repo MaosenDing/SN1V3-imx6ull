@@ -133,6 +133,10 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	if (ChkifCMD(argc, argv, "-dmsg")) {
 		wifi.dbg_pri_msg = 1;
 	}
+
+	if (ChkifCMD(argc, argv, "-dcrc")) {
+		wifi.dbg_pri_chk_flag = 1;
+	}
 	//mdc poll will never return
 	InitWIFI_svc(wifi);
 	wifi_serivce(wifi);
