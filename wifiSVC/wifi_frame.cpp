@@ -254,9 +254,9 @@ int wifi_serivce(WIFI_INFO & wifi)
 		exec_read_message(wifi, num);
 	}
 
-	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_WRITE, CODE_WRITE, "write stage");
+	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_WRITE, CODE_WRITE, "upload stage");
 
-	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD, CODE_SELF_DOWNLOAD, "write stage");
+	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD, CODE_SELF_DOWNLOAD, "download stage");
 
 	return 0;
 }

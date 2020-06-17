@@ -215,10 +215,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			, &tmpIP[3]
 		) == 4) {
 			char * dat = (char *)addr;
-			dat[3] = tmpIP[0];
-			dat[2] = tmpIP[1];
-			dat[1] = tmpIP[2];
-			dat[0] = tmpIP[3];
+			reverse_copy(tmpIP, tmpIP + 4, dat);
 			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
