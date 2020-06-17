@@ -1,6 +1,8 @@
 #include "../wifi_svc.h"
 #include "../wifi_ctrl.h"
 #include "svc_download_file.h"
+#include <string.h>
+#include "jd_share.h"
 struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 {
 	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
@@ -19,6 +21,9 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 	uint16_t crc;
 	uint32_t len;
 	int usingindex = 0;
+
+	char *pbuffer = 0;
+
 
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
@@ -47,6 +52,17 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 				len |= pdat[4] << 16;
 				len |= pdat[5] << 24;
 				usingindex++;
+				if (pbuffer) {
+					delete pbuffer;
+				}
+
+				pbuffer = new char[len];
+
+				if (!pbuffer) {
+					printf("error no enough memory\n");
+					exit(-1);
+				}
+
 				if (info.dbg_pri_msg) {
 					printf("need downfile file index = %d,len = %d , crc = %x,\n"
 						, sec.data[1]
@@ -59,9 +75,22 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 					printf("waiting...len = %d\n", sec.data_len);
 			} else if (sec.frame_index == -3) {
 				//完成标志
+				unsigned int calcrc = crc_make((unsigned char *)pbuffer, len, 0xffff);
+
+				if (calcrc == crc) {
+					printf("crc check ok\n");
+				} else {
+					printf("crc check error,rec crc = %x ,cal crc = %x,len = %d\n"
+						, crc, calcrc, len);
+				}
+				delete[] pbuffer;
 				return WIFI_PRO_STATUS::WIFI_PRO_END;
-			}else if (sec.frame_index == usingindex) {
+			} else if (sec.frame_index == usingindex) {
 				//获取到数据
+				unsigned char * dat = &sec.data[1];
+				int datlen = sec.data_len - 1;
+				char * buffpos = &pbuffer[(1024 - MIN_PACK_SZ - 1) * (sec.frame_index - 1)];
+				memcpy(buffpos, dat, datlen);
 				if (info.dbg_pri_msg) {
 					printf("get frame index = %d\n"
 						, sec.frame_index

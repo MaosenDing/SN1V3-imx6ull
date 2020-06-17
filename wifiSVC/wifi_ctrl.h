@@ -39,10 +39,14 @@ enum CODE_ID {
 	CODE_ERR = -1,
 };
 
-enum WIFI_PRO_STATUS{
+enum WIFI_PRO_STATUS {
 	WIFI_PRO_ERR = -1,
+	//处理结束
 	WIFI_PRO_END = 0,
+	//继续处理
 	WIFI_PRO_NEED_WRITE = 1,
+	//保留到下一轮继续处理
+	WIFI_PRO_NEXT_SHIFT_TO_NEXT_ROUND = 2,
 };
 
 enum
@@ -176,7 +180,12 @@ WIFI_BASE_FUNCTION * FindFunction(WIFI_INFO & wifi, int funMask, int funid);
 
 
 
-std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds);
+std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi
+	, bool(*ChkSession)(WIFI_BASE_SESSION &),int milliseconds);
+
+std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi
+	, bool(*ChkSession)(WIFI_BASE_SESSION &, void * p), void * priv, int milliseconds);
+
 int set_wifi_module(WIFI_INFO & wifi);
 int get_wifi_tim(WIFI_INFO & wifi);
 int get_cache(WIFI_INFO & wifi, int * buffsta);

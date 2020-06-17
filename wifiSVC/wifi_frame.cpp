@@ -182,17 +182,21 @@ int exec_write_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 			ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_WRITE | 0x80); }
 			, wifi.max_delay_ms_muc_response);
 
-			if (ret && ret->frame_index > -2) {
+			if (ret && ret->frame_index != -2) {
 				break;
 			}
 			this_thread::sleep_for(chrono::milliseconds(wifi.max_delay_ms_muc_response));
 		} while (chrono::system_clock::now() < endpoint);
 
-		if (ret && ret->frame_index <= -2) {
+		if (ret && ret->frame_index == -2) {
 			//发送错误  下次再发送
 			return -1;
 		}
 		sta = fun->wifi_read(*ret);
+		if (sta == WIFI_PRO_NEXT_SHIFT_TO_NEXT_ROUND) {
+			//保留到下轮
+			return -2;
+		}
 	} while (sta == WIFI_PRO_NEED_WRITE);
 	//完成
 	//删除
@@ -214,24 +218,28 @@ int exec_download_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun)
 	do {
 		fun->wifi_write(sec);
 		sec.code_num = 0x05;
-		chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_session_response*1000);
+		chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(wifi.max_delay_ms_session_response);
 		shared_ptr<WIFI_BASE_SESSION> ret;
 		do {
 			transmit_session(wifi, sec);
 			ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return session.code_num == (CODE_SELF_WRITE | 0x80); }
 			, wifi.max_delay_ms_muc_response);
 
-			if (ret && ret->frame_index > -2) {
+			if (ret && ret->frame_index != -2) {
 				break;
 			}
 			this_thread::sleep_for(chrono::milliseconds(wifi.max_delay_ms_muc_response));
 		} while (chrono::system_clock::now() < endpoint);
 
-		if (ret && ret->frame_index <= -2) {
+		if (ret && ret->frame_index == -2) {
 			//发送错误  下次再发送
 			return -1;
 		}
 		sta = fun->wifi_read(*ret);
+		if (sta == WIFI_PRO_NEXT_SHIFT_TO_NEXT_ROUND) {
+			//保留到下轮
+			return -2;
+		}
 	} while (sta == WIFI_PRO_NEED_WRITE);
 	//完成
 	//删除

@@ -155,6 +155,27 @@ shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSessio
 	return shared_ptr<WIFI_BASE_SESSION>();
 }
 
+shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi, bool(*ChkSession)(WIFI_BASE_SESSION &, void * p), void * priv, int milliseconds)
+{
+	unique_lock<timed_mutex> lck(wifi.mtx_using_list);
+
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now() + chrono::milliseconds(milliseconds);
+
+	do {
+		for (auto itr = wifi.rec_session_list.begin(); itr != wifi.rec_session_list.end(); ++itr) {
+			if ((*itr) && (itr->use_count()) && (ChkSession(**itr, priv))) {
+				shared_ptr<WIFI_BASE_SESSION> ret(move(*itr));
+				wifi.rec_session_list.erase(itr);
+				return ret;
+			}
+		}
+	} while (cv_status::timeout != wifi.enable_cv.wait_until(lck, endpoint));
+
+	return shared_ptr<WIFI_BASE_SESSION>();
+}
+
+
+
 void Wifi_rec_thread(WIFI_INFO * pwifi)
 {
 	if (!pwifi) {
