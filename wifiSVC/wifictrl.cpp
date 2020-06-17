@@ -21,6 +21,7 @@
 #include "versions.h"
 #include "jd_share.h"
 #include "iostream"
+#include "configOperator.h"
 
 using namespace std;
 
@@ -137,13 +138,14 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	if (ChkifCMD(argc, argv, "-dcrc")) {
 		wifi.dbg_pri_chk_flag = 1;
 	}
+	//scanf cfg file
+	scanfAllTable(wifi.cfg, Mask_All);
+
 	//mdc poll will never return
 	InitWIFI_svc(wifi);
+
 	wifi_serivce(wifi);
 
-
-	exit(0);
-	printf("mdc com\n");
 
 	return 0;
 }

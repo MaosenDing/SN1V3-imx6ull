@@ -234,6 +234,7 @@ void exec_exchange_stage(WIFI_INFO & wifi, uint32_t proMask, int code, const cha
 
 int wifi_serivce(WIFI_INFO & wifi)
 {
+
 	if (0 != wifi_open(wifi)) {
 		printf("wifi open fail\n");
 		exit(0);
@@ -257,7 +258,6 @@ int wifi_serivce(WIFI_INFO & wifi)
 
 	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD, CODE_SELF_DOWNLOAD, "write stage");
 
-	exit(0);
 	return 0;
 }
 

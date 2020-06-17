@@ -1,5 +1,5 @@
-%HeliostatID,12345676
 %ReducerM,rm1
 %PutterM,pm1
 %DriveM,dm1
 %FWSensorM,fwm1
+%PSN_MAC,1:1:1:1

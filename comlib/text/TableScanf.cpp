@@ -163,17 +163,35 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 		break;
 
 	case dateType::MAC:
-		int tmpmac[6];
+		int tmpmac6[6];
 		if (sscanf(data.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x"
-			, &tmpmac[0]
-			, &tmpmac[1]
-			, &tmpmac[2]
-			, &tmpmac[3]
-			, &tmpmac[4]
-			, &tmpmac[5]
+			, &tmpmac6[0]
+			, &tmpmac6[1]
+			, &tmpmac6[2]
+			, &tmpmac6[3]
+			, &tmpmac6[4]
+			, &tmpmac6[5]
 		) == 6) {
 			for (int i = 0; i < 6; i++) {
-				*((unsigned int *)addr + i) = tmpmac[i];
+				*((unsigned char *)addr + i) = tmpmac6[i];
+			}
+			info->dataStatus = dataFromTable;
+		} else {
+			if (default_value) default_value(addr);
+			info->dataStatus = dataTransFaultDefault;
+		}
+		break;
+
+	case dateType::MAC4:
+		int tmpmac4[4];
+		if (sscanf(data.c_str(), "%02x:%02x:%02x:%02x"
+			, &tmpmac4[0]
+			, &tmpmac4[1]
+			, &tmpmac4[2]
+			, &tmpmac4[3]
+		) == 4) {
+			for (int i = 0; i < 4; i++) {
+				*((unsigned char *)addr + i) = tmpmac4[i];
 			}
 			info->dataStatus = dataFromTable;
 		} else {
@@ -325,6 +343,19 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 			, macDat[3]
 			, macDat[4]
 			, macDat[5]
+		);
+		outstring.append(tmpbuff);
+	}
+	break;
+
+	case dateType::MAC4:
+	{
+		char * macDat = (char *)dataAddr;
+		snprintf(tmpbuff, 64, "%%%s,%02x:%02x:%02x:%02x\n", info->name
+			, macDat[0]
+			, macDat[1]
+			, macDat[2]
+			, macDat[3]
 		);
 		outstring.append(tmpbuff);
 	}

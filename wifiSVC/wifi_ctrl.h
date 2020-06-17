@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <condition_variable>
 #include <sys/time.h>
-
+#include "sn1v3cfg.h"
 enum WIFI_ERR {
 	wifi_ok = 0,
 	wifi_disconnect = -1,
@@ -142,6 +142,9 @@ struct WIFI_INFO {
 	unsigned char sndbuf[1024];
 	unsigned char send_seq = 0;
 	//using retry
+
+	//sn1v3 cfg file
+	Tg_table cfg;
 #define MAX_RETRY_EXEC_CTRL (3)
 	//debug using
 	int fake_check_flag = 0;

@@ -46,14 +46,6 @@ void IPServerDefault(void * addr)
 	reverse_copy(serverip, serverip + 4, pos);
 }
 
-void PortServerDefault(void * addr)
-{
-	//服务器默认端口 808
-	int32_t * port = (int32_t *)addr;
-	*port = 808;
-}
-
-
 void IPLocalDefault(void * addr)
 {
 	//本地默认ip 192.168.50.111
@@ -65,11 +57,20 @@ void IPLocalDefault(void * addr)
 
 void MACDefault(void * addr)
 {
-	//本地默认ip 192.168.50.111
+	//mac6
 	const char localip[6] = {0x11,0x22,0x33,0x44,0x55,0xff};
 
 	char * pos = (char *)addr;
 	copy(localip, localip + 6, pos);
+}
+
+void MAC4Default(void * addr)
+{
+	//mac4
+	const char localip[4] = { 1,1,1,1 };
+
+	char * pos = (char *)addr;
+	copy(localip, localip + 4, pos);
 }
 
 void InstallTimDefault(void * addr)
@@ -81,21 +82,20 @@ void InstallTimDefault(void * addr)
 }
 
 CFG_INFO T1[] = {
-	T1_Set_data(1,HeliostatID,dateType::STRING16,stingDefault),
-	T1_Set_data(2,ReducerM,dateType::STRING16,stingDefault),
-	T1_Set_data(3,PutterM,dateType::STRING16,stingDefault),
-	T1_Set_data(4,DriveM,dateType::STRING16,stingDefault),
-	T1_Set_data(5,FWSensorM,dateType::STRING16,stingDefault),
-	T1_Set_data(6,FYSensorM,dateType::STRING16,stingDefault),
-	T1_Set_data(7,InstallTime,dateType::TIM16,InstallTimDefault),
-	T1_Set_data(8,PSN,dateType::MAC,MACDefault),
-	T1_Set_data(9,MDC2_SV_1,dateType::STRING16,stingDefault),
-	T1_Set_data(10,MDC2_SV_2,dateType::STRING16,stingDefault),
-	T1_Set_data(11,MDC2_SV_3,dateType::STRING16,stingDefault),
-	T1_Set_data(12,MDC2_SV_4,dateType::STRING16,stingDefault),
-	T1_Set_data(13,MDC2_SV_5,dateType::STRING16,stingDefault),
-	T1_Set_data(14,DRI1_SV,dateType::STRING16,stingDefault),
-	T1_Set_data(15,DRI2_SV,dateType::STRING16,stingDefault),
+	T1_Set_data(1,ReducerM,dateType::STRING16,stingDefault),
+	T1_Set_data(2,PutterM,dateType::STRING16,stingDefault),
+	T1_Set_data(3,DriveM,dateType::STRING16,stingDefault),
+	T1_Set_data(4,FWSensorM,dateType::STRING16,stingDefault),
+	T1_Set_data(5,FYSensorM,dateType::STRING16,stingDefault),
+	T1_Set_data(6,InstallTime,dateType::TIM16,InstallTimDefault),
+	T1_Set_data(7,PSN_MAC,dateType::MAC4,MAC4Default),
+	T1_Set_data(8,MDC2_SV_1,dateType::STRING16,stingDefault),
+	T1_Set_data(9,MDC2_SV_2,dateType::STRING16,stingDefault),
+	T1_Set_data(10,MDC2_SV_3,dateType::STRING16,stingDefault),
+	T1_Set_data(11,MDC2_SV_4,dateType::STRING16,stingDefault),
+	T1_Set_data(12,MDC2_SV_5,dateType::STRING16,stingDefault),
+	T1_Set_data(13,DRI1_SV,dateType::STRING16,stingDefault),
+	T1_Set_data(14,DRI2_SV,dateType::STRING16,stingDefault),
 	T1_Set_data(16,Wiresless_SV,dateType::STRING16,stingDefault),
 	T1_Set_data(17,HeliostatType,dateType::STRING16,stingDefault),
 	T1_Set_data(18,SN2ID,dateType::STRING16,stingDefault),
@@ -194,6 +194,10 @@ CFG_INFO T4[] = {
 	T4_Set_data(12,LocalIP,dateType::IP,IPLocalDefault),
 	T4_Set_data(13,Channel,dateType::INT32,setDefault(int,0)),
 	T4_Set_data(14,SinglePacketMax,dateType::INT32,int32Default),
+
+	T4_Set_data(20,M_PASS,dateType::STRING32,stingDefault),
+	T4_Set_data(21,B_PASS,dateType::STRING32,stingDefault),
+	T4_Set_data(22,D_PASS,dateType::STRING32,stingDefault),
 };
 
 CFG_INFO T6[] = {

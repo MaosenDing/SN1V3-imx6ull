@@ -362,6 +362,10 @@ int wifi_reset_buff_status(WIFI_INFO & wifi)
 
 int set_wifi_module(WIFI_INFO & wifi)
 {
+	const unsigned char localip[] = { 192,168,1,228 };
+	const unsigned char netmask[] = { 255,255,255,0 };
+	const unsigned char gatway[] = { 192,168,1,250 };
+#if 0
 	set_ssid(wifi, 0, "XINCHEN-2.4G");
 	set_pwd(wifi, 0, "1000000001");
 	char buff[32];
@@ -374,13 +378,16 @@ int set_wifi_module(WIFI_INFO & wifi)
 	int port;
 	get_server(wifi, serverip, port);
 
-
-	const unsigned char localip[] = { 192,168,1,228 };
-	const unsigned char netmask[] = { 255,255,255,0 };
-	const unsigned char gatway[] = { 192,168,1,250 };
-
-
 	set_local_IP(wifi, localip,gatway,netmask);
+#else
+	set_ssid(wifi, 0, wifi.cfg.T4.M_AP1);
+	set_ssid(wifi, 0, wifi.cfg.T4.M_PASS);
+
+	set_server(wifi, (unsigned char *)wifi.cfg.T4.ServerIP, wifi.cfg.T4.ServerPort);
+	set_local_IP(wifi, (unsigned char *)wifi.cfg.T4.LocalIP, gatway, netmask);
+#endif
+
+
 
 	set_connect(wifi);
 

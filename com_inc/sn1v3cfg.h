@@ -26,6 +26,7 @@ extern "C" {
 
 		TIM16,
 		MAC,
+		MAC4,
 
 		BOOLTYPE,
 		IP,
@@ -71,7 +72,7 @@ extern "C" {
 		char FWSensorM[16];
 		char FYSensorM[16];
 		int InstallTime[5];//年月日时分
-		char PSN[6];
+		char PSN_MAC[4];
 		char MDC2_SV_1[16];
 		char MDC2_SV_2[16];
 		char MDC2_SV_3[16];
@@ -161,8 +162,13 @@ extern "C" {
 
 	typedef struct {
 		char M_AP1[32];
+		char M_PASS[32];
+
 		char B_AP2[32];
+		char B_PASS[32];
+
 		char D_AP0[32];
+		char D_PASS[32];
 		int32_t CM_Group;
 		int32_t CM_Times;
 		int32_t CM_Cycle;
@@ -256,7 +262,6 @@ extern "C" {
 	size_t max_group_cnt();
 	const CFG_GROUP * find_group_index(size_t i);
 	const CFG_GROUP * find_group_name(const char * groupName);
-
 
 #ifdef __cplusplus
 }
