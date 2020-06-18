@@ -146,21 +146,20 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			, tim + 3
 			, tim + 4
 		) == 5) {
-			if (is_valid_date(tim[0],tim[1],tim[2]) && is_valid_daytim(tim[3],tim[4],0))
-			{
+			if (is_valid_date(tim[0], tim[1], tim[2]) && is_valid_daytim(tim[3], tim[4], 0)) {
 				ChkFlg = 1;
-			}			
+			}
 		}
 
 		if (ChkFlg == 1) {
-			*(int32_t *)addr = tmpint;
+			copy(tim, tim + 5, (int32_t *)addr);
 			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
 			info->dataStatus = dataTransFaultDefault;
 		}
 	}
-		break;
+	break;
 
 	case dateType::MAC:
 		int tmpmac6[6];
@@ -172,9 +171,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			, &tmpmac6[4]
 			, &tmpmac6[5]
 		) == 6) {
-			for (int i = 0; i < 6; i++) {
-				*((unsigned char *)addr + i) = tmpmac6[i];
-			}
+			copy(tmpmac6, tmpmac6 + 6, (unsigned char *)addr);
 			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
@@ -190,9 +187,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 			, &tmpmac4[2]
 			, &tmpmac4[3]
 		) == 4) {
-			for (int i = 0; i < 4; i++) {
-				*((unsigned char *)addr + i) = tmpmac4[i];
-			}
+			copy(tmpmac4, tmpmac4 + 4, (unsigned char *)addr);
 			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);

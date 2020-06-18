@@ -46,6 +46,24 @@ void IPServerDefault(void * addr)
 	reverse_copy(serverip, serverip + 4, pos);
 }
 
+void IPNETMASKDefault(void * addr)
+{
+	//本地默认ip 192.168.50.111
+	const char localip[4] = { 255,255,255,0 };
+
+	char * pos = (char *)addr;
+	reverse_copy(localip, localip + 4, pos);
+}
+
+void IPGATEWAYDefault(void * addr)
+{
+	//本地默认ip 192.168.50.111
+	const char localip[4] = { 192,168,1,250 };
+
+	char * pos = (char *)addr;
+	reverse_copy(localip, localip + 4, pos);
+}
+
 void IPLocalDefault(void * addr)
 {
 	//本地默认ip 192.168.50.111
@@ -53,15 +71,6 @@ void IPLocalDefault(void * addr)
 
 	char * pos = (char *)addr;
 	reverse_copy(localip, localip + 4, pos);
-}
-
-void MACDefault(void * addr)
-{
-	//mac6
-	const char localip[6] = {0x11,0x22,0x33,0x44,0x55,0xff};
-
-	char * pos = (char *)addr;
-	copy(localip, localip + 6, pos);
 }
 
 void MAC4Default(void * addr)
@@ -198,6 +207,9 @@ CFG_INFO T4[] = {
 	T4_Set_data(20,M_PASS,dateType::STRING32,stingDefault),
 	T4_Set_data(21,B_PASS,dateType::STRING32,stingDefault),
 	T4_Set_data(22,D_PASS,dateType::STRING32,stingDefault),
+
+	T4_Set_data(23,GATEWAY,dateType::IP,IPGATEWAYDefault),
+	T4_Set_data(24,NETMASK,dateType::IP,IPNETMASKDefault),
 };
 
 CFG_INFO T6[] = {

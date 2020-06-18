@@ -184,7 +184,7 @@ int get_server(WIFI_INFO & wifi, unsigned char * serverip, int &port)
 			unsigned char * serverip = &psec->data[1];
 			unsigned char * portpos = serverip + 4;
 			port = portpos[0] | portpos[1] << 8;
-			if (wifi.dbg_pri_wifi_ctrl)printf("get remote ip = %d:%d:%d:%d,port = %d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("get remote ip = %d.%d.%d.%d,port = %d\n"
 				, serverip[0]
 				, serverip[1]
 				, serverip[2]
@@ -362,9 +362,10 @@ int wifi_reset_buff_status(WIFI_INFO & wifi)
 
 int set_wifi_module(WIFI_INFO & wifi)
 {
+
+#if 0
 	const unsigned char netmask[] = { 255,255,255,0 };
 	const unsigned char gatway[] = { 192,168,1,250 };
-#if 0
 	const unsigned char localip[] = { 192,168,1,228 };
 	set_ssid(wifi, 0, "XINCHEN-2.4G");
 	set_pwd(wifi, 0, "1000000001");
@@ -383,11 +384,15 @@ int set_wifi_module(WIFI_INFO & wifi)
 	set_ssid(wifi, 0, wifi.cfg.T4.M_AP1);
 	set_pwd(wifi, 0, wifi.cfg.T4.M_PASS);
 	unsigned char ip[4];
-
+	unsigned char netmask[4];
+	unsigned char gatway[4];
 	reverse_copy(wifi.cfg.T4.ServerIP, wifi.cfg.T4.ServerIP + 4, ip);
 	set_server(wifi, ip, wifi.cfg.T4.ServerPort);
 
 	reverse_copy(wifi.cfg.T4.LocalIP, wifi.cfg.T4.LocalIP + 4, ip);
+	reverse_copy(wifi.cfg.T4.NETMASK, wifi.cfg.T4.NETMASK + 4, netmask);
+	reverse_copy(wifi.cfg.T4.GATEWAY, wifi.cfg.T4.GATEWAY + 4, gatway);
+
 	set_local_IP(wifi, ip, gatway, netmask);
 #endif
 	set_connect(wifi);

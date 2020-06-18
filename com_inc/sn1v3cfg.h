@@ -180,6 +180,8 @@ extern "C" {
 		char ServerIP[4];
 		int32_t ServerPort;
 		char LocalIP[4];
+		char NETMASK[4];
+		char GATEWAY[4];
 		int32_t Channel;
 		int32_t SinglePacketMax;
 	}T4_table;
