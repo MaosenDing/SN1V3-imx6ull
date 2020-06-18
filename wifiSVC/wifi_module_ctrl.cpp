@@ -379,7 +379,7 @@ int set_wifi_module(WIFI_INFO & wifi)
 	int port;
 	get_server(wifi, serverip, port);
 
-	set_local_IP(wifi, localip,gatway,netmask);
+	set_local_IP(wifi, localip, gatway, netmask);
 #else
 	set_ssid(wifi, 0, wifi.cfg.T4.M_AP1);
 	set_pwd(wifi, 0, wifi.cfg.T4.M_PASS);

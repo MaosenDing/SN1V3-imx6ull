@@ -68,9 +68,11 @@ static unsigned char crc_check(unsigned int len, unsigned char *Buff, unsigned i
 	if (crc0 == crc1)
 		return 1;
 	else {
+#if 0
 		printf("len = %d\n", len);
 		disp_x_buff(Buff, len);
 		printf("crc0 = %x , crc1 = %x\n", crc0, crc1);
+#endif
 		return 0;
 	}
 }

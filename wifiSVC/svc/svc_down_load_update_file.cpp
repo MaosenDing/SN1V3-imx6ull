@@ -3,6 +3,27 @@
 #include "svc_download_file.h"
 #include <string.h>
 #include "jd_share.h"
+#include <unistd.h>
+#include <fstream>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+using namespace std;
+
+void child_handler(int num)
+{
+	//SIGCHLD的信号
+	int status;
+	int pid = waitpid(-1, &status, WNOHANG);
+	if (WIFEXITED(status)) {
+		printf("The child %d exit with code %d\n", pid, WEXITSTATUS(status));
+	}
+}
+
+
+
 struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 {
 	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
@@ -23,6 +44,20 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 	int usingindex = 0;
 
 	char *pbuffer = 0;
+
+	int writebin(const char * path, const char * data, const int len)
+	{
+		int goodflg = 0;
+		{
+			ofstream writefile("./update", ios::binary);
+			if (writefile.good()) {
+				writefile.write(pbuffer, len);
+				goodflg = 1;
+			}
+		}
+		sync();
+		return goodflg;
+	}
 
 
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
@@ -78,10 +113,25 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 				unsigned int calcrc = crc_make((unsigned char *)pbuffer, len, 0xffff);
 
 				if (calcrc == crc) {
-					printf("crc check ok\n");
+					if (info.dbg_pri_msg)
+						printf("crc check ok\n");
+					const char * updatepath = "./update";
+					if (writebin(updatepath, pbuffer, len)) {
+						int pid = fork();
+						if (pid == 0) {
+							printf("chmod\n");
+							chmod(updatepath, 0777);
+							execv(updatepath, nullptr);
+							exit(0);
+						} else {
+							signal(SIGCHLD, child_handler);
+						}
+					}
 				} else {
-					printf("crc check error,rec crc = %x ,cal crc = %x,len = %d\n"
-						, crc, calcrc, len);
+					if (info.dbg_pri_msg)
+						printf("crc check error,rec crc = %x ,cal crc = %x,len = %d\n"
+							, crc, calcrc, len);
+
 				}
 				delete[] pbuffer;
 				return WIFI_PRO_STATUS::WIFI_PRO_END;
