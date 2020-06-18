@@ -71,7 +71,7 @@ int get_wifi_tim(WIFI_INFO & wifi)
 	shared_ptr<WIFI_BASE_SESSION> ret;
 
 	printf("test tim \n");
-	ret = exec_wifi_tim(wifi, wifi.max_delay_ms_session_response);
+	ret = exec_wifi_tim(wifi, wifi.max_delay_ms_connecting);
 	if (ret) {
 		printf("tim get ok\n");
 		return 0;

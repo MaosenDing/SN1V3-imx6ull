@@ -118,10 +118,13 @@ struct WIFI_INFO {
 	{}
 	int uartFD = -1;
 	wifi_run_flg recRunFlg = wifi_run_null;
-	int max_delay_ms_muc_response = 100;
-	int max_delay_ms_session_response = 20 * 1000;
-
-	unsigned char this_id[4] = { 0x1,0x1,0x1,0x1 };
+	//wifi mcu 通讯超时
+	const int max_delay_ms_muc_response = 100;
+	//数据传输服务超时
+	const int max_delay_ms_session_response = 20 * 1000;
+	//连接服务器超时
+	const int max_delay_ms_connecting = 60 * 1000;
+	//服务器ID 固定
 	const unsigned char server_id[4] = { 0x62,0x27,0x21,0x55 };
 
 	SN1_SHM * psn1;
