@@ -2,7 +2,7 @@
 
 cp /nucroot/lib/*.so .
 cp /nucroot/bin/*.exe .
-cp /nucroot/bin/*.txt .
+cp /nucroot/bin/T*.txt .
 
 
 

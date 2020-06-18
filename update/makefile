@@ -53,5 +53,9 @@ $(filter %.section , $(cfgsection)): %.section: %.txt
 .PHONY:clean
 clean:
 	-rm -f  ./*.o ./*.section
+	-rm -f ./*.txt
+	-rm -f ./*.EXE
+	-rm -f ./*.exe
+	-rm -f ./*.so
 	-rm -f update*.bin
 	-rm -f aim/* 
