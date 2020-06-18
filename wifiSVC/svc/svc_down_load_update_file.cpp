@@ -9,7 +9,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
 using namespace std;
 
 void child_handler(int num)
@@ -117,14 +116,13 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 						printf("crc check ok\n");
 					const char * updatepath = "./update";
 					if (writebin(updatepath, pbuffer, len)) {
+						signal(SIGCHLD, child_handler);
 						int pid = fork();
 						if (pid == 0) {
-							printf("chmod\n");
+							printf("exev %s\n", updatepath);
 							chmod(updatepath, 0777);
 							execv(updatepath, nullptr);
 							exit(0);
-						} else {
-							signal(SIGCHLD, child_handler);
 						}
 					}
 				} else {

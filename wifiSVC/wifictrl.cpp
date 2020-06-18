@@ -146,7 +146,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 	wifi_serivce(wifi);
 
-
+	this_thread::sleep_for(chrono::seconds(2));
 	return 0;
 }
 
