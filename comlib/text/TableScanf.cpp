@@ -346,50 +346,41 @@ void scanfAllTable(Tg_table & tb, uint32_t table_mask)
 
 
 
-void printData2String(string & outstring, const void * baseaddr, const CFG_INFO * info)
+int printData2String(char * tmpbuff,int maxbuf ,const void * baseaddr, const CFG_INFO * info)
 {
 	void * dataAddr = (char *)baseaddr + info->diff;
-
-	char tmpbuff[64] = { 0 };
 
 
 	switch (info->typ) {
 	case dateType::STRING16:
 	case dateType::STRING32:
 	case dateType::STRING64:
-		snprintf(tmpbuff, 64, "%%%s,%s\n", info->name, (char *)dataAddr);
-		outstring.append(tmpbuff);
-		break;
+		return snprintf(tmpbuff, 64, "%s", (char *)dataAddr);
+
 	case dateType::FLOAT32:
-		snprintf(tmpbuff, 64, "%%%s,%f\n", info->name, *(float *)dataAddr);
-		outstring.append(tmpbuff);
-		break;
+		return snprintf(tmpbuff, 64, "%f", *(float *)dataAddr);
+
 	case dateType::DOUBLE64:
-		snprintf(tmpbuff, 64, "%%%s,%lf\n", info->name, *(double *)dataAddr);
-		outstring.append(tmpbuff);
-		break;
+		return snprintf(tmpbuff, 64, "%lf", *(double *)dataAddr);
+
 	case dateType::INT32:
-		snprintf(tmpbuff, 64, "%%%s,%d\n", info->name, *(int *)dataAddr);
-		outstring.append(tmpbuff);
-		break;
+		return snprintf(tmpbuff, 64, "%d", *(int *)dataAddr);
 
 	case dateType::TIM16:
 	{
 		int * tim = (int *)dataAddr;
-		snprintf(tmpbuff, 64, "%%%s,%d-%d-%d %d:%d\n", info->name
+		return snprintf(tmpbuff, 64, "%d-%d-%d %d:%d"
 			, tim[0]
 			, tim[1]
 			, tim[2]
 			, tim[3]
 			, tim[4]);
-		outstring.append(tmpbuff);
-	}
-		break;
 
+	}
 	case dateType::MAC:
 	{
 		char * macDat = (char *)dataAddr;
-		snprintf(tmpbuff, 64, "%%%s,%02x:%02x:%02x:%02x:%02x:%02x\n", info->name
+		return snprintf(tmpbuff, 64, "%02x:%02x:%02x:%02x:%02x:%02x"
 			, macDat[0]
 			, macDat[1]
 			, macDat[2]
@@ -397,48 +388,41 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 			, macDat[4]
 			, macDat[5]
 		);
-		outstring.append(tmpbuff);
-	}
-	break;
 
+	}
 	case dateType::MAC4:
 	{
 		char * macDat = (char *)dataAddr;
-		snprintf(tmpbuff, 64, "%%%s,%02x:%02x:%02x:%02x\n", info->name
+		return snprintf(tmpbuff, 64, "%02x:%02x:%02x:%02x"
 			, macDat[0]
 			, macDat[1]
 			, macDat[2]
 			, macDat[3]
 		);
-		outstring.append(tmpbuff);
-	}
-	break;
 
+	}
 	case dateType::BOOLTYPE:
 		if (*(int *)dataAddr == 0) {
-			snprintf(tmpbuff, 64, "%%%s,false\n", info->name);
+			return snprintf(tmpbuff, 64, "false");
 		} else {
-			snprintf(tmpbuff, 64, "%%%s,true\n", info->name);
+			return snprintf(tmpbuff, 64, "true");
 		}
-		outstring.append(tmpbuff);
-		break;
 	case dateType::IP:
 	{
 		//ip内存中使用小端格式
 		char * IPdat = (char *)dataAddr;
-		snprintf(tmpbuff, 64, "%%%s,%d.%d.%d.%d\n", info->name
+		return snprintf(tmpbuff, 64, "%d.%d.%d.%d"
 			, IPdat[3]
 			, IPdat[2]
 			, IPdat[1]
 			, IPdat[0]
 		);
-		outstring.append(tmpbuff);
 	}
-	break;
 
 	default:
 		break;
 	}
+	return 0;
 }
 
 void printData2String(string & outstring, const void * baseaddr, const CFG_INFO * info, int wrMask)
@@ -461,9 +445,15 @@ void printData2String(string & outstring, const void * baseaddr, const CFG_INFO 
 	}
 
 	if (writeflg) {
-		printData2String(outstring, baseaddr, info);
-		if (wrMask & writeDataNote)
-		{
+		char namebuff[64];
+		snprintf(namebuff, 64, "%%%s,", info->name);
+		outstring.append(namebuff);
+
+		char tmpstring[64];
+		printData2String(tmpstring, 64, baseaddr, info);
+		outstring.append(tmpstring);
+		outstring.append("\n");
+		if (wrMask & writeDataNote) {
 		}
 	}
 }

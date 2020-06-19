@@ -268,6 +268,7 @@ extern "C" {
 	const CFG_INFO * find_info_by_seqIndex(const CFG_INFO * cfg, size_t maxsz, size_t seqIndex);
 	int query_data_by_index(const void * tableaddr, const CFG_INFO * aimcfg
 		, void * outdata, size_t outMaxlen);
+	int printData2String(char * tmpbuff, int maxbuf, const void * baseaddr, const CFG_INFO * info);
 #ifdef __cplusplus
 }
 #endif
