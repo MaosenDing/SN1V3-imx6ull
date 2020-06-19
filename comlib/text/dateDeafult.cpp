@@ -194,15 +194,14 @@ CFG_INFO T4[] = {
 	T4_Set_data(4,CM_Group,dateType::INT32,int32Default),
 	T4_Set_data(5,CM_Times,dateType::INT32,int32Default),
 	T4_Set_data(6,CM_Cycle,dateType::INT32,int32Default),
-	T4_Set_data(7,AP_SS,dateType::INT32,int32Default),
-	T4_Set_data(8,Baudrate,dateType::INT32,int32Default),
-	T4_Set_data(9,TransmitPower,dateType::INT32,int32Default),
+	T4_Set_data(7,Baudrate,dateType::INT32,int32Default),
 
 	T4_Set_data(10,ServerIP,dateType::IP,IPServerDefault),
 	T4_Set_data(11,ServerPort,dateType::INT32,setDefault(int,8888)),
+
 	T4_Set_data(12,LocalIP,dateType::IP,IPLocalDefault),
 	T4_Set_data(13,Channel,dateType::INT32,setDefault(int,0)),
-	T4_Set_data(14,SinglePacketMax,dateType::INT32,int32Default),
+	T4_Set_data(14,SinglePacketMax,dateType::INT32,setDefault(int,1024)),
 
 	T4_Set_data(20,M_PASS,dateType::STRING32,stingDefault),
 	T4_Set_data(21,B_PASS,dateType::STRING32,stingDefault),
@@ -241,9 +240,15 @@ CFG_INFO T6[] = {
 	T6_Set_data(23,SN2_P5,dateType::FLOAT32,setDefault(float ,20)),//SN2用最大转角速度（度/秒）
 	T6_Set_data(24,SN2_P6,dateType::FLOAT32,setDefault(float ,1)),//SN2用法线最大扫描距离（米）
 
-	T6_Set_data(25,SaveOrg,dateType::BOOLTYPE,boolDefault),
-	T6_Set_data(26,SaveBin,dateType::BOOLTYPE,boolDefault),
-	T6_Set_data(27,SavePath,dateType::STRING64,stingDefault),
+	//是否保存原始图像
+	T6_Set_data(35,SaveOrg,dateType::BOOLTYPE,boolDefault),
+	//是否保存二值化图像
+	T6_Set_data(36,SaveBin,dateType::BOOLTYPE,boolDefault),
+	//保存路径
+	T6_Set_data(37,SavePath,dateType::STRING64,stingDefault),
+
+	T6_Set_data(38,Sn3gain,dateType::INT32,setDefault(float ,0)),
+	T6_Set_data(39,Sn3expo,dateType::INT32,setDefault(float ,0)),
 };
 
 

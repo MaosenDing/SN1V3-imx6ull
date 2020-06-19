@@ -172,9 +172,7 @@ extern "C" {
 		int32_t CM_Group;
 		int32_t CM_Times;
 		int32_t CM_Cycle;
-		int32_t AP_SS;
 		int32_t Baudrate;
-		int32_t TransmitPower;
 		//ip在内存中使用小端格式 即
 		//5 50 168 192表示192.168.50.5
 		char ServerIP[4];
@@ -219,6 +217,9 @@ extern "C" {
 		int SaveOrg; //是否保留原视图片
 		int SaveBin;//是否保留二值化图片
 		char SavePath[64];//图片保持目录
+
+		int Sn3gain;//sn3 专用增益 如果不设置  使用默认值
+		int Sn3expo;//sn3 专用曝光 如果不设置  使用默认值
 	}T6_table;
 
 #define T1_Set_data(seq,member,typ,def_method)      Set_data(T1_table,member,typ,def_method,seq)
