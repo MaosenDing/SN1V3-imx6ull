@@ -141,13 +141,15 @@ void exec_read_message(WIFI_INFO & wifi, int message_id)
 {
 	auto psec = read_first_message(wifi, message_id, wifi.max_delay_ms_session_response);
 
-	if (psec) {
+	if (psec.use_count()) {
 		WIFI_DATA_SUB_PROTOCOL sub;
-		if (0 == mk_WIFI_DATA_SUB_PROTOCOL(*psec, sub)) {
-			if (wifi.dbg_pri_wifi_data) {
-				printf("msg id = %d ,receive fun = %d,datlen = %d\n"
-					, sub.message_id, sub.function_id, sub.datalen);
-			}
+		if (0 > mk_WIFI_DATA_SUB_PROTOCOL(*psec, sub)) {
+			return;
+		}
+
+		if (wifi.dbg_pri_wifi_data) {
+			printf("msg id = %d ,receive fun = %d,datlen = %d\n"
+				, sub.message_id, sub.function_id, sub.datalen);
 		}
 
 		auto fun = FindFunction(wifi, WIFI_BASE_FUNCTION::MASK_READ, sub.function_id);
@@ -197,6 +199,12 @@ int exec_exchange_data_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun, int c
 			//发送错误  下次再发送
 			return -1;
 		}
+
+		if (!ret) {
+			//超时
+			return -2;
+		}
+
 		sta = fun->wifi_read(*ret);
 		if (sta == WIFI_PRO_NEXT_SHIFT_TO_NEXT_ROUND) {
 			//保留到下轮

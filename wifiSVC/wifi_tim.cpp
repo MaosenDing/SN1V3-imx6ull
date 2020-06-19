@@ -44,11 +44,6 @@ static shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi, int maxMS)
 		transmit_session(wifi, sec);
 		shared_ptr<WIFI_BASE_SESSION>  ret = wait_rec_session(wifi, [](WIFI_BASE_SESSION & session) -> bool {return (session.data[0] | 0x80) && session.code_num == (CODE_INIT | 0x80); }, wifi.max_delay_ms_muc_response);
 		if (ret && (ret->data_len == 8)) {
-			if (wifi.dbg_pri_wifi_ctrl) printf("get tim ok = %d-%d-%d %d:%d:%d,%d\n",
-				ret->data[0], ret->data[1], ret->data[2],
-				ret->data[3], ret->data[4], ret->data[5],
-				ret->data[6] | (ret->data[7] << 8)
-			);
 			return ret;
 		}
 
@@ -66,6 +61,17 @@ static shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi, int maxMS)
 }
 
 
+static void tmktime(tm & NowTm, unsigned char *pdata)
+{
+	NowTm.tm_year = (int)pdata[0] + 100;
+	NowTm.tm_mon = (int)pdata[1] - 1;
+	NowTm.tm_mday = (int)pdata[2];
+
+	NowTm.tm_hour = (int)pdata[3];
+	NowTm.tm_min = (int)pdata[4];
+	NowTm.tm_sec = (int)pdata[5];
+}
+
 int get_wifi_tim(WIFI_INFO & wifi)
 {
 	shared_ptr<WIFI_BASE_SESSION> ret;
@@ -73,6 +79,24 @@ int get_wifi_tim(WIFI_INFO & wifi)
 	printf("test tim \n");
 	ret = exec_wifi_tim(wifi, wifi.max_delay_ms_connecting);
 	if (ret) {
+
+		if (wifi.dbg_pri_wifi_ctrl) printf("get tim ok = %d-%d-%d %d:%d:%d,%d\n",
+			ret->data[0], ret->data[1], ret->data[2],
+			ret->data[3], ret->data[4], ret->data[5],
+			ret->data[6] | (ret->data[7] << 8)
+		);
+
+		tm NowTm;
+		tmktime(NowTm, &ret->data[0]);
+
+		time_t tt = mktime(&NowTm);
+
+		timeval rectv;
+		rectv.tv_sec = tt;
+		rectv.tv_usec = (int)(ret->data[6] | ret->data[7] << 8) * 1000;
+
+		settimeofday(&rectv, nullptr);
+
 		printf("tim get ok\n");
 		return 0;
 	}
