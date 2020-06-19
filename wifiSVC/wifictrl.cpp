@@ -25,7 +25,7 @@
 
 using namespace std;
 
-static int mdc_uart_init(int inrate, int argc, char ** argv)
+static int wifi_uart_init(int inrate, int argc, char ** argv)
 {
 	char * name = ChkCmdVal(argc, argv, "-s");
 	cout << "name " << name << endl;
@@ -41,7 +41,7 @@ static int mdc_uart_init(int inrate, int argc, char ** argv)
 
 static void bus_handle(int signo)
 {
-	printf("%d , mdc error demon\n", signo);
+	printf("%d , wifi error demon\n", signo);
 
 	exit(-1);
 }
@@ -83,7 +83,7 @@ void setDbg(WIFI_INFO & wifi)
 
 
 
-int init_mdc_monitor_Service(int argc, char * argv[])
+int init_wifi_monitor_Service(int argc, char * argv[])
 {
 	signal(SIGBUS, bus_handle);
 
@@ -98,7 +98,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 
 	int boundrate = set_bound_rate(argc, argv);
 
-	int fd = mdc_uart_init(boundrate, argc, argv);
+	int fd = wifi_uart_init(boundrate, argc, argv);
 	if (fd < 0) {
 		printf("wifi uart open failed\n");
 		exit(EXIT_FAILURE);
@@ -141,7 +141,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	//scanf cfg file
 	scanfAllTable(wifi.cfg, Mask_All);
 
-	//mdc poll will never return
+	//wifi poll will never return
 	InitWIFI_svc(wifi);
 
 	wifi_serivce(wifi);
@@ -161,8 +161,8 @@ int main(int argc, char **argv)
 	}
 
 
-	logInit("mdc", "./mdc", google::GLOG_WARNING);
-	return init_mdc_monitor_Service(argc, argv);
+	logInit("wifi", "./wifi", google::GLOG_WARNING);
+	return init_wifi_monitor_Service(argc, argv);
 }
 
 
