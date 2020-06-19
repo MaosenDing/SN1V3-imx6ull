@@ -269,6 +269,18 @@ const CFG_GROUP * find_group_index(size_t i)
 	return nullptr;
 }
 
+const CFG_GROUP * find_group_by_cfg_index(size_t index)
+{
+	for (size_t i = 0; i < max_group_cnt(); i++) {
+		if (cfg_group[i].cfgindex == index) {
+			return &cfg_group[i];
+		}
+	}
+	return nullptr;
+}
+
+
+
 const CFG_GROUP * find_group_name(const char * groupName)
 {
 	if (!groupName) {

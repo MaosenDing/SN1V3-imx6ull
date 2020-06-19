@@ -18,7 +18,9 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
-		read_pro_fun(sec);
+		if (PRO_MASK & WIFI_BASE_FUNCTION::MASK_READ) {
+			read_pro_fun(sec);
+		}
 		return WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
@@ -26,7 +28,8 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 	virtual WIFI_PRO_STATUS wifi_write(WIFI_BASE_SESSION & sec) final
 	{
 		mk_write_session_data(sec);
-
+		//单次上传
+		sec.frame_index = -1;
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 

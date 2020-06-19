@@ -30,7 +30,7 @@ flags += -DSCG
 endif
 
 
-aim = update$(VERSION).bin
+aim = MDC2_SV_1$(VERSION).bin
 
 
 $(aim):$(file)

@@ -3,3 +3,11 @@
 %DriveM,dm1
 %FWSensorM,fwm1
 %PSN_MAC,2:2:2:2
+
+%MDC2_SV_1,1.1
+%MDC2_SV_2,1.1
+%MDC2_SV_3,1.1
+%MDC2_SV_4,1.1
+%MDC2_SV_5,1.1
+
+

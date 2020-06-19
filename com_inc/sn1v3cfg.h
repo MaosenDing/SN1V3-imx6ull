@@ -257,14 +257,17 @@ extern "C" {
 		const size_t diff;
 		CFG_INFO * const group;
 		const size_t sz;
-		const int seq;
-		const int cfgindex;
+		const size_t seq;
+		const size_t cfgindex;
 	}CFG_GROUP;
 
 	size_t max_group_cnt();
 	const CFG_GROUP * find_group_index(size_t i);
 	const CFG_GROUP * find_group_name(const char * groupName);
-
+	const CFG_GROUP * find_group_by_cfg_index(size_t i);
+	const CFG_INFO * find_info_by_seqIndex(const CFG_INFO * cfg, size_t maxsz, size_t seqIndex);
+	int query_data_by_index(const void * tableaddr, const CFG_INFO * aimcfg
+		, void * outdata, size_t outMaxlen);
 #ifdef __cplusplus
 }
 #endif

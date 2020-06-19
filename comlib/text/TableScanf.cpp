@@ -268,6 +268,67 @@ void setfromDefault(const void * tableaddr, const char * tableName)
 	}
 }
 
+const CFG_INFO * find_info_by_seqIndex(const CFG_INFO * cfggrp, size_t maxsz, size_t seqIndex)
+{
+	for (size_t datapos = 0; datapos < maxsz; datapos++) {
+		//cfg address
+		const CFG_INFO * info = &cfggrp[datapos];
+
+		if (info->SeqInTable == seqIndex) {
+			return info;
+		}
+	}
+	return nullptr;
+}
+
+int Get_Max_type_len(const CFG_INFO * aimcfg)
+{
+	if (!aimcfg) {
+		return -2;
+	}
+	struct _LENGRP{
+		dateType tp;
+		int len;
+	};
+
+	const _LENGRP LENGRP[] = {
+		{STRING16,16},
+		{STRING32,32},
+		{STRING64,64},
+		{STRING128,128},
+		{FLOAT32,4},
+		{DOUBLE64,8},
+		{INT32,4},
+		{TIM16,5},
+		{MAC,6},
+		{MAC4,4},
+		{BOOLTYPE,1},
+		{IP,6},
+	};
+
+	for (size_t i = 0; i < sizeof(LENGRP) / sizeof(_LENGRP); i++) {
+		if (LENGRP[i].tp == aimcfg->typ)
+		{
+			return LENGRP[i].len;
+		}
+	}
+	return -3;
+};
+
+
+
+int query_data_by_index(const void * tableaddr, const CFG_INFO * aimcfg
+	, void * outdata, size_t outMaxlen)
+{
+	void * aimaddr = (char *)tableaddr + aimcfg->diff;
+
+	int len = Get_Max_type_len(aimcfg);
+	if (len > 0) {
+		memcpy(outdata, aimaddr, len);
+		return len;
+	}
+	return 0;
+}
 
 void scanfAllTable(Tg_table & tb, uint32_t table_mask)
 {
