@@ -90,6 +90,14 @@ void InstallTimDefault(void * addr)
 	copy(localip, localip + 5, pos);
 }
 
+void version_set(void * addr)
+{
+	//版本信息
+	const char * version = VERSION_MDC;
+	strncpy((char *)addr, version, 64);
+}
+
+
 CFG_INFO T1[] = {
 	T1_Set_data(1,ReducerM,dateType::STRING16,stingDefault),
 	T1_Set_data(2,PutterM,dateType::STRING16,stingDefault),
@@ -98,14 +106,16 @@ CFG_INFO T1[] = {
 	T1_Set_data(5,FYSensorM,dateType::STRING16,stingDefault),
 	T1_Set_data(6,InstallTime,dateType::TIM16,InstallTimDefault),
 	T1_Set_data(7,PSN_MAC,dateType::MAC4,MAC4Default),
-	T1_Set_data(8,MDC2_SV_1,dateType::STRING16,stingDefault),
-	T1_Set_data(9,MDC2_SV_2,dateType::STRING16,stingDefault),
-	T1_Set_data(10,MDC2_SV_3,dateType::STRING16,stingDefault),
-	T1_Set_data(11,MDC2_SV_4,dateType::STRING16,stingDefault),
-	T1_Set_data(12,MDC2_SV_5,dateType::STRING16,stingDefault),
-	T1_Set_data(13,DRI1_SV,dateType::STRING16,stingDefault),
-	T1_Set_data(14,DRI2_SV,dateType::STRING16,stingDefault),
-	T1_Set_data(16,Wiresless_SV,dateType::STRING16,stingDefault),
+
+	T1_Set_data_force(8,MDC2_SV_1,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(9,MDC2_SV_2,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(10,MDC2_SV_3,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(11,MDC2_SV_4,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(12,MDC2_SV_5,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(13,DRI1_SV,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(14,DRI2_SV,dateType::STRING16,stingDefault,version_set),
+	T1_Set_data_force(16,Wiresless_SV,dateType::STRING16,stingDefault,version_set),
+
 	T1_Set_data(17,HeliostatType,dateType::STRING16,stingDefault),
 	T1_Set_data(18,SN2ID,dateType::STRING16,stingDefault),
 	T1_Set_data(19,latitude,dateType::FLOAT32,floatDefault),

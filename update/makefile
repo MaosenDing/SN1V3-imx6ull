@@ -15,7 +15,7 @@ cfgsection = $(patsubst %.txt,%.section,$(cfgs))
 file = main.cpp 
 #flags = -Wl,-Tupdate.lds 
 
-VERSION = _1.0,2.45,2.1
+VERSION ?= _5.1
 SCG := 1
 EXE := 1
 
@@ -57,5 +57,5 @@ clean:
 	-rm -f ./*.EXE
 	-rm -f ./*.exe
 	-rm -f ./*.so
-	-rm -f update*.bin
 	-rm -f aim/* 
+	-rm -f ./*.bin

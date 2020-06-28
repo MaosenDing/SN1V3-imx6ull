@@ -226,7 +226,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 }
 
 
-int scanfOneTable(const void * tableaddr, CFG_INFO * info_group,const size_t sz, map<string, string> &datamap)
+int scanfOneTable(const void * tableaddr, CFG_INFO * info_group, const size_t sz, map<string, string> &datamap)
 {
 	if ((!info_group) || (!tableaddr)) {
 		return -1;
@@ -237,7 +237,10 @@ int scanfOneTable(const void * tableaddr, CFG_INFO * info_group,const size_t sz,
 		CFG_INFO  * info = &info_group[datapos];
 		void * dataAddr = (char *)tableaddr + info->diff;
 
-		if (datamap.count(info->name) > 0) {
+		if (info->force_value) {
+			info->force_value(dataAddr);
+			info->dataStatus = dataFromTable;
+		} else if (datamap.count(info->name) > 0) {
 			writeData(dataAddr, datamap[info->name], info);
 		} else {
 			if (info->default_value) {

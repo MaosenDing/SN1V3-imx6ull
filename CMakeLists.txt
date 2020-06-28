@@ -15,6 +15,12 @@ add_definitions("-O2")
 add_definitions("-g3")
 add_definitions(-Wall)
 
+
+add_definitions(-DVERSION_MDC="${ver}")
+message("using VERSION =${ver}")
+
+
+
 PROJECT(PROJECT_ONE)
 
 include_directories(${PROJECT_SOURCE_DIR})

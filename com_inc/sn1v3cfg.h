@@ -60,9 +60,11 @@ extern "C" {
 		void(*default_value)(void *);
 		size_t SeqInTable;
 		DATASTATUS dataStatus;
+		void(*force_value)(void *);//强制设置
 	}CFG_INFO;
 
-#define Set_data(table,member,typ,def_method,seq)    {#member,offsetof(table,member),typ,def_method,seq,dataInit}
+#define Set_data(table,member,typ,def_method,seq)    {#member,offsetof(table,member),typ,def_method,seq,dataInit,0}
+#define Set_data_force(table,member,typ,def_method,seq,force_method)    {#member,offsetof(table,member),typ,def_method,seq,dataInit,force_method}
 
 	typedef struct {
 		char HeliostatID[16];
@@ -229,6 +231,15 @@ extern "C" {
 #define T3_Set_data(seq,member,typ,def_method)      Set_data(T3_table,member,typ,def_method,seq)
 #define T4_Set_data(seq,member,typ,def_method)      Set_data(T4_table,member,typ,def_method,seq)
 #define T6_Set_data(seq,member,typ,def_method)      Set_data(T6_table,member,typ,def_method,seq)
+
+
+#define T1_Set_data_force(seq,member,typ,def_method,force_method)      Set_data_force(T1_table,member,typ,def_method,seq,force_method)
+#define T2_Set_data_force(seq,member,typ,def_method,force_method)      Set_data_force(T2_table,member,typ,def_method,seq,force_method)
+#define T3_Set_data_force(seq,member,typ,def_method,force_method)      Set_data_force(T3_table,member,typ,def_method,seq,force_method)
+#define T4_Set_data_force(seq,member,typ,def_method,force_method)      Set_data_force(T4_table,member,typ,def_method,seq,force_method)
+#define T6_Set_data_force(seq,member,typ,def_method,force_method)      Set_data_force(T6_table,member,typ,def_method,seq,force_method)
+
+
 
 #define setDefault(type ,val) [](void *addr){*(type*)addr = val;}
 #define setDefaultString(str,maxlen) [](void *addr){strncpy((char *)addr, str, maxlen);}
