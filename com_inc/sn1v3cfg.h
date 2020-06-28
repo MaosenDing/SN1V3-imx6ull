@@ -114,49 +114,51 @@ extern "C" {
 
 	typedef struct {
 		//sn1
-		float SN1_e1;
-		float SN1_e2;
-		float SN1_e3;
-		float SN1_e4;
-		float SN1_e5;
-		float SN1_e6;
-		float SN1_e7;
-		float SN1_e8;
-		float SN1_e9;
-		float SN1_e10;
-		float SN1_e11;
-		float SN1_e12;
-		float SN1_e13;
-		float SN1_e14;
-		int SN1_e15;
+		float SN1_P1;
+		float SN1_P2;
+		float SN1_P3;
+		float SN1_P4;
+		float SN1_P5;
+		float SN1_P6;
+		float SN1_P7;
+		float SN1_P8;
+		float SN1_P9;
+		float SN1_P10;
+		float SN1_P11;
+		float SN1_P12;
+		float SN1_P13;
+		float SN1_P14;
+		int SN1_P15;
 		//sn2
-		float SN2_e1;
-		float SN2_e2;
-		float SN2_e3;
-		float SN2_e4;
-		float SN2_e5;
-		float SN2_e6;
-		float SN2_e7;
-		float SN2_e8;
-		float SN2_e9;
-		float SN2_e10;
-		float SN2_e11;
-		float SN2_e12;
-		float SN2_e13;
-		float SN2_e14;
+		float SN2_P1;
+		float SN2_P2;
+		float SN2_P3;
+		float SN2_P4;
+		float SN2_P5;
+		float SN2_P6;
+		float SN2_P7;
+		float SN2_P8;
+		float SN2_P9;
+		float SN2_P10;
+		float SN2_P11;
+		float SN2_P12;
+		float SN2_P13;
+		float SN2_P14;
 		//sn3
-		float SN3_e1;
-		float SN3_e2;
-		float SN3_e3;
-		float SN3_e4;
-		float SN3_e5;
-		float SN3_e6;
-		int SN3_e7;
+		float SN3_P1;
+		float SN3_P2;
+		float SN3_P3;
+		float SN3_P4;
+		float SN3_P5;
+		float SN3_P6;
+		int SN3_P7;
 		//零位
-		float OLW_e1;
-		float OLW_e2;
-		float OLW_e3;
-		int OLW_e4;
+		float OLW_P1;
+		float OLW_P2;
+		float OLW_P3;
+		float OLW_P4;
+		int OLW_P5;
+		int OLW_P6;
 	}T3_table;
 
 

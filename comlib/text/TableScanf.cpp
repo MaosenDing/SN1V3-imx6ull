@@ -74,6 +74,11 @@ static int find_if_true(const char * st)
 			return 1;
 		}
 	}
+
+	if (*st == 1) {
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -137,22 +142,20 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 		break;
 	case dateType::TIM16:
 	{
-		int tim[5];
+		int tim[3];
 		int ChkFlg = 0;
-		if (sscanf(data.c_str(), "%d-%d-%d %d:%d"
+		if (sscanf(data.c_str(), "%d-%d-%d"
 			, tim + 0
 			, tim + 1
 			, tim + 2
-			, tim + 3
-			, tim + 4
-		) == 5) {
-			if (is_valid_date(tim[0], tim[1], tim[2]) && is_valid_daytim(tim[3], tim[4], 0)) {
+		) == 3) {
+			if (is_valid_date(tim[0], tim[1], tim[2])) {
 				ChkFlg = 1;
 			}
 		}
 
 		if (ChkFlg == 1) {
-			copy(tim, tim + 5, (int32_t *)addr);
+			copy(tim, tim + 3, (int32_t *)addr);
 			info->dataStatus = dataFromTable;
 		} else {
 			if (default_value) default_value(addr);
@@ -299,7 +302,7 @@ int Get_Max_type_len(const CFG_INFO * aimcfg)
 		{FLOAT32,4},
 		{DOUBLE64,8},
 		{INT32,4},
-		{TIM16,5},
+		{TIM16,3},
 		{MAC,6},
 		{MAC4,4},
 		{BOOLTYPE,1},
@@ -369,13 +372,11 @@ int printData2String(char * tmpbuff,int maxbuf ,const void * baseaddr, const CFG
 	case dateType::TIM16:
 	{
 		int * tim = (int *)dataAddr;
-		return snprintf(tmpbuff, 64, "%d-%d-%d %d:%d"
+		return snprintf(tmpbuff, 64, "%d-%d-%d"
 			, tim[0]
 			, tim[1]
 			, tim[2]
-			, tim[3]
-			, tim[4]);
-
+		);
 	}
 	case dateType::MAC:
 	{

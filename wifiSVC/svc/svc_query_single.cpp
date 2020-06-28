@@ -67,8 +67,8 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 				char outdata[128] = { 0 };
 				//int len = query_data_by_index((char *)&info.cfg + grp->diff, aiminfo, outdata, 128);
 				int len = printData2String(outdata, 128, (char *)&info.cfg + grp->diff, aiminfo);
-				
-				printf("query name = %s,len = %d\n", aiminfo->name, len);
+
+				printf("query name = %s,len = %d,ret=%s\n", aiminfo->name, len, outdata);
 				if (len > 0) {
 					memcpy(datpos, outdata, len);
 					sec.data_len += len;
