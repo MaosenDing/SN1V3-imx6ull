@@ -215,7 +215,12 @@ int main()
 	for (int i = 0; i < 3; i++) {
 		system("killall daemon.exe");
 		system("killall aim.exe");
+		system("killall wifictrl.exe");
+		system("killall mdc.exe");
+
 		system("killall init:cap");
+		system("killall init:mdc");
+		system("killall init:wifi");
 		system("killall init:mdc");
 		sleep(1);
 	}

@@ -114,7 +114,7 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 				if (calcrc == crc) {
 					if (info.dbg_pri_msg)
 						printf("crc check ok\n");
-					const char * updatepath = "./update";
+					const char * updatepath = "/tmp/update";
 					if (writebin(updatepath, pbuffer, len)) {
 						signal(SIGCHLD, child_handler);
 						int pid = fork();
