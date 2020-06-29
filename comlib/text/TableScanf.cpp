@@ -87,7 +87,7 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 {
 	dateType typ = info->typ;
 	auto default_value = info->default_value;
-	printf("name = %s typeid = %d\n", info->name, info->typ);
+	//printf("name = %s typeid = %d\n", info->name, info->typ);
 	switch (typ) {
 	case dateType::STRING16:
 		strncpy((char *)addr, data.c_str(), 16);

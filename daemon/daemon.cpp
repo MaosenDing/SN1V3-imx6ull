@@ -28,6 +28,10 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <memory>
+
+#include "sn1v3cfg.h"
+#include "tableWork.h"
+#include "configOperator.h"
 using namespace std;
 
 
@@ -98,44 +102,6 @@ static void checkClear(int argc, char *argv[], SN1_SHM * psn1)
 	}
 }
 
-enum sn_sta {
-	sn_stop = 0,
-	sn_1 = 1,
-	sn_2 = 2,
-	sn_3 = 3,
-};
-
-
-
-static sn_sta checkSN_sta(string & st)
-{
-	struct _GRP {
-		sn_sta sta;
-		const char * str;
-	};
-
-	_GRP ppp[] = {
-		{sn_stop,"stop"},
-		{sn_1,"sn1"},
-		{sn_2,"sn2"},
-		{sn_3,"sn3"},
-	};
-
-	if (st.size() > 0) {
-		for (auto one : ppp) {
-			char * findst = strstr((char *)st.c_str(), one.str);
-
-			if (findst) {
-				return one.sta;
-			}
-		}
-	}
-	return sn_1;
-}
-
-
-
-
 
 struct GUARD_SERVICE {
 	GUARD_SERVICE(int & inpid) :shared_pid(inpid) {}
@@ -144,6 +110,88 @@ struct GUARD_SERVICE {
 	virtual bool need_boot() = 0;
 	virtual const char * get_name() = 0;
 };
+
+
+struct svc_wifi : public GUARD_SERVICE {
+	svc_wifi(SN1_SHM & sn1) :GUARD_SERVICE(sn1.pid_mdc) {}
+
+	virtual const char * get_name() final
+	{
+		return "wifi service";
+	}
+
+	virtual int init_pid(int argc, char * argv[]) final
+	{
+		if (shared_pid > 0) {
+			SN1V2_WARN_LOG("mdc ,kill pid =%d\n", shared_pid);
+			kill(shared_pid, SIGINT);
+			shared_pid = 0;
+		}
+
+		int pid = fork();
+		if (pid == 0) {
+			system("/root/io.sh jd3 1");
+			prctl(PR_SET_NAME, "init:wifi");
+			int ret = execv("./wifictrl.exe", argv);
+			SN1V2_ERR_LOG("wifi finished itself,ret = %d\n", ret);
+			SN1V2_ERR_LOG("errno = %d\n", errno);
+			exit(0);
+		} else if (pid > 0) {
+			return pid;
+		}
+		SN1V2_ERR_LOG("fork error ###################1\n");
+		return -1;
+	}
+
+	int last_connectted_min;
+
+	virtual bool need_boot()final
+	{
+		//测试时间
+		time_t now = time(0);
+		tm t2;
+
+		localtime_r(&now, &t2);
+
+		const int year = t2.tm_year + 1900;
+		const int mon = t2.tm_mon + 1;
+		const int day = t2.tm_mday;
+
+		if (year < 2015) {
+			//没有获取时间  直接长连接
+			return true;
+		}
+
+		Tg_table tg_table;
+		scanfAllTable(tg_table, Mask_T4);
+		//固定长连接
+		if (0 == tg_table.T4.CM_Cycle) {
+			return false;
+		}
+		//短连接判断
+		system("/root/io.sh jd3 0");
+		int thismin = t2.tm_min + t2.tm_hour * 60;
+
+		int lastblock = last_connectted_min / tg_table.T4.CM_Cycle;
+		int thisblock = thismin / tg_table.T4.CM_Cycle;
+
+		//时间区不同
+		if (lastblock != thisblock) {
+			//下次开始时间
+			int aimsecond = thisblock * tg_table.T4.CM_Cycle * 60
+				+ tg_table.T4.CM_Group * 60 + tg_table.T4.CM_Times;
+			//现在时间
+			int nowsecond = thismin * 60 + t2.tm_hour * 3600;
+			if (nowsecond > aimsecond) {
+				last_connectted_min = thismin;
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
+
 
 struct svc_mdc : public GUARD_SERVICE {
 	svc_mdc(SN1_SHM & sn1) :GUARD_SERVICE(sn1.pid_mdc) {}
@@ -247,77 +295,6 @@ static shared_ptr<string> GetFile(const char * fileName)
 	return st;
 }
 
-
-
-
-
-
-struct svc_cap : public GUARD_SERVICE {
-	svc_cap(SN1_SHM & sn1) :GUARD_SERVICE(sn1.pid_aim) {}
-
-
-
-	virtual const char * get_name() final
-	{
-		return "cap svc";
-	}
-
-	virtual int init_pid(int argc, char * argv[]) final
-	{
-		if (shared_pid) {
-			SN1V2_WARN_LOG("cap ,kill pid =%d\n", shared_pid);
-			kill(shared_pid, SIGINT);
-			shared_pid = 0;
-		}
-
-		int pid = fork();
-		if (pid == 0) {
-			prctl(PR_SET_NAME, "init:cap");
-			while (true) {
-				if (0 > wait_for_mdc(1000)) {
-					SN1V2_WARN_LOG("reboot########################\n");
-					system("reboot");
-					exit(EXIT_FAILURE);
-				}
-				if (true == NeedCapWork()) {
-
-					const char * daycfgFile = "day.cfg";
-
-					auto fil = GetFile(daycfgFile);
-					checkCont(*fil);
-
-					execl("./aim.exe", "./aim.exe", "tableGen2", "SCG.txt", 0);
-				}
-			}
-			exit(0);
-		} else if (pid > 0) {
-			return pid;
-		}
-		SN1V2_ERR_LOG("fork error ###################2\n");
-		return -1;
-	}
-	virtual bool need_boot()final
-	{
-		auto fil = GetFile("/tmp/snsta");
-		if (sn_1 != checkSN_sta(*fil))
-		{
-			return false;
-		}
-		return true;
-	}
-};
-
-#define MAX_FAIL_TIME 100
-static int error_time = 0;
-static void chk_reboot()
-{
-	if (error_time++ > MAX_FAIL_TIME) {
-		SN1V2_WARN_LOG("over max error time,reboot\n");
-		system("reboot");
-	}
-}
-
-
 int main(int argc, char *argv[])
 {
 	logInit("daemon", "./daemon", google::GLOG_WARNING);
@@ -331,11 +308,11 @@ int main(int argc, char *argv[])
 	checkClear(argc, argv, psn1);
 
 	svc_mdc svc_mdc0(*psn1);
-	svc_cap svc_cap0(*psn1);
+	svc_wifi svc_wifi0(*psn1);
 
 	GUARD_SERVICE *group[] = {
-		&svc_mdc0 ,
-		&svc_cap0 ,
+		//&svc_mdc0 ,
+		&svc_wifi0,
 	};
 
 	for (GUARD_SERVICE * p : group) {
@@ -346,7 +323,7 @@ int main(int argc, char *argv[])
 
 	while (true) {
 		for (GUARD_SERVICE * p : group) {
-			sleep(1);
+			sleep(3);
 
 			bool bootFLG = false;
 			//check dead
@@ -358,7 +335,6 @@ int main(int argc, char *argv[])
 					continue;
 				}
 				//check program fail count
-				chk_reboot();
 				p->shared_pid = 0;
 				SN1V2_WARN_LOG("svc = %s ,ret aim ret pid = %d,status = %#x\n"
 					, p->get_name(), retpid, status);

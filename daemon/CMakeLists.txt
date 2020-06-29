@@ -7,6 +7,7 @@ add_executable(daemon.exe daemon.cpp )
 include_directories("./")
 
 
+#target_link_libraries(daemon.exe PRIVATE comlib_static)
 target_link_libraries(daemon.exe PRIVATE comlib)
 
 INSTALL(TARGETS daemon.exe
@@ -14,4 +15,3 @@ INSTALL(TARGETS daemon.exe
 )
 
 #target_link_libraries(daemon PRIVATE -lpthread)
-
