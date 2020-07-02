@@ -38,7 +38,7 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_BASE_FUNCTION
 	int msgid = 0;
 
 	vector<uint8_t> dat;
-#define HEAD_LEN (4)
+#define HEAD_LEN (3)
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
 		WIFI_DATA_SUB_PROTOCOL sub;
@@ -64,14 +64,14 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_BASE_FUNCTION
 
 		//数据信令
 		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD) {
-			printf("MASK_SELF_UPLOAD get frame index = %d,using index = %d \n", sec.frame_index, usingindex);
+			if (info.dbg_pri_msg) printf("MASK_SELF_UPLOAD get frame index = %d,using index = %d \n", sec.frame_index, usingindex);
 			if (sec.frame_index == usingindex) {
 				usingindex++;
 				if (usingindex > MaxIndex) {
 					return WIFI_PRO_STATUS::WIFI_PRO_END;
 				}
 			} else {
-				printf("MASK_SELF_UPLOAD get frame index = %d \n", sec.frame_index);
+				if (info.dbg_pri_msg) printf("MASK_SELF_UPLOAD get frame index = %d \n", sec.frame_index);
 			}
 		}
 		return WIFI_PRO_STATUS::WIFI_PRO_NEED_WRITE;
@@ -80,15 +80,15 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_BASE_FUNCTION
 	size_t fil_data(unsigned char * buff, size_t packlen, size_t packindex)
 	{
 		size_t sz = dat.size();
-		printf("out index = %d,",packindex);
+		if (info.dbg_pri_msg) printf("out index = %d,", packindex);
 		const unsigned char * srcdat = &dat[0];
-		if (packindex >= MaxIndex || packindex <= 0) {
-			printf("end frame\n");
+		if (packindex > MaxIndex || packindex <= 0) {
+			if (info.dbg_pri_msg) printf("end frame\n");
 			return 0;
 		}
-		size_t srcpos = (packindex - 1) * packlen;		
+		size_t srcpos = (packindex - 1) * packlen;
 		int len = ((sz - srcpos) > packlen) ? packlen : (sz - srcpos);
-		printf("cp pos = %d,len = %d\n", srcpos, len);
+		if (info.dbg_pri_msg) printf("cp pos = %d,len = %d\n", srcpos, len);
 		memcpy(buff, &srcdat[srcpos], len);
 		return len;
 	}
@@ -105,8 +105,7 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_BASE_FUNCTION
 			if (dat.size()) {
 				MaxIndex =
 					dat.size() / sigpack //满包 
-					+ ((dat.size() % sigpack) ? 1 : 0)//半满包 
-					+ 1//空包					
+					+ 1//空包 或者 半满包				
 					;
 			} else {
 				MaxIndex = 0;
@@ -147,7 +146,7 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_BASE_FUNCTION
 			sec.data[sec.data_len++] = msgid >> 8;
 #endif
 			sec.data[sec.data_len++] = functionID;
-#if HEAD_LEN >= 3
+#if HEAD_LEN >= 4
 			sec.data[sec.data_len++] = fileindex;
 #endif
 			int len = fil_data(&sec.data[sec.data_len], sigpack, usingindex);

@@ -329,14 +329,15 @@ int get_cache(WIFI_INFO & wifi, int * buffsta)
 {
 	auto psec = exec_wifi_ctrl(wifi, 0x48, nullptr, 0);
 
-	if (psec && psec->data_len == 3 && buffsta) {
-		buffsta[0] = psec->data[0];
-		buffsta[1] = psec->data[1];
-		buffsta[2] = psec->data[2];
+	if (psec && (psec->data_len == 4) && buffsta) {
+		buffsta[0] = psec->data[1];
+		buffsta[1] = psec->data[2];
+		buffsta[2] = psec->data[3];
 		return 0;
 	}
 	return -1;
 }
+
 
 
 int get_status(WIFI_INFO & wifi)

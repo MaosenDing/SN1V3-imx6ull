@@ -216,6 +216,32 @@ int exec_exchange_data_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun, int c
 	return 0;
 }
 
+//int get_cache(WIFI_INFO & wifi, int * buffsta)
+
+static int checkBufferClear(WIFI_INFO & wifi)
+{
+	int buff[3];
+	chrono::time_point<std::chrono::system_clock> endpoint = chrono::system_clock::now()
+		+ chrono::milliseconds(wifi.max_delay_ms_session_response);
+	while (true) {
+		if (0 == get_cache(wifi, buff)) {
+			if (wifi.dbg_pri_wifi_ctrl) {
+				printf("get cached ,upload = %d,download = %d,useable = %d\n"
+					, buff[0]
+					, buff[1]
+					, buff[2]
+				);
+			}
+			if ((buff[0] == 0) && (buff[1] == 0)) {
+				return 0;
+			}
+		}
+		if (chrono::system_clock::now() > endpoint) {
+			return -1;
+		}
+	}
+}
+
 
 void exec_exchange_stage(WIFI_INFO & wifi, uint32_t proMask, int code, const char * execName)
 {
@@ -225,7 +251,12 @@ void exec_exchange_stage(WIFI_INFO & wifi, uint32_t proMask, int code, const cha
 	while (itr != wifi.write_fun_list.end()) {
 		if ((*itr)->GetProMask() & proMask) {
 			if (wifi.dbg_pri_msg) printf("%s = %s\n", execName, (*itr)->FUNCTION_NAME());
-			if (0 == exec_exchange_data_message(wifi, *itr, code)) {
+			int exec_exchangecode = exec_exchange_data_message(wifi, *itr, code);
+			if (0 != checkBufferClear(wifi)) {
+				if (wifi.dbg_pri_msg)printf("%s send error\n", execName);
+			}
+
+			if (0 == exec_exchangecode) {
 				std::unique_lock<std::mutex> lk(wifi.mtx_write_fun_list);
 				auto tmp = itr;
 				++itr;
