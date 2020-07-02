@@ -154,8 +154,8 @@ struct svc_wifi : public GUARD_SERVICE {
 		localtime_r(&now, &t2);
 
 		const int year = t2.tm_year + 1900;
-		const int mon = t2.tm_mon + 1;
-		const int day = t2.tm_mday;
+		//const int mon = t2.tm_mon + 1;
+		//const int day = t2.tm_mday;
 
 		if (year < 2015) {
 			//没有获取时间  直接长连接
@@ -227,7 +227,7 @@ struct svc_mdc : public GUARD_SERVICE {
 		return true;
 	}
 };
-
+#if 0
 enum file_sta{
 	fil_ok = 0,//ok
 	fil_no_file,//无配置文件
@@ -235,47 +235,6 @@ enum file_sta{
 	fil_no_set,//没有set信息
 	fil_day_error,//时间不达标
 };
-
-
-static file_sta checkCont(string & st)
-{
-	char * buff = (char *)st.c_str();
-
-	char * findRESET = strstr(buff, "reset");
-
-	if (findRESET) {
-		return fil_reset;
-	}
-
-	char * findSETTIME = strstr(buff, "set@");
-
-	if (findSETTIME) {
-		int year, mon, day;
-		if (3 == sscanf(buff, "set@%d-%d-%d", &year, &mon, &day)) {
-			tm thisday;
-			time_t thistim = time(nullptr);
-			localtime_r(&thistim, &thisday);
-			//fix tim
-			thisday.tm_year += 1900;
-			thisday.tm_mon += 1;
-
-			if (thisday.tm_year < year) {
-				return fil_day_error;
-			}
-
-			if (thisday.tm_mon < mon) {
-				return fil_day_error;
-			}
-
-			if (thisday.tm_mday <= day) {
-				return fil_day_error;
-			}
-			return fil_ok;
-		}
-	}
-	return fil_no_set;
-}
-
 
 static shared_ptr<string> GetFile(const char * fileName)
 {
@@ -294,7 +253,7 @@ static shared_ptr<string> GetFile(const char * fileName)
 	}
 	return st;
 }
-
+#endif
 int main(int argc, char *argv[])
 {
 	logInit("daemon", "./daemon", google::GLOG_WARNING);

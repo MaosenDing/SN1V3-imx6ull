@@ -224,7 +224,7 @@ void exec_exchange_stage(WIFI_INFO & wifi, uint32_t proMask, int code, const cha
 
 	while (itr != wifi.write_fun_list.end()) {
 		if ((*itr)->GetProMask() & proMask) {
-			printf("%s = %s\n", execName, (*itr)->FUNCTION_NAME());
+			if (wifi.dbg_pri_msg) printf("%s = %s\n", execName, (*itr)->FUNCTION_NAME());
 			if (0 == exec_exchange_data_message(wifi, *itr, code)) {
 				std::unique_lock<std::mutex> lk(wifi.mtx_write_fun_list);
 				auto tmp = itr;
@@ -256,13 +256,14 @@ int wifi_serivce(WIFI_INFO & wifi)
 		}
 	} else {
 		if (wifi.dbg_pri_wifi_data) printf("get no message\n");
+		exit(0);
 	}
 
 	for (auto & num : *rdvec) {
 		exec_read_message(wifi, num);
 	}
 
-	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_WRITE, CODE_WRITE, "upload stage");
+	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD, CODE_WRITE, "upload stage");
 
 	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD, CODE_SELF_DOWNLOAD, "download stage");
 

@@ -15,8 +15,8 @@ cd ${build}
 cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver}
 cpunum=$(cat /proc/cpuinfo | grep processor | wc -l)
 make -j${cpunum}
-#sudo make install/strip
-sudo make install
+sudo make install/strip
+
 cd ../update
 make clean
 ./cp.sh

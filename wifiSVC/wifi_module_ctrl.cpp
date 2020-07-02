@@ -160,7 +160,7 @@ int set_server(WIFI_INFO & wifi,const unsigned char * serverip, int port)
 	if (psec) {
 		int datlen = psec->data_len - 1;
 		if (datlen == 6) {
-			if (wifi.dbg_pri_wifi_ctrl)printf("set remote ip = %d:%d:%d:%d,port = %d\n"
+			if (wifi.dbg_pri_wifi_ctrl)printf("set remote ip = %d.%d.%d.%d,port = %d\n"
 				, serverip[0]
 				, serverip[1]
 				, serverip[2]
@@ -360,6 +360,19 @@ int wifi_reset_buff_status(WIFI_INFO & wifi)
 	return -1;
 }
 
+int wifi_set_mac(WIFI_INFO & wifi,char * buff)
+{
+	auto psec = exec_wifi_ctrl(wifi, 0x4b, buff, 4);
+
+	if (psec) {
+		printf("set mac ok \n");
+		return 0;
+	}
+
+	return -1;
+}
+
+
 int set_wifi_module(WIFI_INFO & wifi)
 {
 
@@ -380,7 +393,8 @@ int set_wifi_module(WIFI_INFO & wifi)
 	get_server(wifi, serverip, port);
 
 	set_local_IP(wifi, localip, gatway, netmask);
-#else
+#else	
+	wifi_set_mac(wifi, wifi.cfg.T1.PSN_MAC);
 	set_ssid(wifi, 0, wifi.cfg.T4.M_AP1);
 	set_pwd(wifi, 0, wifi.cfg.T4.M_PASS);
 	unsigned char ip[4];

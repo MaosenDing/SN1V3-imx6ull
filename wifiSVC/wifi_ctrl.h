@@ -98,7 +98,7 @@ struct WIFI_BASE_FUNCTION {
 	enum {
 		MASK_READ_NUM = 1 << 2,
 		MASK_READ = 1 << 3,
-		MASK_WRITE = 1 << 4,
+		MASK_SELF_UPLOAD = 1 << 4,
 		MASK_SELF_DOWNLOAD = 1 << 5,
 	};
 

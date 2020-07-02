@@ -13,7 +13,7 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 
 	WIFI_QUERY_SINGLE_DATA(WIFI_INFO & info, int inmsgid, int intable, int inindex) :WIFI_FUNCTION_ONCE_WRITE(info)
 	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_WRITE;
+		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD;
 		functionID = 2;
 		msgid = inmsgid;
 		table = intable;

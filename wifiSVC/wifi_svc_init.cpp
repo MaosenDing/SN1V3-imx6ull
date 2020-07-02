@@ -6,7 +6,7 @@ WIFI_BASE_FUNCTION * GetSn2Center(WIFI_INFO & wifi);
 //一次发送
 WIFI_BASE_FUNCTION * GetWIFI_QUERY_SINGLE_DATA(WIFI_INFO & wifi);
 //文件上传
-
+WIFI_BASE_FUNCTION * Getuploadupatefile(WIFI_INFO & wifi);
 //文件下载
 WIFI_BASE_FUNCTION * Getdownloadupatefile(WIFI_INFO & wifi);
 typedef WIFI_BASE_FUNCTION * (* WIFIINT)(WIFI_INFO & wifi);
@@ -18,7 +18,7 @@ WIFIINT wifigrp[] =
 	//一次发送
 	GetWIFI_QUERY_SINGLE_DATA,
 	//文件上传
-
+	Getuploadupatefile,
 	//文件下载
 	Getdownloadupatefile,
 };
