@@ -180,8 +180,9 @@ struct svc_wifi : public GUARD_SERVICE {
 			//下次开始时间
 			int aimsecond = thisblock * tg_table.T4.CM_Cycle * 60
 				+ tg_table.T4.CM_Group * 60 + tg_table.T4.CM_Times;
+			//printf("next tim = %d;%d;%d\n", aimsecond / 3600, aimsecond / 60 % 60, aimsecond % 60);
 			//现在时间
-			int nowsecond = thismin * 60 + t2.tm_hour * 3600;
+			int nowsecond = thismin * 60 + t2.tm_sec;
 			if (nowsecond > aimsecond) {
 				last_connectted_min = thismin;
 				return true;
