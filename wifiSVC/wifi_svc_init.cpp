@@ -5,6 +5,7 @@
 WIFI_BASE_FUNCTION * GetSn2Center(WIFI_INFO & wifi);
 //一次发送
 WIFI_BASE_FUNCTION * GetWIFI_QUERY_SINGLE_DATA(WIFI_INFO & wifi);
+WIFI_BASE_FUNCTION * GetWIFI_WRITE_SINGLE_CFG(WIFI_INFO & wifi);
 //文件上传
 WIFI_BASE_FUNCTION * Getuploadupatefile(WIFI_INFO & wifi);
 //文件下载
@@ -17,6 +18,7 @@ WIFIINT wifigrp[] =
 	GetSn2Center,
 	//一次发送
 	GetWIFI_QUERY_SINGLE_DATA,
+	GetWIFI_WRITE_SINGLE_CFG,
 	//文件上传
 	Getuploadupatefile,
 	//文件下载

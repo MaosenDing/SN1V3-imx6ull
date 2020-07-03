@@ -90,7 +90,6 @@ extern "C" {
 		float elevation;
 		float Temperature;
 		float Pressure;
-		float DeltaT;
 		float HeliostatPointX;
 		float HeliostatPointY;
 		float HeliostatPointZ;
@@ -279,10 +278,11 @@ extern "C" {
 	const CFG_GROUP * find_group_index(size_t i);
 	const CFG_GROUP * find_group_name(const char * groupName);
 	const CFG_GROUP * find_group_by_cfg_index(size_t i);
-	const CFG_INFO * find_info_by_seqIndex(const CFG_INFO * cfg, size_t maxsz, size_t seqIndex);
+	CFG_INFO * find_info_by_seqIndex(CFG_INFO * cfg, size_t maxsz, size_t seqIndex);
 	int query_data_by_index(const void * tableaddr, const CFG_INFO * aimcfg
 		, void * outdata, size_t outMaxlen);
 	int printData2String(char * tmpbuff, int maxbuf, const void * baseaddr, const CFG_INFO * info);
+	void scanfSingleDataCtype(void * addr, const char *src, CFG_INFO  * info);
 #ifdef __cplusplus
 }
 #endif

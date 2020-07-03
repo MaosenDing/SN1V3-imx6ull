@@ -83,11 +83,11 @@ static int find_if_true(const char * st)
 }
 
 
-static void writeData(void * addr, string & data, CFG_INFO  * info)
+static void scanfSingleData(void * addr, string & data, CFG_INFO  * info)
 {
 	dateType typ = info->typ;
 	auto default_value = info->default_value;
-	//printf("name = %s typeid = %d\n", info->name, info->typ);
+	//printf("name = %s typeid = %d ,val = %s\n", info->name, info->typ , data.c_str());
 	switch (typ) {
 	case dateType::STRING16:
 		strncpy((char *)addr, data.c_str(), 16);
@@ -225,6 +225,14 @@ static void writeData(void * addr, string & data, CFG_INFO  * info)
 	}
 }
 
+void scanfSingleDataCtype(void * addr, const char *src,CFG_INFO  * info)
+{
+	if (src) {
+		string p(src);
+		scanfSingleData((char *)addr + info->diff, p, info);
+	}
+}
+
 
 int scanfOneTable(const void * tableaddr, CFG_INFO * info_group, const size_t sz, map<string, string> &datamap)
 {
@@ -241,7 +249,7 @@ int scanfOneTable(const void * tableaddr, CFG_INFO * info_group, const size_t sz
 			info->force_value(dataAddr);
 			info->dataStatus = dataFromTable;
 		} else if (datamap.count(info->name) > 0) {
-			writeData(dataAddr, datamap[info->name], info);
+			scanfSingleData(dataAddr, datamap[info->name], info);
 		} else {
 			if (info->default_value) {
 				info->default_value(dataAddr);
@@ -274,11 +282,11 @@ void setfromDefault(const void * tableaddr, const char * tableName)
 	}
 }
 
-const CFG_INFO * find_info_by_seqIndex(const CFG_INFO * cfggrp, size_t maxsz, size_t seqIndex)
+CFG_INFO * find_info_by_seqIndex(CFG_INFO * cfggrp, size_t maxsz, size_t seqIndex)
 {
 	for (size_t datapos = 0; datapos < maxsz; datapos++) {
 		//cfg address
-		const CFG_INFO * info = &cfggrp[datapos];
+		CFG_INFO * info = &cfggrp[datapos];
 
 		if (info->SeqInTable == seqIndex) {
 			return info;
@@ -356,6 +364,9 @@ int printData2String(char * tmpbuff,int maxbuf ,const void * baseaddr, const CFG
 {
 	void * dataAddr = (char *)baseaddr + info->diff;
 
+	dateType typ = info->typ;
+	auto default_value = info->default_value;
+	printf("6name = %s typeid = %d ， %p\n", info->name, info->typ , baseaddr);
 
 	switch (info->typ) {
 	case dateType::STRING16:
@@ -364,8 +375,10 @@ int printData2String(char * tmpbuff,int maxbuf ,const void * baseaddr, const CFG
 		return snprintf(tmpbuff, 64, "%s", (char *)dataAddr);
 
 	case dateType::FLOAT32:
+	{
+		printf("test = %p\n", dataAddr);
 		return snprintf(tmpbuff, 64, "%f", *(float *)dataAddr);
-
+	}
 	case dateType::DOUBLE64:
 		return snprintf(tmpbuff, 64, "%lf", *(double *)dataAddr);
 

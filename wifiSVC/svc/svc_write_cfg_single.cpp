@@ -3,18 +3,18 @@
 #include "svc_once_write.h"
 #include "jd_share.h"
 #include <string.h>
-struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
+struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 {
-	WIFI_QUERY_SINGLE_DATA(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_WRITE(info)
+	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_WRITE(info)
 	{
 		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
-		functionID = 2;
+		functionID = 1;
 	}
 
-	WIFI_QUERY_SINGLE_DATA(WIFI_INFO & info, int inmsgid, int intable, int inindex) :WIFI_FUNCTION_ONCE_WRITE(info)
+	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info, int inmsgid, int intable, int inindex) :WIFI_FUNCTION_ONCE_WRITE(info)
 	{
 		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD;
-		functionID = 2;
+		functionID = 1;
 		msgid = inmsgid;
 		table = intable;
 		index = inindex;
@@ -23,7 +23,7 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 
 	virtual const char * FUNCTION_NAME() final
 	{
-		return "query single data";
+		return "write single data";
 	}
 
 	int table = 0;
@@ -34,14 +34,40 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 		WIFI_DATA_SUB_PROTOCOL sub;
 		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
 
-		if (sec.frame_index == -1 && sub.datalen == 2) {
-			if (info.dbg_pri_msg) {
-				printf("table =%d, id = %d\n"
+		if (sec.frame_index == -1 && sub.datalen > 2) {
+			//if (info.dbg_pri_msg) 
+			{
+				printf("table =%d, id = %d,val = %s\n"
 					, sub.function_data[0]
 					, sub.function_data[1]
+					, &sub.function_data[2]
 				);
 			}
-			ADD_FUN(new WIFI_QUERY_SINGLE_DATA(info
+			table = sub.function_data[0];
+			index = sub.function_data[1];
+
+			unsigned char * datpos = &sec.data[sec.data_len];
+			const CFG_GROUP * grp = find_group_by_cfg_index(table);
+			if (grp) {
+				CFG_INFO * info_group = grp->group;
+				size_t sz = grp->sz;
+				CFG_INFO * aiminfo = find_info_by_seqIndex(info_group, sz, index);
+				if (aiminfo) {
+					char outdata[128] = { 0 };
+					printf("0out data = %p ,diff = %d\n", &info.cfg,grp->diff);
+
+					scanfSingleDataCtype( ((char *)&info.cfg)  + grp->diff, (char *)&sub.function_data[2], aiminfo);
+					
+					printf("1out data = %p\n", ((char *)&info.cfg) + grp->diff);
+
+					int len = printData2String(outdata, 128, &info.cfg, aiminfo);
+					
+					printf("2out data = %s\n", outdata);
+					printf("3out data = %f\n", *(float*)((char *)&info.cfg + grp->diff));
+				}
+			}
+
+			ADD_FUN(new WIFI_WRITE_SINGLE_DATA(info
 				, sub.message_id
 				, sub.function_data[0]
 				, sub.function_data[1]));
@@ -68,7 +94,7 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 				//int len = query_data_by_index((char *)&info.cfg + grp->diff, aiminfo, outdata, 128);
 				int len = printData2String(outdata, 128, (char *)&info.cfg + grp->diff, aiminfo);
 
-				printf("query name = %s,len = %d,ret=%s\n", aiminfo->name, len, outdata);
+				printf("update name = %s,len = %d,ret=%s\n", aiminfo->name, len, outdata);
 				if (len > 0) {
 					memcpy(datpos, outdata, len);
 					sec.data_len += len;
@@ -84,9 +110,9 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 };
 
 
-WIFI_BASE_FUNCTION * GetWIFI_QUERY_SINGLE_DATA(WIFI_INFO & wifi)
+WIFI_BASE_FUNCTION * GetWIFI_WRITE_SINGLE_CFG(WIFI_INFO & wifi)
 {
-	return new WIFI_QUERY_SINGLE_DATA(wifi);
+	return new WIFI_WRITE_SINGLE_DATA(wifi);
 }
 
 
