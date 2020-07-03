@@ -34,7 +34,9 @@ int wifi_open(WIFI_INFO & wifi)
 	//上电
 
 	//设置
-	set_wifi_module(wifi);
+	if (0 != set_wifi_module(wifi)) {
+		return -4;
+	}
 	//对时
 	if (0 != get_wifi_tim(wifi)) {
 		return -3;
@@ -273,9 +275,9 @@ void exec_exchange_stage(WIFI_INFO & wifi, uint32_t proMask, int code, const cha
 
 int wifi_serivce(WIFI_INFO & wifi)
 {
-
-	if (0 != wifi_open(wifi)) {
-		printf("wifi open fail\n");
+	int err = wifi_open(wifi);
+	if (err != 0) {
+		printf("wifi open fail,err=%d\n",err);
 		exit(0);
 	}
 

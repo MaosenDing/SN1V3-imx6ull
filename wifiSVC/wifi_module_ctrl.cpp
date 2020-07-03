@@ -381,36 +381,60 @@ int set_wifi_module(WIFI_INFO & wifi)
 	const unsigned char netmask[] = { 255,255,255,0 };
 	const unsigned char gatway[] = { 192,168,1,250 };
 	const unsigned char localip[] = { 192,168,1,228 };
-	set_ssid(wifi, 0, "XINCHEN-2.4G");
-	set_pwd(wifi, 0, "1000000001");
+	if (set_ssid(wifi, 0, "XINCHEN-2.4G")) {
+		return -__LINE__;
+	}
+	if (set_pwd(wifi, 0, "1000000001")) {
+		return -__LINE__;
+	}
 	char buff[32];
-	get_ssid(wifi, 0, buff, 32);
-	get_pwd(wifi, 0, buff, 32);
+	if (get_ssid(wifi, 0, buff, 32)) {
+		return -__LINE__;
+	}
+	if (get_pwd(wifi, 0, buff, 32)) {
+		return -__LINE__;
+	}
 
 	unsigned char ip[] = { 192,168,1,107 };
-	set_server(wifi, ip, 8888);
+	if (set_server(wifi, ip, 8888)) {
+		return -__LINE__;
+	}
 	unsigned char serverip[4];
 	int port;
-	get_server(wifi, serverip, port);
-
-	set_local_IP(wifi, localip, gatway, netmask);
+	if (get_server(wifi, serverip, port)) {
+		return -__LINE__;
+	}
+	if (set_local_IP(wifi, localip, gatway, netmask)) {
+		return -__LINE__;
+	}
 #else	
-	wifi_set_mac(wifi, wifi.cfg.T1.PSN_MAC);
-	set_ssid(wifi, 0, wifi.cfg.T4.M_AP1);
-	set_pwd(wifi, 0, wifi.cfg.T4.M_PASS);
+	if (wifi_set_mac(wifi, wifi.cfg.T1.PSN_MAC)) {
+		return -__LINE__;
+	}
+	if (set_ssid(wifi, 0, wifi.cfg.T4.M_AP1)) {
+		return -__LINE__;
+	}
+	if (set_pwd(wifi, 0, wifi.cfg.T4.M_PASS)) {
+
+	}
 	unsigned char ip[4];
 	unsigned char netmask[4];
 	unsigned char gatway[4];
 	reverse_copy(wifi.cfg.T4.ServerIP, wifi.cfg.T4.ServerIP + 4, ip);
-	set_server(wifi, ip, wifi.cfg.T4.ServerPort);
-
+	if (set_server(wifi, ip, wifi.cfg.T4.ServerPort)) {
+		return -__LINE__;
+	}
 	reverse_copy(wifi.cfg.T4.LocalIP, wifi.cfg.T4.LocalIP + 4, ip);
 	reverse_copy(wifi.cfg.T4.NETMASK, wifi.cfg.T4.NETMASK + 4, netmask);
 	reverse_copy(wifi.cfg.T4.GATEWAY, wifi.cfg.T4.GATEWAY + 4, gatway);
 
-	set_local_IP(wifi, ip, gatway, netmask);
+	if (set_local_IP(wifi, ip, gatway, netmask)) {
+		return -__LINE__;
+	}
 #endif
-	set_connect(wifi);
+	if (set_connect(wifi)) {
+		return -__LINE__;
+	}
 
 	return 0;
 }
