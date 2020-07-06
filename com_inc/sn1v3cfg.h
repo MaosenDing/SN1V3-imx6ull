@@ -85,14 +85,14 @@ extern "C" {
 		char Wiresless_SV[16];
 		char HeliostatType[16];
 		char SN2ID[16];
-		float latitude;
-		float longtitude;
-		float elevation;
-		float Temperature;
-		float Pressure;
-		float HeliostatPointX;
-		float HeliostatPointY;
-		float HeliostatPointZ;
+		double latitude;
+		double longtitude;
+		double elevation;
+		double Temperature;
+		double Pressure;
+		double HeliostatPointX;
+		double HeliostatPointY;
+		double HeliostatPointZ;
 	}T1_table;
 
 
@@ -264,13 +264,21 @@ extern "C" {
 	};
 
 	typedef struct {
+		//t1
 		const char * groupName;
+		//t1.txt
 		const char * cfgName;
+		//Mask_T1
 		const int cfgMask;
+		//对于tg_table的内存偏移
 		const size_t diff;
+		//下挂的描述表
 		CFG_INFO * const group;
+		//描述表数量
 		const size_t sz;
+		//0 1 2 3 4 5 
 		const size_t seq;
+		//1 2 3 4 6
 		const size_t cfgindex;
 	}CFG_GROUP;
 
@@ -283,6 +291,7 @@ extern "C" {
 		, void * outdata, size_t outMaxlen);
 	int printData2String(char * tmpbuff, int maxbuf, const void * baseaddr, const CFG_INFO * info);
 	void scanfSingleDataCtype(void * addr, const char *src, CFG_INFO  * info);
+	void printTable2cfgfile(void * cfg_addr, const CFG_GROUP * grp, int writeMask);
 #ifdef __cplusplus
 }
 #endif

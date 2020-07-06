@@ -118,14 +118,14 @@ CFG_INFO T1[] = {
 
 	T1_Set_data(16,HeliostatType,dateType::STRING16,stingDefault),
 	T1_Set_data(17,SN2ID,dateType::STRING16,stingDefault),
-	T1_Set_data(18,latitude,dateType::FLOAT32,floatDefault),
-	T1_Set_data(19,longtitude,dateType::FLOAT32,floatDefault),
-	T1_Set_data(20,elevation,dateType::FLOAT32,floatDefault),
-	T1_Set_data(21,Temperature,dateType::FLOAT32,floatDefault),
-	T1_Set_data(22,Pressure,dateType::FLOAT32,floatDefault),
-	T1_Set_data(23,HeliostatPointX,dateType::FLOAT32,floatDefault),
-	T1_Set_data(24,HeliostatPointY,dateType::FLOAT32,floatDefault),
-	T1_Set_data(25,HeliostatPointZ,dateType::FLOAT32,floatDefault),
+	T1_Set_data(18,latitude,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(19,longtitude,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(20,elevation,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(21,Temperature,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(22,Pressure,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(23,HeliostatPointX,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(24,HeliostatPointY,dateType::DOUBLE64,doubleDefault),
+	T1_Set_data(25,HeliostatPointZ,dateType::DOUBLE64,doubleDefault),
 };
 
 CFG_INFO T2[] = {

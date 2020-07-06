@@ -11,6 +11,7 @@
 #include <regex>
 #include "sn1v3cfg.h"
 #include "tableWork.h"
+#include <fstream>
 using namespace std;
 
 
@@ -365,10 +366,10 @@ int printData2String(char * tmpbuff,int maxbuf ,const void * baseaddr, const CFG
 	void * dataAddr = (char *)baseaddr + info->diff;
 
 	dateType typ = info->typ;
-	auto default_value = info->default_value;
-	printf("6name = %s typeid = %d ， %p\n", info->name, info->typ , baseaddr);
+	//auto default_value = info->default_value;
+	//printf("6name = %s typeid = %d ， %p\n", info->name, info->typ , baseaddr);
 
-	switch (info->typ) {
+	switch (typ) {
 	case dateType::STRING16:
 	case dateType::STRING32:
 	case dateType::STRING64:
@@ -487,6 +488,22 @@ void printTable2String(string & outstring, void * table, const CFG_INFO * info, 
 	}
 }
 
+void printTable2cfgfile(void * cfg_addr, const CFG_GROUP * grp, int writeMask)
+{
+	if ((!cfg_addr) || (!grp)) {
+		return;
+	}
+	char * table = (char *)cfg_addr + grp->diff;
+	size_t sz = grp->sz;
+	const CFG_INFO *info = grp->group;
+
+	string outstring;
+	for (size_t datapos = 0; datapos < sz; datapos++) {
+		printData2String(outstring, table, &info[datapos], writeMask);
+	}
+	ofstream f(grp->cfgName, ios::trunc);
+	f << outstring;
+}
 
 void testpro()
 {

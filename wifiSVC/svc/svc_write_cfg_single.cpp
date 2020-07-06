@@ -35,8 +35,7 @@ struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
 
 		if (sec.frame_index == -1 && sub.datalen > 2) {
-			//if (info.dbg_pri_msg) 
-			{
+			if (info.dbg_pri_msg) {
 				printf("table =%d, id = %d,val = %s\n"
 					, sub.function_data[0]
 					, sub.function_data[1]
@@ -46,24 +45,18 @@ struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 			table = sub.function_data[0];
 			index = sub.function_data[1];
 
-			unsigned char * datpos = &sec.data[sec.data_len];
 			const CFG_GROUP * grp = find_group_by_cfg_index(table);
 			if (grp) {
 				CFG_INFO * info_group = grp->group;
 				size_t sz = grp->sz;
 				CFG_INFO * aiminfo = find_info_by_seqIndex(info_group, sz, index);
 				if (aiminfo) {
-					char outdata[128] = { 0 };
-					printf("0out data = %p ,diff = %d\n", &info.cfg,grp->diff);
-
-					scanfSingleDataCtype( ((char *)&info.cfg)  + grp->diff, (char *)&sub.function_data[2], aiminfo);
+					char tmpdat[128];
+					memcpy(tmpdat, &sub.function_data[2], sub.datalen - 2);
+					tmpdat[sub.datalen - 2] = 0;
+					scanfSingleDataCtype((char *)&info.cfg + grp->diff, tmpdat, aiminfo);
 					
-					printf("1out data = %p\n", ((char *)&info.cfg) + grp->diff);
-
-					int len = printData2String(outdata, 128, &info.cfg, aiminfo);
-					
-					printf("2out data = %s\n", outdata);
-					printf("3out data = %f\n", *(float*)((char *)&info.cfg + grp->diff));
+					printTable2cfgfile(&info.cfg, grp, writeUseful);
 				}
 			}
 
