@@ -195,7 +195,8 @@ std::shared_ptr<WIFI_BASE_SESSION> wait_rec_session(WIFI_INFO & wifi
 int set_wifi_module(WIFI_INFO & wifi);
 int get_wifi_tim(WIFI_INFO & wifi);
 int get_cache(WIFI_INFO & wifi, int * buffsta);
-
+int set_connect(WIFI_INFO & wifi);
+int set_disconnect(WIFI_INFO & wifi);
 //重置wifi buffer
 int wifi_reset_buff_status(WIFI_INFO & wifi);
 

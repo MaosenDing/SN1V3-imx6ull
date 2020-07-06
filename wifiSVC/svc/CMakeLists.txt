@@ -11,5 +11,6 @@ svc_query_single.cpp
 svc_down_load_update_file.cpp
 svc_upload_file.cpp
 svc_write_cfg_single.cpp
+svc_down_load_cfg_table.cpp
 )
 target_link_directories(mastersvc PUBLIC "${PROJECT_SOURCE_DIR}/timework")

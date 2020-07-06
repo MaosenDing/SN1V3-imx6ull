@@ -10,6 +10,7 @@ WIFI_BASE_FUNCTION * GetWIFI_WRITE_SINGLE_CFG(WIFI_INFO & wifi);
 WIFI_BASE_FUNCTION * Getuploadupatefile(WIFI_INFO & wifi);
 //文件下载
 WIFI_BASE_FUNCTION * Getdownloadupatefile(WIFI_INFO & wifi);
+WIFI_BASE_FUNCTION * Getdownloadcfgtable(WIFI_INFO & wifi);
 typedef WIFI_BASE_FUNCTION * (* WIFIINT)(WIFI_INFO & wifi);
 
 WIFIINT wifigrp[] =
@@ -23,6 +24,7 @@ WIFIINT wifigrp[] =
 	Getuploadupatefile,
 	//文件下载
 	Getdownloadupatefile,
+	Getdownloadcfgtable,
 };
 
 

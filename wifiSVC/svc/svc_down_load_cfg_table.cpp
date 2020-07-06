@@ -11,37 +11,27 @@
 #include <sys/wait.h>
 using namespace std;
 
-void child_handler(int num)
+
+
+struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE :public WIFI_FUNCTION_DOWNLOAD_FILE
 {
-	//SIGCHLD的信号
-	int status;
-	int pid = waitpid(-1, &status, WNOHANG);
-	if (WIFEXITED(status)) {
-		printf("The child %d exit with code %d\n", pid, WEXITSTATUS(status));
-	}
-}
-
-
-
-struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
-{
-	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
+	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(WIFI_INFO & info) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
 	{
 		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
-		functionID = 0x83;
+		functionID = 0x80;
 	}
 
-	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info, int downloadindex) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
+	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(WIFI_INFO & info, int downloadindex) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
 	{
 		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD;
-		functionID = 0x83;
+		functionID = 0x80;
 		fileindex = downloadindex;
 	}
 	int fileindex = 0;
 
 	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) final
 	{
-		ADD_FUN(new WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(info, sub.function_data[0]));
+		ADD_FUN(new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(info, sub.function_data[0]));
 	}
 	virtual int first_data_frame(WIFI_BASE_SESSION & sec, uint16_t &outcrc, uint32_t &outlen)final
 	{
@@ -66,18 +56,14 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 
 	virtual int data_finish(char * data, int len)final
 	{
-		const char * updatepath = "/tmp/update";
-		if (writebin(updatepath, data, len)) {
-			signal(SIGCHLD, child_handler);
-			int pid = fork();
-			if (pid == 0) {
-				printf("exev %s\n", updatepath);
-				chmod(updatepath, 0777);
-				execv(updatepath, nullptr);
-				exit(0);
+		const CFG_GROUP * grp = find_group_by_cfg_index(fileindex);
+		if (grp) {
+			const char * updatepath = grp->cfgName;
+			if (writebin(updatepath, data, len)) {
+				return 0;
 			}
 		}
-		return 0;
+		return -1;
 	}
 
 	virtual int memcpy_write_fix_dat(unsigned char buff[], int maxlen) final
@@ -88,14 +74,14 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 
 	virtual const char * FUNCTION_NAME() final
 	{
-		return "download update file";
+		return "download cfg file";
 	}
 };
 
 
-WIFI_BASE_FUNCTION * Getdownloadupatefile(WIFI_INFO & wifi)
+WIFI_BASE_FUNCTION * Getdownloadcfgtable(WIFI_INFO & wifi)
 {
-	return new WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(wifi);
+	return new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(wifi);
 }
 
 

@@ -277,7 +277,7 @@ int wifi_serivce(WIFI_INFO & wifi)
 {
 	int err = wifi_open(wifi);
 	if (err != 0) {
-		printf("wifi open fail,err=%d\n",err);
+		printf("wifi open fail,err=%d\n", err);
 		exit(0);
 	}
 
@@ -299,6 +299,8 @@ int wifi_serivce(WIFI_INFO & wifi)
 	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD, CODE_WRITE, "upload stage");
 
 	exec_exchange_stage(wifi, WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD, CODE_SELF_DOWNLOAD, "download stage");
+
+	set_disconnect(wifi);
 
 	return 0;
 }
