@@ -108,9 +108,12 @@ struct WIFI_BASE_FUNCTION {
 
 	void ADD_FUN(WIFI_BASE_FUNCTION *);
 protected:
-	unsigned int PRO_MASK = 0;
+	void SetProMask(uint32_t inmask) { PRO_MASK = inmask; }
 	int functionID = -1;
 	WIFI_INFO &info;
+private:
+	uint32_t PRO_MASK = 0;
+
 };
 
 struct WIFI_INFO {

@@ -1,17 +1,44 @@
+#ifndef __SVC_UPLOAD_FILE_H___
+#define __SVC_UPLOAD_FILE_H___
 #include "../wifi_svc.h"
 #include "../wifi_ctrl.h"
+#include "svc_once_read.h"
 #include <mutex>
 using namespace  std;
 
-
-
-
-struct WIFI_FUNCTION_UPLOADFILE_FILE :public WIFI_BASE_FUNCTION
+struct WIFI_FUNCTION_UPLOADFILE_FILE_HEAD :public WIFI_FUNCTION_ONCE_READ
 {
-	WIFI_FUNCTION_UPLOADFILE_FILE(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)
-	{}
+	WIFI_FUNCTION_UPLOADFILE_FILE_HEAD(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_READ(info)
+	{
+	}
 
+	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) final
+	{
+		WIFI_DATA_SUB_PROTOCOL sub;
+		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
+		//控制信令
+		if (sec.frame_index == -1) {
+			if (info.dbg_pri_msg) {
+				printf("len = %d ,fil id = %d,tim = %d:%d - %d:%d\n"
+					, sub.datalen
+					, sub.function_data[0]
+					, sub.function_data[1], sub.function_data[2]
+					, sub.function_data[3], sub.function_data[4]
+				);
+			}
+			contrl_read(sub);
+		}
+	}
 	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) = 0;
+};
+
+
+struct WIFI_FUNCTION_UPLOADFILE_FILE_DAT :public WIFI_BASE_FUNCTION
+{
+	WIFI_FUNCTION_UPLOADFILE_FILE_DAT(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)
+	{
+		SetProMask(WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD);
+	}
 	virtual void load_data(vector<uint8_t> &dat) = 0;
 	virtual int fil_first_frame_head(unsigned char * dat, int maxlen) = 0;
 
@@ -23,24 +50,9 @@ struct WIFI_FUNCTION_UPLOADFILE_FILE :public WIFI_BASE_FUNCTION
 	{
 		WIFI_DATA_SUB_PROTOCOL sub;
 		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
-		//控制信令
-		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_READ) {
-			if (sec.frame_index == -1) {
-				if (info.dbg_pri_msg) {
-					printf("len = %d ,fil id = %d,tim = %d:%d - %d:%d\n"
-						, sub.datalen
-						, sub.function_data[0]
-						, sub.function_data[1], sub.function_data[2]
-						, sub.function_data[3], sub.function_data[4]
-					);
-				}
-				contrl_read(sub);
-			}
-			return WIFI_PRO_STATUS::WIFI_PRO_END;
-		}
 
 		//数据信令
-		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD) {
+		if (GetProMask() == WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD) {
 			if (info.dbg_pri_msg) printf("MASK_SELF_UPLOAD get frame index = %d,using index = %d \n", sec.frame_index, usingindex);
 			if (sec.frame_index == usingindex) {
 				usingindex++;
@@ -151,6 +163,6 @@ private:
 
 	vector<uint8_t> dat;
 };
-
+#endif
 
 

@@ -9,30 +9,22 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "svc_once_read.h"
 using namespace std;
 
 
 
 struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE :public WIFI_FUNCTION_DOWNLOAD_FILE
 {
-	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(WIFI_INFO & info) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
-	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
-		functionID = 0x80;
-	}
 
 	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(WIFI_INFO & info, int downloadindex) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
 	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD;
 		functionID = 0x80;
 		fileindex = downloadindex;
 	}
 	int fileindex = 0;
 
-	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) final
-	{
-		ADD_FUN(new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(info, sub.function_data[0]));
-	}
+
 	virtual int first_data_frame(WIFI_BASE_SESSION & sec, uint16_t &outcrc, uint32_t &outlen)final
 	{
 		unsigned char * pdat = &sec.data[2];
@@ -78,10 +70,38 @@ struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE :public WIFI_FUNCTION_DOWNLOAD_FILE
 	}
 };
 
+struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD :public WIFI_FUNCTION_ONCE_READ 
+{
+	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_READ(info)
+	{}
+
+	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) final
+	{
+		WIFI_DATA_SUB_PROTOCOL sub;
+		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
+		//控制信令
+		if (GetProMask() == WIFI_BASE_FUNCTION::MASK_READ) {
+			if (sec.frame_index == -1) {
+				if (sub.datalen == 1) {
+					if (info.dbg_pri_msg) {
+						printf("need downfile index = %d\n", sub.function_data[0]);
+					}
+					ADD_FUN(new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(info, sub.function_data[0]));
+				}
+			}
+		}
+	}
+	virtual const char * FUNCTION_NAME() final
+	{
+		return "download cfg file";
+	}
+};
+
+
 
 WIFI_BASE_FUNCTION * Getdownloadcfgtable(WIFI_INFO & wifi)
 {
-	return new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE(wifi);
+	return new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD(wifi);
 }
 
 

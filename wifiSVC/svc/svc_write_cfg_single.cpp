@@ -7,13 +7,11 @@ struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 {
 	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_WRITE(info)
 	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
 		functionID = 1;
 	}
 
 	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info, int inmsgid, int intable, int inindex) :WIFI_FUNCTION_ONCE_WRITE(info)
 	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD;
 		functionID = 1;
 		msgid = inmsgid;
 		table = intable;

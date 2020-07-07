@@ -15,17 +15,13 @@
 using namespace std;
 
 
-struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_FUNCTION_UPLOADFILE_FILE
-{
-	WIFI_FUNCTION_UPLOAD_FILE(WIFI_INFO & info) :WIFI_FUNCTION_UPLOADFILE_FILE(info)
-	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
-		functionID = 0x86;
-	}
 
-	WIFI_FUNCTION_UPLOAD_FILE(WIFI_INFO & info, int downloadindex, unsigned char *intim) :WIFI_FUNCTION_UPLOADFILE_FILE(info)
+
+
+struct WIFI_FUNCTION_UPLOAD_LOG_DAT :public WIFI_FUNCTION_UPLOADFILE_FILE_DAT
+{
+	WIFI_FUNCTION_UPLOAD_LOG_DAT(WIFI_INFO & info, int downloadindex, unsigned char *intim) :WIFI_FUNCTION_UPLOADFILE_FILE_DAT(info)
 	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD;
 		functionID = 0x86;
 		fileindex = downloadindex;
 		memcpy(tim, intim, 4);
@@ -33,13 +29,7 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_FUNCTION_UPLOADFILE_FILE
 	int fileindex = 0;
 	unsigned char tim[4];
 
-	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) final
-	{
-		if (sub.datalen == 5) {
-			ADD_FUN(new WIFI_FUNCTION_UPLOAD_FILE(
-				info, sub.function_data[0], &sub.function_data[1]));
-		}
-	}
+
 
 	virtual void load_data(vector<uint8_t> &dat) final
 	{
@@ -61,9 +51,32 @@ struct WIFI_FUNCTION_UPLOAD_FILE :public WIFI_FUNCTION_UPLOADFILE_FILE
 };
 
 
+
+
+struct WIFI_FUNCTION_UPLOAD_LOG_HEAD :public WIFI_FUNCTION_UPLOADFILE_FILE_HEAD
+{
+	WIFI_FUNCTION_UPLOAD_LOG_HEAD(WIFI_INFO & info) :WIFI_FUNCTION_UPLOADFILE_FILE_HEAD(info)
+	{
+		functionID = 0x86;
+	}
+	virtual const char * FUNCTION_NAME()
+	{
+		return "upload log fil";
+	}
+
+	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) final
+	{
+		if (sub.datalen == 5) {
+			ADD_FUN(new WIFI_FUNCTION_UPLOAD_LOG_DAT(
+				info, sub.function_data[0], &sub.function_data[1]));
+		}
+	}
+};
+
+
 WIFI_BASE_FUNCTION * Getuploadupatefile(WIFI_INFO & wifi)
 {
-	return new WIFI_FUNCTION_UPLOAD_FILE(wifi);
+	return new WIFI_FUNCTION_UPLOAD_LOG_HEAD(wifi);
 }
 
 

@@ -19,7 +19,9 @@ using namespace  std;
 struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 {
 	WIFI_FUNCTION_DOWNLOAD_FILE(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)
-	{}
+	{
+		SetProMask(WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD);
+	}
 
 	int writebin(const char * path, const char * data, const int len)
 	{
@@ -35,7 +37,7 @@ struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 		return goodflg;
 	}
 
-	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) = 0;
+
 	virtual int first_data_frame(WIFI_BASE_SESSION & sec, uint16_t& outcrc, uint32_t &outlen) = 0;
 	virtual int data_finish(char * data, int len) = 0;
 	virtual int memcpy_write_fix_dat(unsigned char buff[],int maxlen) = 0;
@@ -45,19 +47,9 @@ struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 	{
 		WIFI_DATA_SUB_PROTOCOL sub;
 		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
-		//控制信令
-		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_READ) {
-			if (sec.frame_index == -1) {
-				if (sub.datalen == 1) {
-					if (info.dbg_pri_msg) {
-						printf("need downfile index = %d\n", sub.function_data[0]);
-					}
-					contrl_read(sub);
-				}
-			}
-		}
+
 		//数据信令
-		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD) {
+		if (GetProMask() == WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD) {
 			if (sec.frame_index == 0) {
 				uint16_t tmpcrc;
 				uint32_t tmplen;

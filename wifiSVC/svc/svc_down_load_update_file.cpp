@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "svc_once_read.h"
 using namespace std;
 
 void child_handler(int num)
@@ -25,15 +26,8 @@ void child_handler(int num)
 
 struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 {
-	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
-	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_READ;
-		functionID = 0x83;
-	}
-
 	WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(WIFI_INFO & info, int downloadindex) :WIFI_FUNCTION_DOWNLOAD_FILE(info)
 	{
-		PRO_MASK = WIFI_BASE_FUNCTION::MASK_SELF_DOWNLOAD;
 		functionID = 0x83;
 		fileindex = downloadindex;
 	}
@@ -92,10 +86,40 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 	}
 };
 
+struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD :public WIFI_FUNCTION_ONCE_READ
+{
+	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_READ(info)
+	{
+		functionID = 0x83;
+	}
+
+	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) final
+	{
+		WIFI_DATA_SUB_PROTOCOL sub;
+		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
+		//控制信令
+		if (GetProMask() == WIFI_BASE_FUNCTION::MASK_READ) {
+			if (sec.frame_index == -1) {
+				if (sub.datalen == 1) {
+					if (info.dbg_pri_msg) {
+						printf("need downfile index = %d\n", sub.function_data[0]);
+					}
+					ADD_FUN(new WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(info, sub.function_data[0]));
+				}
+			}
+		}
+	}
+	virtual const char * FUNCTION_NAME() final
+	{
+		return "download update file";
+	}
+};
+
+
 
 WIFI_BASE_FUNCTION * Getdownloadupatefile(WIFI_INFO & wifi)
 {
-	return new WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE(wifi);
+	return new WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD(wifi);
 }
 
 

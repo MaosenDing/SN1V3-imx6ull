@@ -13,14 +13,11 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 {
 	WIFI_FUNCTION_ONCE_WRITE(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)
 	{
-
+		SetProMask(WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD);
 	}
 
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
-		if (PRO_MASK & WIFI_BASE_FUNCTION::MASK_READ) {
-			read_pro_fun(sec);
-		}
 		return WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
@@ -40,18 +37,10 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 
 	virtual void DESTORY_WRITE(WIFI_INFO & info) final
 	{
-		destor_write_fun();
+		delete this;
 	}
 
-	virtual void destor_write_fun() = 0;
-
-	enum read_sta {
-		sta_need_write = 1,
-		sta_end = 2,
-	};
-
 	virtual void mk_write_session_data(WIFI_BASE_SESSION & sec) = 0;
-	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) = 0;
 };
 
 
