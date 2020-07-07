@@ -161,12 +161,11 @@ struct svc_wifi : public GUARD_SERVICE {
 			//没有获取时间  直接长连接
 			return true;
 		}
-
 		Tg_table tg_table;
 		scanfAllTable(tg_table, Mask_T4);
 		//固定长连接
 		if (0 == tg_table.T4.CM_Cycle) {
-			return false;
+			return true;
 		}
 		//短连接判断
 		system("/root/io.sh jd3 0");

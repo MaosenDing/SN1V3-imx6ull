@@ -5,7 +5,7 @@ workPath="/nucroot"
 
 
 if [ $# -lt 1 ] ; then
-	ver="default80"
+	ver=`date +%Y-%m-%d`
 else
 	ver=$1
 fi
