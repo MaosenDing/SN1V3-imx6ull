@@ -134,11 +134,6 @@ struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
-	virtual void destor_write_fun()
-	{
-		delete this;
-	}
-
 	virtual void DESTORY_FIRST(WIFI_INFO & info) final
 	{
 		delete this;
@@ -147,7 +142,7 @@ struct WIFI_FUNCTION_DOWNLOAD_FILE :public WIFI_BASE_FUNCTION
 
 	virtual void DESTORY_WRITE(WIFI_INFO & info) final
 	{
-		destor_write_fun();
+		delete this;
 	}
 private:
 	int fileindex = 0;

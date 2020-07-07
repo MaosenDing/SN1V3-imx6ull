@@ -2,7 +2,7 @@
 %PutterM,pm1
 %DriveM,dm1
 %FWSensorM,fwm1
-%PSN_MAC,2:2:2:2
+%PSN_MAC,b:b:b:b
 
 %MDC2_SV_1,1.1
 %MDC2_SV_2,1.1

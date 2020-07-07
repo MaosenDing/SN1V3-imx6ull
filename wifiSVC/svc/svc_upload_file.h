@@ -9,32 +9,127 @@ using namespace  std;
 struct WIFI_FUNCTION_UPLOADFILE_FILE :public WIFI_BASE_FUNCTION
 {
 	WIFI_FUNCTION_UPLOADFILE_FILE(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)
-	{
+	{}
 
-	}
+	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) = 0;
+	virtual void load_data(vector<uint8_t> &dat) = 0;
+	virtual int fil_first_frame_head(unsigned char * dat, int maxlen) = 0;
 
+	//数据部分需要添加的特殊数据
+	virtual int data_frame_fil_head(unsigned char * dat, int maxlen) { return 0; }
+	virtual int data_frame_fix_len() { return 0; }
+#define HEAD_LEN (3)
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) final
 	{
-		if (frameIndex == 0) {
-			//if succ
-			//如果可以发送 准备数据
-			//prepare_data();
-			//error
-			//
+		WIFI_DATA_SUB_PROTOCOL sub;
+		mk_WIFI_DATA_SUB_PROTOCOL(sec, sub);
+		//控制信令
+		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_READ) {
+			if (sec.frame_index == -1) {
+				if (info.dbg_pri_msg) {
+					printf("len = %d ,fil id = %d,tim = %d:%d - %d:%d\n"
+						, sub.datalen
+						, sub.function_data[0]
+						, sub.function_data[1], sub.function_data[2]
+						, sub.function_data[3], sub.function_data[4]
+					);
+				}
+				contrl_read(sub);
+			}
+			return WIFI_PRO_STATUS::WIFI_PRO_END;
 		}
 
+		//数据信令
+		if (PRO_MASK == WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD) {
+			if (info.dbg_pri_msg) printf("MASK_SELF_UPLOAD get frame index = %d,using index = %d \n", sec.frame_index, usingindex);
+			if (sec.frame_index == usingindex) {
+				usingindex++;
+				if (usingindex > MaxIndex) {
+					return WIFI_PRO_STATUS::WIFI_PRO_END;
+				}
+			} else {
+				if (info.dbg_pri_msg) printf("MASK_SELF_UPLOAD get frame index = %d \n", sec.frame_index);
+			}
+		}
+		return WIFI_PRO_STATUS::WIFI_PRO_NEED_WRITE;
+	}
 
-		//if succ frameindex ++
-		//error resend frame
-		return WIFI_PRO_STATUS::WIFI_PRO_END;
+	size_t fil_data(unsigned char * buff, size_t packlen, size_t packindex)
+	{
+		size_t sz = dat.size();
+		if (info.dbg_pri_msg) printf("out index = %d,", packindex);
+		const unsigned char * srcdat = &dat[0];
+		if (packindex > MaxIndex || packindex <= 0) {
+			if (info.dbg_pri_msg) printf("end frame\n");
+			return 0;
+		}
+		size_t srcpos = (packindex - 1) * packlen;
+		int len = ((sz - srcpos) > packlen) ? packlen : (sz - srcpos);
+		if (info.dbg_pri_msg) printf("cp pos = %d,len = %d\n", srcpos, len);
+		memcpy(buff, &srcdat[srcpos], len);
+		return len;
 	}
 
 
 	virtual WIFI_PRO_STATUS wifi_write(WIFI_BASE_SESSION & sec) final
 	{
-		if (frameIndex == 0) {
+		int sigpack = MAX_PACK_SZ - MIN_PACK_SZ - HEAD_LEN - data_frame_fix_len();
+		if (usingindex == 0) {
+			load_data(dat);
 
+			unsigned int calcrc = crc_make((unsigned char *)&dat[0], dat.size(), 0xffff);
 
+			if (dat.size()) {
+				MaxIndex =
+					dat.size() / sigpack //满包 
+					+ 1//空包 或者 半满包				
+					;
+			} else {
+				MaxIndex = 0;
+			}
+			printf("sigpack = %d , maxindex = %d \n", sigpack, MaxIndex);
+
+			sec.data_len = 0;
+
+#if HEAD_LEN >= 3
+			sec.data[sec.data_len++] = msgid;
+			sec.data[sec.data_len++] = msgid >> 8;
+#endif
+			sec.data[sec.data_len++] = functionID;
+
+			int len = fil_first_frame_head(&sec.data[sec.data_len], 100);
+
+			sec.data_len += len;
+
+			sec.data[sec.data_len++] = calcrc;
+			sec.data[sec.data_len++] = calcrc >> 8;
+
+			int32_t sz = dat.size();
+			memcpy(&sec.data[sec.data_len], &sz, 4);
+			sec.data_len += 4;
+
+			sec.frame_index = 0;
+
+			if (info.dbg_pri_msg) {
+				printf("snd fil,len = %d,crc = %x\n"
+					, sz, calcrc
+				);
+			}
+		} else {
+			sec.data_len = 0;
+#if HEAD_LEN >= 3
+			sec.data[sec.data_len++] = msgid;
+			sec.data[sec.data_len++] = msgid >> 8;
+#endif
+			sec.data[sec.data_len++] = functionID;
+
+			sec.data_len += data_frame_fil_head(&sec.data[sec.data_len], 100);
+
+			int len = fil_data(&sec.data[sec.data_len], sigpack, usingindex);
+
+			sec.data_len = HEAD_LEN + data_frame_fix_len() + len;
+
+			sec.frame_index = usingindex;
 		}
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
@@ -46,26 +141,15 @@ struct WIFI_FUNCTION_UPLOADFILE_FILE :public WIFI_BASE_FUNCTION
 
 	virtual void DESTORY_WRITE(WIFI_INFO & info) final
 	{
-		destor_write_fun();
+		delete this;
 	}
-
-	virtual WIFI_BASE_FUNCTION * create_write_fun() = 0;
-	virtual void destor_write_fun() = 0;
-
-	enum read_sta {
-		sta_need_write = 1,
-		sta_end = 2,
-		sta_send_error = 3,
-	};
-
-	virtual void mk_upload_head_data(WIFI_BASE_SESSION & sec) = 0;
-	virtual char * getData(int frameIndex) = 0;
-	virtual int getDataMaxFrame() = 0;
-	//
-	virtual read_sta prepare_data(read_sta sta) = 0;
-
 private:
-	int frameIndex = 0;
+	int usingindex = 0;
+	int MaxIndex = 0;
+
+	int msgid = 0;
+
+	vector<uint8_t> dat;
 };
 
 
