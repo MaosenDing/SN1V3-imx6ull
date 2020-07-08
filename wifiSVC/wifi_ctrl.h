@@ -89,9 +89,6 @@ struct WIFI_BASE_FUNCTION {
 	virtual WIFI_PRO_STATUS wifi_read(WIFI_BASE_SESSION & sec) = 0;
 	virtual WIFI_PRO_STATUS wifi_write(WIFI_BASE_SESSION & sec) = 0;
 
-	virtual void DESTORY_FIRST(WIFI_INFO & info) = 0;
-	virtual void DESTORY_WRITE(WIFI_INFO & info) = 0;
-
 	virtual const char * FUNCTION_NAME() = 0;
 
 	virtual ~WIFI_BASE_FUNCTION() {}

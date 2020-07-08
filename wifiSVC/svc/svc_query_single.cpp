@@ -7,9 +7,6 @@
 
 
 
-
-
-
 struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 {
 

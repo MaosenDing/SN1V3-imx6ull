@@ -1,3 +1,5 @@
+#ifndef __SVC_ONCE_WRITE_H___
+#define __SVC_ONCE_WRITE_H___
 #include "../wifi_svc.h"
 #include "../wifi_ctrl.h"
 #include <mutex>
@@ -30,18 +32,8 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
-	virtual void DESTORY_FIRST(WIFI_INFO & info) final
-	{
-		delete this;
-	}
-
-	virtual void DESTORY_WRITE(WIFI_INFO & info) final
-	{
-		delete this;
-	}
-
 	virtual void mk_write_session_data(WIFI_BASE_SESSION & sec) = 0;
 };
 
-
+#endif
 

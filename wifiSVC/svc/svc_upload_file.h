@@ -145,16 +145,6 @@ struct WIFI_FUNCTION_UPLOADFILE_FILE_DAT :public WIFI_BASE_FUNCTION
 		}
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
-
-	virtual void DESTORY_FIRST(WIFI_INFO & info) final
-	{
-		delete this;
-	}
-
-	virtual void DESTORY_WRITE(WIFI_INFO & info) final
-	{
-		delete this;
-	}
 private:
 	int usingindex = 0;
 	int MaxIndex = 0;

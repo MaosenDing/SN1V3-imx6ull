@@ -27,16 +27,6 @@ struct WIFI_FUNCTION_ONCE_READ :public WIFI_BASE_FUNCTION
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;
 	}
 
-	virtual void DESTORY_FIRST(WIFI_INFO & info) final
-	{
-		delete this;
-	}
-
-	virtual void DESTORY_WRITE(WIFI_INFO & info)final
-	{
-		delete this;
-	}
-
 	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) = 0;
 };
 #endif

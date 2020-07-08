@@ -262,7 +262,7 @@ void exec_exchange_stage(WIFI_INFO & wifi, uint32_t proMask, int code, const cha
 				std::unique_lock<std::mutex> lk(wifi.mtx_write_fun_list);
 				auto tmp = itr;
 				++itr;
-				(*tmp)->DESTORY_WRITE(wifi);
+				delete *tmp;
 				wifi.write_fun_list.erase(tmp);
 			} else {
 				++itr;

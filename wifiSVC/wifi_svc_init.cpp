@@ -50,7 +50,7 @@ void WIFI_INFO::delete_svc()
 	if (svcGrp && svcCnt >= 0) {
 		for (int i = 0; i < svcCnt; i++) {
 			WIFI_BASE_FUNCTION* tmp = svcGrp[i];
-			tmp->DESTORY_FIRST(*this);
+			delete tmp;
 		}
 		delete svcGrp;
 		svcGrp = 0;
