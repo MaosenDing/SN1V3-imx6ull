@@ -104,6 +104,8 @@ struct WIFI_BASE_FUNCTION {
 	int GetProMask() { return PRO_MASK; }
 
 	void ADD_FUN(WIFI_BASE_FUNCTION *);
+
+	static uint16_t static_msg_id;
 protected:
 	void SetProMask(uint32_t inmask) { PRO_MASK = inmask; }
 	int functionID = -1;

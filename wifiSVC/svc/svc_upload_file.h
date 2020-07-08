@@ -6,6 +6,22 @@
 #include <mutex>
 using namespace  std;
 
+
+/*
+对于 WIFI_FUNCTION_UPLOADFILE_FILE_DAT
+virtual void load_data(vector<uint8_t> &dat) final
+重写该函数 用于载入数据
+
+virtual int fil_first_frame_head(unsigned char * dat, int maxlen) final
+重写该函数 用于第一帧特殊数据头，返回添加的数据长度，填充数据到dat 中
+
+
+
+特殊用法，数据包前面添加固定长度数据，重写下列函数
+virtual int data_frame_fil_head(unsigned char * dat, int maxlen) { return 0; }
+virtual int data_frame_fix_len() { return 0; }
+*/
+
 struct WIFI_FUNCTION_UPLOADFILE_FILE_HEAD :public WIFI_FUNCTION_ONCE_READ
 {
 	WIFI_FUNCTION_UPLOADFILE_FILE_HEAD(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_READ(info)
@@ -32,10 +48,10 @@ struct WIFI_FUNCTION_UPLOADFILE_FILE_HEAD :public WIFI_FUNCTION_ONCE_READ
 	virtual void contrl_read(WIFI_DATA_SUB_PROTOCOL & sub) = 0;
 };
 
-
 struct WIFI_FUNCTION_UPLOADFILE_FILE_DAT :public WIFI_BASE_FUNCTION
 {
-	WIFI_FUNCTION_UPLOADFILE_FILE_DAT(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)
+	WIFI_FUNCTION_UPLOADFILE_FILE_DAT(WIFI_INFO & info,int inmsgid) 
+		:WIFI_BASE_FUNCTION(info),msgid(inmsgid)
 	{
 		SetProMask(WIFI_BASE_FUNCTION::MASK_SELF_UPLOAD);
 	}
@@ -149,7 +165,7 @@ private:
 	int usingindex = 0;
 	int MaxIndex = 0;
 
-	int msgid = 0;
+	int msgid;
 
 	vector<uint8_t> dat;
 };

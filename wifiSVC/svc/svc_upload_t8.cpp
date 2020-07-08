@@ -20,7 +20,8 @@ using namespace std;
 
 struct WIFI_FUNCTION_UPLOAD_T8_DAT :public WIFI_FUNCTION_UPLOADFILE_FILE_DAT
 {
-	WIFI_FUNCTION_UPLOAD_T8_DAT(WIFI_INFO & info, int downloadindex, unsigned char *intim) :WIFI_FUNCTION_UPLOADFILE_FILE_DAT(info)
+	WIFI_FUNCTION_UPLOAD_T8_DAT(WIFI_INFO & info, int downloadindex, unsigned char *intim,int inmsgid) 
+		:WIFI_FUNCTION_UPLOADFILE_FILE_DAT(info, inmsgid)
 	{
 		functionID = 0x85;
 		fileindex = downloadindex;
@@ -68,7 +69,10 @@ struct WIFI_FUNCTION_UPLOAD_T8_HEAD :public WIFI_FUNCTION_UPLOADFILE_FILE_HEAD
 	{
 		if (sub.datalen == 5) {
 			ADD_FUN(new WIFI_FUNCTION_UPLOAD_T8_DAT(
-				info, sub.function_data[0], &sub.function_data[1]));
+				info, sub.function_data[0]
+				, &sub.function_data[1]
+				, WIFI_BASE_FUNCTION::static_msg_id++
+			));
 		}
 	}
 };

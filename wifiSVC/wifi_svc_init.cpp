@@ -1,6 +1,6 @@
 #include "wifi_ctrl.h"
 
-
+uint16_t WIFI_BASE_FUNCTION::static_msg_id = 0;
 //单接收
 WIFI_BASE_FUNCTION * GetSn2Center(WIFI_INFO & wifi);
 //一次发送

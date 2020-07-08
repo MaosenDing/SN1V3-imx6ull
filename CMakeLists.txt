@@ -6,7 +6,7 @@ option(ENABLE_SHARED_COM "enable shared com" ON)
 
 
 
-option(CMAKE_VERBOSE_MAKEFILE "make verbose=1" ON)
+option(CMAKE_VERBOSE_MAKEFILE "make verbose=1" OFF)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(-mcpu=arm926ej-s -mapcs -rdynamic)

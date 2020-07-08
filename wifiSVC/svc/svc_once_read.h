@@ -5,7 +5,7 @@
 
 //单次接收模板
 //只适用于纯单次接收的功能
-//重写read_pro_fun和接收掩码以及功能编号
+//重写read_pro_fun
 struct WIFI_FUNCTION_ONCE_READ :public WIFI_BASE_FUNCTION
 {
 	WIFI_FUNCTION_ONCE_READ(WIFI_INFO & info) :WIFI_BASE_FUNCTION(info)

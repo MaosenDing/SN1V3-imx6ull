@@ -27,7 +27,7 @@ using namespace std;
 // Parameter: char * fname
 // Parameter: string & refVect
 //************************************
-ERR_STA loadFile(char *fname ,string & refVect)
+ERR_STA loadFile(const char *fname ,string & refVect)
 {
 	ifstream ifs(fname);
 	
@@ -71,7 +71,7 @@ ERR_STA loadFile(char *fname ,string & refVect)
 }
 
 
-ERR_STA loadFile(char *fname, vector<uint8_t> & refVect) 
+ERR_STA loadFile(const char *fname, vector<uint8_t> & refVect) 
 {
 	ifstream ifs(fname, ios::binary);
 
@@ -115,7 +115,7 @@ ERR_STA loadFile(char *fname, vector<uint8_t> & refVect)
 }
 
 
-ERR_STA loadFileC(char *fname, char ** refVect, int * outsize)
+ERR_STA loadFileC(const char *fname, char ** refVect, int * outsize)
 {
 	if (fname == nullptr || refVect == nullptr || outsize == nullptr)
 	{
@@ -204,19 +204,19 @@ static void split(const string & input, vector<string> &outVector, char fdelimit
 // Access:    public 
 // Returns:   ERR_STA
 // Qualifier:
-// Parameter: char * filePath ÎÄ¼şÂ·¾¶
-// Parameter: char fdelimiter ·Ö¸ñ·û
-// Parameter: vector<int> & frange ÒªÈ¡µÄÊı¾İ¶Î Èç0 1 3 5
-// Parameter: vector <string> & outVector È¡³öµÄÊı¾İ
+// Parameter: char * filePath æ–‡ä»¶è·¯å¾„
+// Parameter: char fdelimiter åˆ†æ ¼ç¬¦
+// Parameter: vector<int> & frange è¦å–çš„æ•°æ®æ®µ å¦‚0 1 3 5
+// Parameter: vector <string> & outVector å–å‡ºçš„æ•°æ®
 //************************************
 ERR_STA RTF(char * filePath, char fdelimiter, vector<int>& frange, vector <string> & outVector)
 {
 	string bin;
-	//ÔØÈëÎÄ¼ş
+	//è½½å…¥æ–‡ä»¶
 	ERR_STA sta = loadFile(filePath, bin);
 	if (sta) return sta;
 
-	//·Ö¸î×Ö·û
+	//åˆ†å‰²å­—ç¬¦
 	vector<string> tmpVector;
 	try
 	{
@@ -228,7 +228,7 @@ ERR_STA RTF(char * filePath, char fdelimiter, vector<int>& frange, vector <strin
 	}
 	
 
-	//Ìî³äÊı¾İ
+	//å¡«å……æ•°æ®
 	int error_time = 0;
 	outVector.clear();
 	for (unsigned int getcode : frange)
@@ -258,10 +258,10 @@ ERR_STA RTF(char * filePath, char fdelimiter, vector<int>& frange, vector <strin
 // Access:    public 
 // Returns:   ERR_STA
 // Qualifier:
-// Parameter: char * filePath ÎÄ¼şÂ·¾¶
-// Parameter: char fdelimiter ·Ö¸ñ·û Èç'\' ','
-// Parameter: char wtype	Ğ´ÈëÀàĞÍ ¡®a¡¯ 'w' Á½ÖÖ
-// Parameter: string & fdata ÒªĞ´ÈëµÄÊı¾İ
+// Parameter: char * filePath æ–‡ä»¶è·¯å¾„
+// Parameter: char fdelimiter åˆ†æ ¼ç¬¦ å¦‚'\' ','
+// Parameter: char wtype	å†™å…¥ç±»å‹ â€˜aâ€™ 'w' ä¸¤ç§
+// Parameter: string & fdata è¦å†™å…¥çš„æ•°æ®
 //************************************
 ERR_STA WTF(char * filePath, char fdelimiter, char wtype, string & fdata)
 {
@@ -451,7 +451,7 @@ shared_ptr<vector<string> > getAllFileName(char * path,const char * postfix)
 	while ((dp = readdir(dfd)) != NULL)
 	{
 		if (strncmp(dp->d_name, ".", 1) == 0)
-			continue; /* Ìø¹ıµ±Ç°ÎÄ¼ş¼ĞºÍÉÏÒ»²ãÎÄ¼ş¼ĞÒÔ¼°Òş²ØÎÄ¼ş*/
+			continue; /* è·³è¿‡å½“å‰æ–‡ä»¶å¤¹å’Œä¸Šä¸€å±‚æ–‡ä»¶å¤¹ä»¥åŠéšè—æ–‡ä»¶*/
 		if (strlen(path) + strlen(dp->d_name) + 2 > sizeof(tmpname))
 		{
 			cout << "file" << path << "/" << dp->d_name << " is too long" << endl;

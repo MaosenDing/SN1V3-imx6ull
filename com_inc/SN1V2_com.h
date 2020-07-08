@@ -73,9 +73,9 @@
 	ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData);
 	ERR_STA saveCsv(char * filePath, std::vector<uint8_t> & vdata, int lineWidth);
 	//载入文件
-	ERR_STA loadFile(char *fname, std::string & refVect);
-	ERR_STA loadFile(char *fname, std::vector<uint8_t> & refVect);
-	ERR_STA loadFileC(char *fname, char ** refVect, int * outsize);
+	ERR_STA loadFile(const char *fname, std::string & refVect);
+	ERR_STA loadFile(const char *fname, std::vector<uint8_t> & refVect);
+	ERR_STA loadFileC(const char *fname, char ** refVect, int * outsize);
 	//rgb565 转换
 	bool RGB565binaryzation(char * srcdata, char *dst, size_t pixCount);
 	bool RGB565binaryzation(std::vector<uint8_t> & srcdata, std::vector <uint8_t> &dst);

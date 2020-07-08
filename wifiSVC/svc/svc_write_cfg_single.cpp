@@ -6,15 +6,10 @@
 #include "svc_once_read.h"
 struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 {
-	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_WRITE(info)
-	{
-		functionID = 1;
-	}
 
-	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info, int inmsgid, int intable, int inindex) :WIFI_FUNCTION_ONCE_WRITE(info)
+	WIFI_WRITE_SINGLE_DATA(WIFI_INFO & info, int inmsgid, int intable, int inindex) :WIFI_FUNCTION_ONCE_WRITE(info,inmsgid)
 	{
 		functionID = 1;
-		msgid = inmsgid;
 		table = intable;
 		index = inindex;
 	}
@@ -27,19 +22,15 @@ struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 
 	int table = 0;
 	int index = 0;
-	int msgid = 0;
 
 
-	virtual void mk_write_session_data(WIFI_BASE_SESSION & sec) final
+	virtual int mk_write_data(unsigned char * dat, int maxlen)final
 	{
-		sec.data_len = 5;
-		sec.data[0] = msgid;
-		sec.data[1] = msgid >> 8;
-		sec.data[2] = functionID;
-		sec.data[3] = table;
-		sec.data[4] = index;
-
-		unsigned char * datpos = &sec.data[sec.data_len];
+		dat[1] = functionID;
+		dat[2] = table;
+		dat[3] = index;
+		int retlen = 3;
+		unsigned char * datpos = &dat[3];
 		const CFG_GROUP * grp = find_group_by_cfg_index(table);
 		if (grp) {
 			CFG_INFO * info_group = grp->group;
@@ -53,10 +44,11 @@ struct WIFI_WRITE_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 				printf("update name = %s,len = %d,ret=%s\n", aiminfo->name, len, outdata);
 				if (len > 0) {
 					memcpy(datpos, outdata, len);
-					sec.data_len += len;
+					retlen += len;
 				}
 			}
 		}
+		return retlen;
 	}
 };
 
@@ -103,9 +95,9 @@ struct WIFI_WRITE_SINGLE_DATA_HEAD :public WIFI_FUNCTION_ONCE_READ
 			}
 
 			ADD_FUN(new WIFI_WRITE_SINGLE_DATA(info
-				, sub.message_id
-				, sub.function_data[0]
-				, sub.function_data[1]));
+				, WIFI_BASE_FUNCTION::static_msg_id++
+				, table
+				, index));
 		}
 	}
 };
