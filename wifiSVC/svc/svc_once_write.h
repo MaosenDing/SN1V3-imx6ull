@@ -24,7 +24,8 @@ struct WIFI_FUNCTION_ONCE_WRITE :public WIFI_BASE_FUNCTION
 	{
 		sec.data[0] = msgid;
 		sec.data[1] = msgid >> 8;
-		sec.data_len = 2 + mk_write_data(sec.data, 100);
+		sec.data[2] = functionID;
+		sec.data_len = 3 + mk_write_data(&sec.data[3], 100);
 		//单次上传
 		sec.frame_index = -1;
 		return  WIFI_PRO_STATUS::WIFI_PRO_END;

@@ -48,12 +48,17 @@ struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE :public WIFI_FUNCTION_DOWNLOAD_FILE
 
 	virtual int data_finish(char * data, int len)final
 	{
+		printf("len = %d,dat = %s\n", len, data);
+		printf("fileindex = %d\n",fileindex);
 		const CFG_GROUP * grp = find_group_by_cfg_index(fileindex);
 		if (grp) {
 			const char * updatepath = grp->cfgName;
+			printf("name = %s\n", grp->cfgName);
 			if (writebin(updatepath, data, len)) {
 				return 0;
 			}
+		} else {
+			printf("123\n");
 		}
 		return -1;
 	}
@@ -73,7 +78,9 @@ struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE :public WIFI_FUNCTION_DOWNLOAD_FILE
 struct WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD :public WIFI_FUNCTION_ONCE_READ 
 {
 	WIFI_FUNCTION_DOWNLOAD_CFG_TABLE_HEAD(WIFI_INFO & info) :WIFI_FUNCTION_ONCE_READ(info)
-	{}
+	{
+		functionID = 0x80;
+	}
 
 	virtual void read_pro_fun(WIFI_BASE_SESSION & sec) final
 	{

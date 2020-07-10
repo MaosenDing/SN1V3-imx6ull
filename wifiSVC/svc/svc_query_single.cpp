@@ -28,11 +28,10 @@ struct WIFI_QUERY_SINGLE_DATA :public WIFI_FUNCTION_ONCE_WRITE
 
 	virtual int mk_write_data(unsigned char * dat, int maxlen) final
 	{
-		dat[1] = functionID;
-		dat[2] = table;
-		dat[3] = index;
-		int retlen = 3;
-		unsigned char * datpos = &dat[3];
+		dat[0] = table;
+		dat[1] = index;
+		int retlen = 2;
+		unsigned char * datpos = &dat[2];
 		const CFG_GROUP * grp = find_group_by_cfg_index(table);
 		if (grp) {
 			CFG_INFO * info_group = grp->group;
