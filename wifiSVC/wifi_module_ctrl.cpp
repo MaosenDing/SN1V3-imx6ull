@@ -338,8 +338,6 @@ int get_cache(WIFI_INFO & wifi, int * buffsta)
 	return -1;
 }
 
-
-
 int get_status(WIFI_INFO & wifi)
 {
 	auto psec = exec_wifi_ctrl(wifi, 0x49, nullptr, 0);
@@ -373,10 +371,27 @@ int wifi_set_mac(WIFI_INFO & wifi,char * buff)
 	return -1;
 }
 
+int get_key(WIFI_INFO & wifi, int * buffsta)
+{
+	auto psec = exec_wifi_ctrl(wifi, 0x4C, nullptr, 0);
+	
+	if (psec && (psec->data_len == 3) && buffsta) {
+		buffsta[0] = psec->data[1];
+		buffsta[1] = psec->data[2];
+		return 0;
+	}
+	return -1;
+}
 
 int set_wifi_module(WIFI_INFO & wifi)
 {
+	int key[2];
+	if (0 == get_key(wifi, key)) {
+		printf("key 1=%d ,key2=%d\n", key[0], key[1]);
 
+	} else {
+		printf("get key fail\n");
+	}
 #if 0
 	const unsigned char netmask[] = { 255,255,255,0 };
 	const unsigned char gatway[] = { 192,168,1,250 };
@@ -407,7 +422,7 @@ int set_wifi_module(WIFI_INFO & wifi)
 	if (set_local_IP(wifi, localip, gatway, netmask)) {
 		return -__LINE__;
 	}
-#else	
+#else
 	if (wifi_set_mac(wifi, wifi.cfg.T1.PSN_MAC)) {
 		return -__LINE__;
 	}

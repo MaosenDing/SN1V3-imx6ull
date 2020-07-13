@@ -53,7 +53,7 @@ int logInit(const char * LogName, const char * SavePath, int setLevel)
 	google::InitGoogleLogging(LogName);
 
 	FLAGS_colorlogtostderr = true;//设置输出到屏幕的日志显示相应颜色
-
+	FLAGS_timestamp_in_logfile_name = false;
 								  //FLAGS_servitysinglelog = true;// 用来按照等级区分log文件
 	FLAGS_logbufsecs = 0;//缓冲日志输出，默认为30秒，此处改为立即输出
 	FLAGS_max_log_size = 1; //最大日志大小为 100MB
@@ -81,6 +81,7 @@ int logInit(const char * LogName, const char * SavePath, int setLevel)
 	switch (setLevel) {
 	case google::GLOG_INFO:
 		google::SetLogDestination(google::GLOG_INFO, Info);
+		
 	case	google::GLOG_WARNING:
 		google::SetLogDestination(google::GLOG_WARNING, Warn);
 	case		google::GLOG_ERROR:

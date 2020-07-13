@@ -3,6 +3,7 @@
 uint16_t WIFI_BASE_FUNCTION::static_msg_id = 0;
 //单接收
 WIFI_BASE_FUNCTION * GetSn2Center(WIFI_INFO & wifi);
+WIFI_BASE_FUNCTION * GetCleanFilesystem(WIFI_INFO & wifi);
 //一次发送
 WIFI_BASE_FUNCTION * GetWIFI_QUERY_SINGLE_DATA(WIFI_INFO & wifi);
 WIFI_BASE_FUNCTION * GetWIFI_WRITE_SINGLE_CFG(WIFI_INFO & wifi);
@@ -17,6 +18,7 @@ WIFIINT wifigrp[] =
 {
 	//单接收
 	GetSn2Center,
+	GetCleanFilesystem,
 	//一次发送
 	GetWIFI_QUERY_SINGLE_DATA,
 	GetWIFI_WRITE_SINGLE_CFG,

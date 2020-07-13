@@ -12,7 +12,7 @@ using namespace std;
 #define BINSTAET(bin) _binary_##bin##_start
 #define BINEND(bin) _binary_##bin##_end
 
-#define CLEAN_ALL_LOG 0
+#define CLEAN_ALL_LOG 1
 #define CLEAN_CRE 0
 
 
@@ -209,6 +209,7 @@ int main()
 	system("rm /mnt/jaffs/user/aim -rf");
 	system("rm /mnt/jaffs/user/daemon -rf");
 	system("rm /mnt/jaffs/user/mdc -rf");
+	system("rm /mnt/jaffs/user/wifi -rf");
 	system("rm /mnt/jaffs/user/20* -rf\n");
 	system("rm /mnt/jaffs/user/19* -rf\n");
 #endif
@@ -253,8 +254,8 @@ int main()
 		printf("sync\n");
 		sync();
 	}
-	system("./io jd2 0");
-	system("./io jd3 0");
+	system("/root/io jd2 0");
+	system("/root/io jd3 0");
 
 	printf("umount\n");
 	system("umount /mnt/jaffs/");

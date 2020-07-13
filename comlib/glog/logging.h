@@ -280,12 +280,13 @@ typedef unsigned __int64 uint64;
 //
 // Log lines have this form:
 //
-//     Lmmdd hh:mm:ss.uuuuuu threadid file:line] msg...
+//     Lyyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg...
 //
 // where the fields are defined as follows:
 //
 //   L                A single character, representing the log level
 //                    (eg 'I' for INFO)
+//   yyyy             The year
 //   mm               The month (zero padded; ie May is '05')
 //   dd               The day (zero padded)
 //   hh:mm:ss.uuuuuu  Time in hours, minutes and fractional seconds
@@ -329,6 +330,9 @@ typedef unsigned __int64 uint64;
   }                                                                     \
   using fLS::FLAGS_##name
 #endif
+
+// Set whether appending a timestamp to the log file name
+DECLARE_bool(timestamp_in_logfile_name);
 
 // Set whether log messages go to stderr instead of logfiles
 DECLARE_bool(logtostderr);
@@ -522,6 +526,11 @@ GOOGLE_GLOG_DLL_DECL void ShutdownGoogleLogging();
 // Install a function which will be called after LOG(FATAL).
 GOOGLE_GLOG_DLL_DECL void InstallFailureFunction(void (*fail_func)());
 
+// Enable/Disable old log cleaner.
+GOOGLE_GLOG_DLL_DECL void EnableLogCleaner(int overdue_days);
+GOOGLE_GLOG_DLL_DECL void DisableLogCleaner();
+
+
 class LogSink;  // defined below
 
 // If a non-NULL sink pointer is given, we push this message to that sink.
@@ -652,7 +661,7 @@ void MakeCheckOpValueString(std::ostream* os, const unsigned char& v);
 // Build the error message string. Specify no inlining for code size.
 template <typename T1, typename T2>
 std::string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext)
-    __attribute__ ((noinline));
+    __attribute__((noinline));
 
 namespace base {
 namespace internal {
@@ -1247,7 +1256,7 @@ public:
   void SendToSyslogAndLog();  // Actually dispatch to syslog and the logs
 
   // Call abort() or similar to perform LOG(FATAL) crash.
-  static void __attribute__ ((noreturn)) Fail();
+  static void __attribute__((noreturn)) Fail();
 
   std::ostream& stream();
 
@@ -1295,7 +1304,7 @@ class GOOGLE_GLOG_DLL_DECL LogMessageFatal : public LogMessage {
  public:
   LogMessageFatal(const char* file, int line);
   LogMessageFatal(const char* file, int line, const CheckOpString& result);
-  __attribute__ ((noreturn)) ~LogMessageFatal();
+  __attribute__((noreturn)) ~LogMessageFatal();
 };
 
 // A non-macro interface to the log facility; (useful
@@ -1320,7 +1329,7 @@ inline void LogAtLevel(int const severity, std::string const &msg) {
 // reasonably good C++11 support, so we set LANG_CXX for it and
 // newer versions (_MSC_VER >= 1900).
 #if (defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L || \
-     (defined(_MSC_VER) && _MSC_VER >= 1900))
+     (defined(_MSC_VER) && _MSC_VER >= 1900)) && !defined(__UCLIBCXX_MAJOR__)
 // Helper for CHECK_NOTNULL().
 //
 // In C++11, all cases can be handled by a single function. Since the value
@@ -1426,6 +1435,16 @@ class GOOGLE_GLOG_DLL_DECL LogSink {
   virtual void send(LogSeverity severity, const char* full_filename,
                     const char* base_filename, int line,
                     const struct ::tm* tm_time,
+                    const char* message, size_t message_len, int32 usecs) {
+    send(severity, full_filename, base_filename, line,
+         tm_time, message, message_len);
+  }
+  // This send() signature is obsolete.
+  // New implementations should define this in terms of
+  // the above send() method.
+  virtual void send(LogSeverity severity, const char* full_filename,
+                    const char* base_filename, int line,
+                    const struct ::tm* tm_time,
                     const char* message, size_t message_len) = 0;
 
   // Redefine this to implement waiting for
@@ -1447,7 +1466,15 @@ class GOOGLE_GLOG_DLL_DECL LogSink {
   // Can be useful to implement send().
   static std::string ToString(LogSeverity severity, const char* file, int line,
                               const struct ::tm* tm_time,
-                              const char* message, size_t message_len);
+                              const char* message, size_t message_len,
+                              int32 usecs);
+
+  // Obsolete
+  static std::string ToString(LogSeverity severity, const char* file, int line,
+                              const struct ::tm* tm_time,
+                              const char* message, size_t message_len) {
+    return ToString(severity, file, line, tm_time, message, message_len, 0);
+  }
 };
 
 // Add or remove a LogSink as a consumer of logging data.  Thread-safe.
@@ -1629,7 +1656,7 @@ class GOOGLE_GLOG_DLL_DECL NullStreamFatal : public NullStream {
   NullStreamFatal() { }
   NullStreamFatal(const char* file, int line, const CheckOpString& result) :
       NullStream(file, line, result) { }
-  __attribute__ ((noreturn)) ~NullStreamFatal() throw () { _exit(1); }
+  __attribute__((noreturn)) ~NullStreamFatal() throw () { _exit(1); }
 };
 
 // Install a signal handler that will dump signal information and a stack
