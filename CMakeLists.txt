@@ -1,30 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 
-include(compiler.cmake)
-
 option(ENABLE_SHARED_COM "enable shared com" ON)
-
-
-
 option(CMAKE_VERBOSE_MAKEFILE "make verbose=1" OFF)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-add_definitions(-mcpu=arm926ej-s -mapcs -rdynamic)
-add_definitions(-mno-unaligned-access -fno-aggressive-loop-optimizations -fno-omit-frame-pointer)
-add_definitions("-O2")
-add_definitions("-g3")
-add_definitions(-Wall)
-
 
 add_definitions(-DVERSION_MDC="${ver}")
 message("using VERSION =${ver}")
 
-
-
 PROJECT(PROJECT_ONE)
 
 include_directories(${PROJECT_SOURCE_DIR})
-
 
 #SN1头文件
 include_directories("com_inc")

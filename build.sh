@@ -12,7 +12,7 @@ fi
 
 mkdir ${build}
 cd ${build}
-cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver}
+cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.cmake
 cpunum=$(cat /proc/cpuinfo | grep processor | wc -l)
 make -j${cpunum}
 sudo make install/strip
