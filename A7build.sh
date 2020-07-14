@@ -1,7 +1,7 @@
 #! /bin/bash
 
 build="tmp"
-workPath="/nucroot"
+workPath="/imxroot"
 
 
 if [ $# -lt 1 ] ; then
@@ -12,7 +12,7 @@ fi
 
 mkdir ${build}
 cd ${build}
-cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.cmake -DCPU=arm9
+cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.cmake -DCPU=A7
 cpunum=$(cat /proc/cpuinfo | grep processor | wc -l)
 make -j${cpunum}
 sudo make install/strip

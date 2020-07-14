@@ -1,7 +1,7 @@
 
 
 #add_compile_options(-Ofast)
-
+add_compile_options(-fPIC)
 set(fil jd_share.cpp mem_share.cpp versions.cpp)
 
 IF(ENABLE_SHARED_COM)
@@ -38,12 +38,19 @@ JD
 "-Wl,--no-whole-archive"
 )
 
-target_include_directories(comlib PUBLIC "glog")
-target_link_directories(comlib PUBLIC "glog")
-target_link_libraries(comlib PUBLIC -lglog)
+IF (CPU STREQUAL "A7")
+set(GLOG_DIR "/share/imx/gloginstall/lib/cmake/glog")
+ENDIF()
+
+IF (CPU STREQUAL "arm9")
+set(GLOG_DIR "/share/nuc/gloginstall/lib/cmake/glog")
+ENDIF()
+
+find_package(GLOG)
+target_link_libraries(comlib PUBLIC glog::glog)
+
+
 
 IF(ENABLE_SHARED_COM)
-target_include_directories(comlib_static PUBLIC "glog")
-target_link_directories(comlib_static PUBLIC "glog")
-target_link_libraries(comlib_static PUBLIC -lglog)
+target_link_libraries(comlib_static PUBLIC glog::glog)
 endif()
