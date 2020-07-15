@@ -488,6 +488,10 @@ static int loopcap(int argc, char * argv[])
 	return 0;
 }
 
+int processTest(int argc, char * argv[]);
+
+
+
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
@@ -502,6 +506,7 @@ MAIN_CMD cmd_group[] = {
 	{"testfind",testfind},
 	{"testTimeTableV2",testTimeTableV2},
 	{"loopcap",loopcap},
+	{"pro",processTest},
 };
 
 

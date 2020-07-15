@@ -1,7 +1,7 @@
 
 
 set(main aim.exe)
-add_executable(${main} aim.cpp)
+add_executable(${main} aim.cpp processtest.cpp)
 
 #sensor
 add_subdirectory(sensor)
