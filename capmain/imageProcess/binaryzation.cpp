@@ -153,27 +153,25 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 }
 
 #endif
-void neon_test(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
+//uint8x16_t dat = vld1q_u8(src);
+//uint8x16_t dat2 = vcgtq_u8(dat, comp);
+//vst1q_u8(src, dat2);
+//src += 16;
+
+
+void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 {
-	//pixCount = 8;
-	//const uint16x8_t RGB565_RED = vdupq_n_u16(0xf800);
-	//const uint16x8_t RGB565_GREEN = vdupq_n_u16(0x07e0);
-	//const uint16x8_t RGB565_BLUE = vdupq_n_u16(0x001f);
-	//const uint16x8_t ROUND_NUM = vdupq_n_u16(50);
+	asm  volatile(
+		"vdup.u8 q0,%2 \n \t"
+		//"add %1,%1,#16 \n\t"
+		//"vld1.8 {d2,d3} ,[%0]! \n \t "
+		"vst1.8 {d0,d1},[%1] \n \t"
 
-	//const uint16x8_t const_299 = vdupq_n_u16(299);
-	//const uint16x8_t const_587 = vdupq_n_u16(587);
-	//const uint16x8_t const_114 = vdupq_n_u16(114);
-	//const uint16x8_t const_1000 = vdupq_n_u16(1000);
+		:
+	: "r"(srcdata), "r"(dst), "r"(pixCount)
+		: "q0", "q1"
+		);
 
-	//uint16x8_t rgb565 = vld1q_u16(srcdata);
-	//uint16x8_t tmpr0 = vandq_u16(rgb565, RGB565_RED);
-	//uint16x8_t tmpg0 = vandq_u16(rgb565, RGB565_GREEN);
-	//uint16x8_t tmpb0 = vandq_u16(rgb565, RGB565_BLUE);
-
-	//ans = vshrq_n_u16(ans, 10);
-	//uint8x8_t ret = vmovn_u16(ans);
-	//vst1_u8(dst, ret);
 }
 
 void binary_tes(unsigned char * src, int thr, size_t len)
@@ -303,13 +301,34 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 #else
 void fastbinaryzation(unsigned char * src, int thres, int insize)
 {
+#if 0
 	uint8x16_t comp = vdupq_n_u8(thres);
 	insize /= 16;
-	while (insize -- ){
-		uint8x16_t dat = vld1q_u8(src);	
+	while (insize--) {
+		uint8x16_t dat = vld1q_u8(src);
 		uint8x16_t dat2 = vcgtq_u8(dat, comp);
 		vst1q_u8(src, dat2);
 		src += 16;
 	}
+#else
+	insize /= 16;
+	asm  volatile(
+
+		"vdup.u8 q0,%1 \n \t"
+		"myloop: \n \t"
+
+		"vld1.8 {d2,d3} ,[%0] \n \t "
+		"vcgt.u8 q1,q1,q0 \n \t"
+		"vst1.8 {d2,d3},[%0] \n \t"
+
+		"add %0,%0,#16 \n\t"
+		"sub %2,%2,#1 \n\t"
+		"cmp %2,#0 \n\t"
+		"bne myloop \n\t"
+		:
+	: "r"(src), "r"(thres), "r"(insize)
+		: "q0", "q1" 
+		);
+#endif
 }
 #endif
