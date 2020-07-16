@@ -153,11 +153,6 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 }
 
 #endif
-//uint8x16_t dat = vld1q_u8(src);
-//uint8x16_t dat2 = vcgtq_u8(dat, comp);
-//vst1q_u8(src, dat2);
-//src += 16;
-
 
 void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 {
@@ -311,23 +306,26 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 		src += 16;
 	}
 #else
-	insize /= 16;
+	insize /= 32;
 	asm  volatile(
-
 		"vdup.u8 q0,%1 \n \t"
+
 		"myloop: \n \t"
+		"pld [%0,#32] \n \t"
+		"vld1.8 {d4,d5,d6,d7} ,[%0] \n \t "
 
-		"vld1.8 {d2,d3} ,[%0] \n \t "
-		"vcgt.u8 q1,q1,q0 \n \t"
-		"vst1.8 {d2,d3},[%0] \n \t"
+		"vcgt.u8 q2,q2,q0 \n \t"
+		"vcgt.u8 q3,q3,q0 \n \t"
 
-		"add %0,%0,#16 \n\t"
+		"vst1.8 {d4,d5,d6,d7},[%0] \n \t"
+
+		"add %0,%0,#32 \n\t"
 		"sub %2,%2,#1 \n\t"
 		"cmp %2,#0 \n\t"
 		"bne myloop \n\t"
 		:
 	: "r"(src), "r"(thres), "r"(insize)
-		: "q0", "q1" 
+		: "q0" ,"q2" , "q3"
 		);
 #endif
 }
