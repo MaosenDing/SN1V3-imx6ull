@@ -489,7 +489,7 @@ static int loopcap(int argc, char * argv[])
 }
 
 int processTest(int argc, char * argv[]);
-
+int processTest2(int argc, char * argv[]);
 
 
 MAIN_CMD cmd_group[] = {
@@ -507,6 +507,7 @@ MAIN_CMD cmd_group[] = {
 	{"testTimeTableV2",testTimeTableV2},
 	{"loopcap",loopcap},
 	{"pro",processTest},
+	{"pro2",processTest2},
 };
 
 

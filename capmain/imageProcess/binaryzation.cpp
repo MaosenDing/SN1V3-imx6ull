@@ -45,7 +45,7 @@ void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 }
 
 
-
+#if 0
 void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 {
 	const unsigned int RGB565_RED = 0xf800;
@@ -112,6 +112,69 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 		}
 	}
 }
+#else
+#include <arm_neon.h>
+void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
+{
+	//pixCount = 8;
+	const uint16x8_t RGB565_RED = vdupq_n_u16(0xf800);
+	const uint16x8_t RGB565_GREEN = vdupq_n_u16(0x07e0);
+	const uint16x8_t RGB565_BLUE = vdupq_n_u16(0x001f);
+	const uint16x8_t ROUND_NUM = vdupq_n_u16(50/8);
+
+	//const uint16x8_t const_299 = vdupq_n_u16(299);
+	//const uint16x8_t const_587 = vdupq_n_u16(587);
+	//const uint16x8_t const_114 = vdupq_n_u16(114);
+	const uint16x8_t const_1000 = vdupq_n_u16(1000);
+
+	uint16_t * endp = &srcdata[pixCount];
+
+	while (srcdata < endp){
+		uint16x8_t rgb565 = vld1q_u16(srcdata);
+		uint16x8_t tmpr0 = vandq_u16(rgb565, RGB565_RED);
+		uint16x8_t tmpg0 = vandq_u16(rgb565, RGB565_GREEN);
+		uint16x8_t tmpb0 = vandq_u16(rgb565, RGB565_BLUE);
+
+		uint16x8_t tmpr1 = vshrq_n_u16(tmpr0, 8);
+		uint16x8_t tmpg1 = vshrq_n_u16(tmpg0, 3);
+		uint16x8_t tmpb1 = vshlq_n_u16(tmpb0, 3);
+
+		uint16x8_t ans = vmulq_n_u16(tmpr1, 299/8);
+		ans = vmlaq_n_u16(ans, tmpg1, 587/8);
+		ans = vmlaq_n_u16(ans, tmpb1, 114/8);
+
+		ans = vaddq_u16(ans, ROUND_NUM);
+
+		uint8x8_t ret = vshrn_n_u16(ans, 10-3);
+		vst1_u8(dst, ret);
+		dst += 8;
+		srcdata += 8;
+	}
+}
+
+#endif
+void neon_test(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
+{
+	//pixCount = 8;
+	//const uint16x8_t RGB565_RED = vdupq_n_u16(0xf800);
+	//const uint16x8_t RGB565_GREEN = vdupq_n_u16(0x07e0);
+	//const uint16x8_t RGB565_BLUE = vdupq_n_u16(0x001f);
+	//const uint16x8_t ROUND_NUM = vdupq_n_u16(50);
+
+	//const uint16x8_t const_299 = vdupq_n_u16(299);
+	//const uint16x8_t const_587 = vdupq_n_u16(587);
+	//const uint16x8_t const_114 = vdupq_n_u16(114);
+	//const uint16x8_t const_1000 = vdupq_n_u16(1000);
+
+	//uint16x8_t rgb565 = vld1q_u16(srcdata);
+	//uint16x8_t tmpr0 = vandq_u16(rgb565, RGB565_RED);
+	//uint16x8_t tmpg0 = vandq_u16(rgb565, RGB565_GREEN);
+	//uint16x8_t tmpb0 = vandq_u16(rgb565, RGB565_BLUE);
+
+	//ans = vshrq_n_u16(ans, 10);
+	//uint8x8_t ret = vmovn_u16(ans);
+	//vst1_u8(dst, ret);
+}
 
 void binary_tes(unsigned char * src, int thr, size_t len)
 {
@@ -164,9 +227,7 @@ void binary_tes(unsigned char * src, int thr, size_t len)
 
 
 
-
-
-
+#if 0
 void fastbinaryzation(unsigned char * src, int thres, int insize)
 {
 	if (insize % 4 == 0)
@@ -239,3 +300,16 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 		}
 	}
 }
+#else
+void fastbinaryzation(unsigned char * src, int thres, int insize)
+{
+	uint8x16_t comp = vdupq_n_u8(thres);
+	insize /= 16;
+	while (insize -- ){
+		uint8x16_t dat = vld1q_u8(src);	
+		uint8x16_t dat2 = vcgtq_u8(dat, comp);
+		vst1q_u8(src, dat2);
+		src += 16;
+	}
+}
+#endif
