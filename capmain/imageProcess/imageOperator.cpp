@@ -28,7 +28,7 @@ using namespace std;
 // Parameter: float imHf
 // Parameter: float imVf
 // Parameter: IMAGEDATA & outImage
-// Des: ÅÄÉãÍ¼Æ¬ Î´ÊµÏÖ
+// Des: æ‹æ‘„å›¾ç‰‡ æœªå®ç°
 //************************************
 ERR_STA CapImg(float ImGain, float imExpo, float imHf, float imVf, IMAGEDATA & outImage)
 {
@@ -67,7 +67,7 @@ ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData)
 	{
 		return saveBin(filPath, *(ImageData.Image_data));
 	}
-	if (ImageData.itype == IT_BIN_ONE_BYTE) //¶şÖµ»¯  csv¸ñÊ½
+	if (ImageData.itype == IT_BIN_ONE_BYTE) //äºŒå€¼åŒ–  csvæ ¼å¼
 	{
 		return saveCsv(filPath, *ImageData.Image_data, ImageData.right);
 	}
@@ -82,7 +82,7 @@ ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData)
 
 void fastbinaryzation(unsigned char * src, int thres, int insize);
 
-
+int getMaxVal(vector<uint8_t> &testArray);
 //************************************
 // Method:    BinaImg
 // FullName:  BinaImg
@@ -93,9 +93,10 @@ void fastbinaryzation(unsigned char * src, int thres, int insize);
 // Parameter: unsigned int gth
 // Parameter: float bth
 // Parameter: IMAGEDATA & outImage
-// ¶şÖµ»¯Êı¾İ inputData -> outImage
-// ½öÊµÏÖ¶Ô»Ò¶È»¯Í¼ÏñµÄ¶şÖµ»¯
+// äºŒå€¼åŒ–æ•°æ® inputData -> outImage
+// ä»…å®ç°å¯¹ç°åº¦åŒ–å›¾åƒçš„äºŒå€¼åŒ–
 //************************************
+#if 1
 ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & outImage)
 {
 	if (&inputData == &outImage)
@@ -115,16 +116,9 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 		{
 			vector<uint8_t> & testArray = *inputData.Image_data;
 
-			vector<uint8_t>::iterator max;
-			{
-				TIME_INTERVAL_SCOPE("get max :");
-				max = max_element(testArray.begin(), testArray.end());
-			}
-#if 0
-			cout << "get max gray =" << (int)*max << endl;
-#endif
-			int realThres = *max * bth;
-			if (*max > gth)
+			int maxval = getMaxVal(testArray);
+			int realThres = maxval * bth;
+			if (maxval > gth)
 			{
 				shared_ptr<vector<uint8_t>> tmpArray;
 				try
@@ -140,7 +134,7 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 				{
 					TIME_INTERVAL_SCOPE("test real bin :");
 #if 0
-				//¶şÖµ»¯
+				//äºŒå€¼åŒ–
 					for_each(tmpArray->begin(), tmpArray->end(), [realThres](uint8_t & p) {
 					if (p > realThres)
 					{
@@ -156,7 +150,7 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 #endif
 				}
 #if 0
-				//±£´æ¶şÖµ»¯Í¼Ïñ
+				//ä¿å­˜äºŒå€¼åŒ–å›¾åƒ
 				cout << "save bin error code =" << (int)saveBin((char *)"mybin", testArray) << endl;
 #endif
 				outImage.itype = IT_BIN_ONE_BYTE;
@@ -185,7 +179,7 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 	}
 	SN1V2_ERROR_CODE_RET(err_UNKNOWN);
 }
-
+#endif
 
 ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 {
@@ -200,23 +194,16 @@ ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 		{
 			vector<uint8_t> & testArray = *procData.Image_data;
 
-			vector<uint8_t>::iterator max;
-			{
-				TIME_INTERVAL_SCOPE("get max :");
-				max = max_element(testArray.begin(), testArray.end());
-			}
-#if 0
-			cout << "get max gray =" << (int)*max << endl;
-#endif
-			int realThres = *max * bth;
-			if (*max > gth)
+			int maxval = getMaxVal(testArray);
+			int realThres = maxval * bth;
+			if (maxval > gth)
 			{
 				shared_ptr<vector<uint8_t>> tmpArray = procData.Image_data;
 
 				{
 					TIME_INTERVAL_SCOPE("test real bin :");
 #if 0
-					//¶şÖµ»¯
+					//äºŒå€¼åŒ–
 					for_each(tmpArray->begin(), tmpArray->end(), [realThres](uint8_t & p) {
 						if (p > realThres)
 						{
@@ -232,19 +219,19 @@ ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 #endif
 				}
 #if 0
-				//±£´æ¶şÖµ»¯Í¼Ïñ
+				//ä¿å­˜äºŒå€¼åŒ–å›¾åƒ
 				cout << "save bin error code =" << (int)saveBin((char *)"mybin", testArray) << endl;
 #endif
 				procData.itype = IT_BIN_ONE_BYTE;
 				return err_ok;
 			}
 			else
-			{//ÓĞÍ¼¾Í²»¼ÇÂ¼´íÎó
+			{//æœ‰å›¾å°±ä¸è®°å½•é”™è¯¯
 				SN1V2_INFO_CODE_RET(err_binaryzation_aim_null);
 			}
 		}
 		else
-		{//ÓĞÍ¼¾Í²»¼ÇÂ¼´íÎó
+		{//æœ‰å›¾å°±ä¸è®°å½•é”™è¯¯
 			SN1V2_INFO_CODE_RET(err_Inval_image);
 		}
 	}

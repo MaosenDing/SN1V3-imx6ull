@@ -56,11 +56,11 @@ int processTest(int argc, char * argv[])
 	RGB888_2_565(&dat[0], &*basemem, getwidth * getheigth);
 
 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 1; i++) {
 		shared_ptr<unsigned char >ppp(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
 		memcpy(&*ppp, &*basemem, imgSize);
 		TimeInterval ppp2("test:");
-		ImageProcessRGB("test.jpg"
+		ImageProcessRGB("tp/test.jpg"
 			, std::move(ppp)
 			, imgSize, getwidth, getheigth
 			, res, thres, thresPer
@@ -69,3 +69,25 @@ int processTest(int argc, char * argv[])
 	}
 	return 0;
 }
+void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
+int processTest2(int argc, char * argv[])
+{
+#define NUM (32)
+	uint8_t test[NUM];
+	uint8_t out[NUM];
+
+
+
+	for (int in = 0; in < NUM; in++) {
+		test[in] = in;
+	}
+
+
+	neon_test(test, out, 1);
+
+	for (size_t i = 0; i < NUM; i++) {
+		printf("index %d = %d\n",i,out[i]);
+	}
+	return 0;
+}
+

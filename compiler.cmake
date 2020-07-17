@@ -32,5 +32,6 @@ add_definitions(-mfpu=neon-vfpv4)
 add_definitions("-O2")
 add_definitions("-g3")
 add_definitions(-Wall)
+add_definitions(-DCORTEX=1)
 
 ENDIF()

@@ -17,55 +17,80 @@ using namespace std;
 
 ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right)
 {
-	if (inImage.itype != IT_BIN_ONE_BYTE)
-	{
+	TIME_INTERVAL_SCOPE("get bound2 :");
+	if (inImage.itype != IT_BIN_ONE_BYTE) {
 		SN1V2_ERROR_CODE_RET(err_Image_type_unsupported);
 	}
 
 	int width = inImage.right;
 	int heigth = inImage.bottom;
 
-	top = -1;
+#define MAXVAL (0xffff)
+
+	top = MAXVAL;
 	bottom = -1;
-	left = -1;
+	left = MAXVAL;
 	right = -1;
-	
-	for (int y = 0; y < heigth; y++)
-	{
-		for (int x = 0; x < width; x++)
-		{
-			if (inImage.at(x,y))
-			{
-				if (top == -1)
-				{
-					top = y;
-				}
 
-				if (y > bottom)
-				{
-					bottom = y;
-				}
+	unsigned char * src = &inImage.at(0, 0);
 
-				if (left == -1)
-				{
-					left = x;
-				}
-				else if(x < left)
-				{
-					left = x;
-				}
+	if ((heigth % 8 == 0) && (width % 128 == 0)) {
+		//向量化
+		for (int y = 0; y < (heigth & (~(8 - 1))); y++) {
+			for (int x = 0; x < (width & (~(128 - 1))); x++) {
+				unsigned char dat = src[x + y * width];
+				if (dat) {
+					if (y < top) {
+						top = y;
+					}
 
-				if (x > right)
-				{
-					right = x;
+					if (y > bottom) {
+						bottom = y;
+					}
+
+					if (x < left) {
+						left = x;
+					}
+
+					if (x > right) {
+						right = x;
+					}
 				}
-			}					
+			}
+		}
+	}
+	else {
+		for (int y = 0; y < (heigth & (~(8 - 1))); y++) {
+			for (int x = 0; x < (width & (~(128 - 1))); x++) {
+				if (inImage.at(x, y)) {
+					if (y < top) {
+						top = y;
+					}
+
+					if (y > bottom) {
+						bottom = y;
+					}
+
+					if (x < left) {
+						left = x;
+					}
+
+					if (x > right) {
+						right = x;
+					}
+				}
+			}
 		}
 	}
 
-	if (top == -1 || bottom == -1 || left == -1 || right == -1 )
-	{
-		SN1V2_ERROR_CODE_RET( err_binaryzation_aim_null);
+
+
+	if (top == MAXVAL || bottom == -1 || left == MAXVAL || right == -1) {
+		top = -1;
+		bottom = -1;
+		left = -1;
+		right = -1;
+		SN1V2_ERROR_CODE_RET(err_binaryzation_aim_null);
 	}
 	return err_ok;
 }
