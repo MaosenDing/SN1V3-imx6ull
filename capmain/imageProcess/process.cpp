@@ -15,9 +15,9 @@ using namespace std;
 
 
 
-ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right)
+ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right , int flgFast)
 {
-	TIME_INTERVAL_SCOPE("get bound2 :");
+	TIME_INTERVAL_SCOPE("get bound :");
 	if (inImage.itype != IT_BIN_ONE_BYTE) {
 		SN1V2_ERROR_CODE_RET(err_Image_type_unsupported);
 	}
@@ -32,13 +32,12 @@ ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, 
 	left = MAXVAL;
 	right = -1;
 
-	unsigned char * src = &inImage.at(0, 0);
-
-	if ((heigth % 8 == 0) && (width % 128 == 0)) {
+	uint32_t * src32 = (uint32_t *)&inImage.at(0, 0);
+	if (flgFast && (heigth % 8 == 0) && (width % 128 == 0)) {
 		//向量化
-		for (int y = 0; y < (heigth & (~(8 - 1))); y++) {
-			for (int x = 0; x < (width & (~(128 - 1))); x++) {
-				unsigned char dat = src[x + y * width];
+		for (int y = 0; y < heigth; y++) {
+			for (int x = 0; x < width / 4; x++) {
+				uint32_t dat = src32[x + y * width / 4];
 				if (dat) {
 					if (y < top) {
 						top = y;
@@ -48,20 +47,19 @@ ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, 
 						bottom = y;
 					}
 
-					if (x < left) {
-						left = x;
+					if (x * 4 < left) {
+						left = x * 4;
 					}
 
-					if (x > right) {
-						right = x;
+					if (x * 4 > right) {
+						right = x * 4 + 3;
 					}
 				}
 			}
 		}
-	}
-	else {
-		for (int y = 0; y < (heigth & (~(8 - 1))); y++) {
-			for (int x = 0; x < (width & (~(128 - 1))); x++) {
+	} else {
+		for (int y = 0; y < heigth; y++) {
+			for (int x = 0; x < width; x++) {
 				if (inImage.at(x, y)) {
 					if (y < top) {
 						top = y;
@@ -554,7 +552,7 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 	ERR_STA err;
 
 	int top = 0, bottom = 0, left = 0, right = 0;
-	if (err_ok != (err = getLightBound(inImage, top, bottom, left, right))) {
+	if (err_ok != (err = getLightBound(inImage, top, bottom, left, right , 1))) {
 		SN1V2_WARN_MWSSAGE_WITH("bound error", err);
 		return err;
 	} else {

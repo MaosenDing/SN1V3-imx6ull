@@ -113,8 +113,9 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 		}
 	}
 }
-#else 
+#else
 
+#if 0
 void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 {
 	//pixCount = 8;
@@ -172,6 +173,32 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 		srcdata += 16;
 	}
 }
+#else
+void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
+{
+	for (size_t i = 0; i < (pixCount & ~127); i += 8) {
+#define COLOR 3//r g b
+
+#if COLOR == 1
+		const uint8x8_t mask_3 = vdup_n_u8(~(8 - 1));
+		uint8x8x2_t  rgb565 = vld2_u8((uint8_t *)(srcdata + i));	
+		uint8x8_t btun = vand_u8(rgb565.val[1], mask_3);
+		vst1_u8((dst + i), btun);
+#elif COLOR == 2
+		const uint8x8_t mask_2 = vdup_n_u8(~(4 - 1));
+		uint16x8_t  rgb565 = vld1q_u16((uint16_t *)(srcdata + i));
+		uint8x8_t btun = vshrn_n_u16(rgb565, 3);
+		btun = vand_u8(btun, mask_2);
+		vst1_u8((dst + i), btun);
+#elif COLOR == 3
+		uint8x8x2_t  rgb565 = vld2_u8((uint8_t *)(srcdata + i));
+		uint8x8_t btun = vshl_n_u8(rgb565.val[0], 3);
+		vst1_u8((dst + i), btun);
+#endif
+	}
+}
+
+#endif
 
 #endif
 
@@ -206,56 +233,6 @@ void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 
 #endif
 }
-
-void binary_tes(unsigned char * src, int thr, size_t len)
-{
-	if (len % 2 == 0)
-	{
-		for (size_t i = 0;i < len/2;i++)
-		{
-			unsigned char *test1 = &src[2 * i];
-			unsigned char *test2 = &src[2 * i + 1];
-
-
-			if (*test1 > thr)
-			{
-				*test1 = 255;
-			}
-			else
-			{
-				*test1 = 0;
-			}
-
-			if (*test2 > thr)
-			{
-				*test2 = 255;
-			}
-			else
-			{
-				*test2 = 0;
-			}
-		}
-	}
-	else
-	{
-		for (size_t i = 0;i < len;i++)
-		{
-			if (src[i] > thr)
-			{
-				src[i] = 255;
-			}
-			else
-			{
-				src[i] = 0;
-			}
-		}
-	}
-}
-
-
-
-
-
 
 
 #ifndef CORTEX
