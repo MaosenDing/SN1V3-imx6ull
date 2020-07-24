@@ -18,7 +18,7 @@ using namespace std;
 
 
 
-//½Ó¹ÜËùÓÐÊý¾Ý
+//æŽ¥ç®¡æ‰€æœ‰æ•°æ®
 IMAGEDATA & IMAGEDATA::operator = (IMAGEDATA & fromData)
 {
 	this->itype = fromData.itype;
@@ -82,9 +82,9 @@ ERR_STA IMAGEDATA::clone(int x, int y, int width, int height, std::shared_ptr<IM
 
 	try
 	{
-		*outPoint = *this;//¸´ÖÆËùÓÐÊôÐÔ;
-		outPoint->Image_data = make_shared<vector<uint8_t>>();
-		outPoint->Image_data->resize(width * height);
+		*outPoint = *this;//å¤åˆ¶æ‰€æœ‰å±žæ€§;
+		outPoint->Image_data = (unsigned char *)malloc(width*height);
+		outPoint->delflg = 1;
 	}
 	catch (std::bad_alloc &bd)
 	{

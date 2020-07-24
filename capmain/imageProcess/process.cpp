@@ -97,7 +97,7 @@ ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, 
 
 //查看感染最大使用堆栈
 //#define COUT_MAX_HEAP
-static unsigned int Infect(vector<unsigned char> & data, int width, int startPoint, int tag,
+static unsigned int Infect(unsigned char * data, int width, int startPoint, int tag,
 	const unsigned int InfectAim = 255,//感染目标
 	const unsigned int MinInfect = 50,//链接最小像素
 	const unsigned int CleanValue = 0)//失败处理值
@@ -207,19 +207,15 @@ static void clean_other_tag(IMAGEDATA & inImage, int SaveTag)
 			}
 		}
 	}
-#else 
-	for (auto & testPos : *inImage.Image_data)
-	{
-		if (testPos == SaveTag)
-		{
+#else
+	for (size_t i = 0; i < (inImage.size() & (~3)); i++) {
+		unsigned char & testPos = inImage.Image_data[i];
+		if (testPos == SaveTag) {
 			testPos = 255;
-		}
-		else
-		{
+		} else {
 			testPos = 0;
 		}
 	}
-
 #endif
 }
 
@@ -230,11 +226,11 @@ static int step_in_tag(IMAGEDATA & inImage, int &pixCnt,const unsigned int MinCn
 	vector<int> inFectList;
 	inFectList.push_back(0);
 	
-	size_t maxIndex = inImage.Image_data->size();
+	size_t maxIndex = inImage.size();
 
 	for (size_t index = 0; index < maxIndex; index++)
 	{
-		unsigned char & testPoint = inImage.Image_data->at(index);
+		unsigned char & testPoint = inImage.at(index);
 		if (testPoint == 255)
 		{
 			//递进感染编号
@@ -246,7 +242,7 @@ static int step_in_tag(IMAGEDATA & inImage, int &pixCnt,const unsigned int MinCn
 				break;
 			}
 			//感染扩散
-			unsigned int infectCount = Infect(*inImage.Image_data, inImage.right, index, tag, 255, MinCntGrp, 0);
+			unsigned int infectCount = Infect(inImage.Image_data, inImage.right, index, tag, 255, MinCntGrp, 0);
 
 			if (0 == infectCount)
 			{
@@ -310,9 +306,9 @@ static shared_ptr<vector<PixPos> > getLineament(IMAGEDATA &inImage)
 
 	shared_ptr<vector<PixPos> > retVect = make_shared<vector<PixPos>>();
 
-	for (size_t index = 0; index < inImage.Image_data->size(); index++)
+	for (size_t index = 0; index < inImage.size(); index++)
 	{
-		unsigned char & testPoint = inImage.Image_data->at(index);
+		unsigned char & testPoint = inImage.at(index);
 
 		if (testPoint)
 		{
@@ -326,7 +322,7 @@ static shared_ptr<vector<PixPos> > getLineament(IMAGEDATA &inImage)
 			bool breakFlag = false;
 			for (size_t sideIndex : dirIndex)
 			{
-				unsigned char & thisSide = inImage.Image_data->at(sideIndex);
+				unsigned char & thisSide = inImage.at(sideIndex);
 				if (thisSide == 0)
 				{
 					breakFlag = true;
@@ -341,9 +337,9 @@ static shared_ptr<vector<PixPos> > getLineament(IMAGEDATA &inImage)
 		}
 	}
 	//消除内部点
-	for (size_t index = 0; index < inImage.Image_data->size(); index++)
+	for (size_t index = 0; index < (inImage.size() &(~3)); index++)
 	{
-		unsigned char & testPoint = inImage.Image_data->at(index);
+		unsigned char testPoint = inImage.at(index);
 		if (testPoint != 255)
 		{
 			testPoint = 0;
@@ -557,7 +553,6 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 		return err;
 	} else {
 		error_bound boudf = check_bound(inImage, top, bottom, left, right);
-
 		if (boudf) {
 			fixBound(inImage, boudf, left, right, top, bottom);
 			SN1V2_INF_LOG("bound error,left = %d,right = %d,top = %d,bottom = %d\n", left, right, top, bottom);
@@ -569,15 +564,12 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 		int clone_heigth = bottom - top + 1 + 2;
 		
 		err = inImage.clone(clone_left, clone_top, clone_width, clone_heigth, processImage);
-		//释放二值化内存
-		inImage.Image_data.reset();
 
 		if (err != err_ok) {
 			return err;
 		} else {
 			int pixCnt = 0;
 			err = RegImg(*processImage, pixCnt, MinCntGrp);
-
 			if (err != err_ok) {
 				//cout << "reg Img error = " << (int)err << endl;
 				SN1V2_WARN_MWSSAGE_WITH("reg img", err);
@@ -587,7 +579,6 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 			float diff_center_x = 0;
 			float diff_center_y = 0;
 			err = ImgCenter(*processImage, diff_center_x, diff_center_y);
-
 #if COUT_IMAGE_DEBUG_INFO > 0
 			cout << "center x =" << diff_center_x << ",center y=" << diff_center_y << endl;
 #endif
@@ -602,9 +593,7 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 			try {
 				//求唯一区域轮廓
 				shared_ptr<vector<PixPos> >RangePixPos = getLineament(*processImage);
-
 				saveCir(Transimit_img_Path, *RangePixPos, clone_left, clone_top);
-
 				float	quality = CirDeg(*RangePixPos, diff_center_x, diff_center_y);
 #if 0
 				cout << "real center x =" << real_center_x << ",real center y=" << real_center_y << endl;
@@ -637,68 +626,39 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 }
 
 
-ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer,bool BINjpgSaveFlag = true,unsigned int MinCntGrp = 50)
+ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer, bool BINjpgSaveFlag = true, unsigned int MinCntGrp = 50)
 {
+	TIME_INTERVAL_SCOPE("ImageProcessRGB:");
+
 	ERR_STA err = err_ok;
+	int pixcnt = inputSize / 2;
+	RGB565GRAY(LoadImg.get(), inputSize);
 
-	shared_ptr<vector<uint8_t>> saveGray;
-	try
-	{
-		saveGray = make_shared<vector<uint8_t>>(inputSize / 2);
-
-	}
-	catch (std::bad_alloc & bd)
-	{
-		SN1V2_ERROR_CODE_RET(err_out_of_memory);
-	}
-	err = RGB565GRAY(LoadImg.get(), inputSize, saveGray);
-	//释放内存 
-	LoadImg.reset();
-
-	if (err != err_ok)
-	{
-		return err;
-	}
 	//制作二值化图片
 	shared_ptr<IMAGEDATA> BinImage = make_shared<IMAGEDATA>();
 	{
-#if 0
-		shared_ptr<IMAGEDATA> testImage = make_shared<IMAGEDATA>();
-#else
-		shared_ptr<IMAGEDATA> &testImage = BinImage;
-#endif
-		testImage->Image_data = std::move(saveGray);
-		testImage->left = 0;
-		testImage->right = width;
-		testImage->top = 0;
-		testImage->bottom = height;
-		testImage->byte_per_pix = 1;
-		testImage->itype = IT_GRAY_ONE_BYTE;
+		BinImage->Image_data = LoadImg.get();
+		BinImage->left = 0;
+		BinImage->right = width;
+		BinImage->top = 0;
+		BinImage->bottom = height;
+		BinImage->byte_per_pix = 1;
+		BinImage->itype = IT_BIN_ONE_BYTE;;
 		{
 			TIME_INTERVAL_SCOPE("bin operator:");
-			err = BinaImg(*testImage, thres, thresPer, *BinImage);
+			err = BinaImg(LoadImg.get(), pixcnt, thres, thresPer);
 		}
 	}
 
-	if (err == err_ok && BINjpgSaveFlag == true)
-	{
-		auto start = chrono::system_clock::now();
-		SaveGRAYJpg((char *)saveName, *BinImage);
-		auto tim = std::chrono::duration_cast<std::chrono::duration<float>>(chrono::system_clock::now() - start).count();
-		LOG_IF(WARNING,tim > 1)<< "jpg compress&save:"<< tim << "S";
-	}
 
-	if (err == err_ok)
-	{
+	if (err == err_ok) {
 		TIME_INTERVAL_SCOPE("image process operator:");
-#if COUT_IMAGE_DEBUG_INFO > 0
-		cout << "bin ok" << endl;
-#endif
-		err = BinProcess(*BinImage, res ,MinCntGrp);
+		err = BinProcess(*BinImage, res, MinCntGrp);
 	}
-
 	return err;
 }
+
+
 
 #include <sys/stat.h>
 

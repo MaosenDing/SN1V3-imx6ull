@@ -387,52 +387,6 @@ ERR_STA saveBin(char * filePath, vector<uint8_t> & vdata)
 
 
 
-ERR_STA saveCsv(char * filePath, vector<uint8_t> & vdata,int lineWidth)
-{
-	if (filePath)
-	{
-		ofstream f(filePath, ios::trunc);
-		//cout << "data len =" << vdata.size() << endl;
-		int bigFlag = 0;
-		if (f)
-		{
-			for (size_t i = 0; i < vdata.size();)
-			{
-				uint8_t data = vdata[i];
-				if (data > 100)
-				{
-					bigFlag++;
-				}
-				f << (int)data << ",";
-				++i;
-				if (0 == i%lineWidth)
-				{
-					f << endl;
-				}
-			}
-			//cout << "big size =" << bigFlag << endl;
-
-			if (f)
-			{
-				return err_ok;
-			}
-			else
-			{
-				SN1V2_ERROR_CODE_RET(err_cannot_write_file);
-			}
-		}
-		else
-		{
-			SN1V2_ERROR_CODE_RET(err_cannot_open_file);
-		}
-	}
-	else
-	{
-		SN1V2_ERROR_CODE_RET(err_inval_para);
-	}
-	SN1V2_ERROR_CODE_RET(err_UNKNOWN);
-}
-
 #include <dirent.h>
 
 shared_ptr<vector<string> > getAllFileName(char * path,const char * postfix)

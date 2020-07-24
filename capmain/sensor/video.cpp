@@ -11,8 +11,8 @@
 #include <video.h>
 
 using namespace std;
-#define UXGA_WIDTH (1600)
-#define UXGA_HEIGHT (1200)
+#define UXGA_WIDTH (1920)
+#define UXGA_HEIGHT (1080)
 
 #define VGA_WIDTH (640)
 #define VGA_HEIGHT (480)
@@ -43,22 +43,30 @@ int init_cap(const char * videoName)
 	printf("Driver Name : %s\nCard Name : %s\nBus info : %s\nDriver Version : %u.%u.%u\n", cap.driver, cap.card, cap.bus_info, (cap.version >> 16) & 0XFF, (cap.version >> 8) & 0XFF, cap.version & 0XFF);
 	//////
 	struct v4l2_fmtdesc fmtdesc;
+	memset(&fmtdesc, 0, sizeof(fmtdesc));
 	fmtdesc.index = 0; 
 	fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	while (ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1) {
-		printf("TK-------->>>>>fmtdesc.description is %s\n", fmtdesc.description);
+		printf("pixelformat is '%c%c%c%c', description is '%s' \n", fmtdesc.pixelformat & 0xFF,
+			(fmtdesc.pixelformat >> 8) & 0xFF, (fmtdesc.pixelformat >> 16) & 0xFF,
+			(fmtdesc.pixelformat >> 24) & 0xFF, fmtdesc.description);
 		fmtdesc.index++;
 	}
 	//////
 	struct v4l2_format fmt;
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	ioctl(fd, VIDIOC_G_FMT, &fmt);
+	if(0 == ioctl(fd, VIDIOC_G_FMT, &fmt))
 	printf("get fmt.fmt.width is %d\nfmt.fmt.pix.height is %d\nfmt.fmt.pix.colorspace is %d\n", fmt.fmt.pix.width, fmt.fmt.pix.height, fmt.fmt.pix.colorspace);
+	else {
+		printf("VIDIOC_G_FMT V4L2_BUF_TYPE_VIDEO_CAPTURE error=%d\n",errno);
+	}
+
 
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width = WIDTH_INIT;
 	fmt.fmt.pix.height = HEIGTH_INIT;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB565;
+	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+
 	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 	if (-1 == ioctl(fd, VIDIOC_S_FMT, &fmt)) {
 		printf("VIDIOC_S_FMT set error \n");
@@ -66,17 +74,17 @@ int init_cap(const char * videoName)
 
 	//////
 	struct v4l2_requestbuffers req;
-	req.count = 3;
+	req.count = 1;
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_MMAP;
 	if (-1 == ioctl(fd, VIDIOC_REQBUFS, &req)) {
 		printf("VIDIOC_REQBUFS set error \n");
 	}
 
-	if (req.count < 2) {
-		printf("Insufficient buffer memory \n");
-		exit(EXIT_FAILURE);
-	}
+	//if (req.count < 2) {
+	//	printf("Insufficient buffer memory \n");
+	//	exit(EXIT_FAILURE);
+	//}
 
 	unsigned int n_buffers = 0;
 	for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
@@ -101,7 +109,7 @@ int init_cap(const char * videoName)
 	////
 	unsigned int i;
 	enum v4l2_buf_type type;
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < 1; i++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
@@ -137,34 +145,30 @@ int set_gain_expose(int fd, int gain, int expose)
 	struct v4l2_control  Setting;
 
 	Setting.id = V4L2_CID_EXPOSURE_AUTO;
-	Setting.value = V4L2_EXPOSURE_MANUAL;
-	int ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
+	Setting.value = 1;
+	if (0 > ioctl(fd, VIDIOC_S_CTRL, &Setting)) {
+		printf("V4L2_CID_EXPOSURE_AUTO error = %d \n", errno);
+	}
 
-
-	Setting.id = V4L2_CID_AUTOGAIN;
-	Setting.value = 0;
-	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
-
+	Setting.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	Setting.value = expose;
+	if (0 > ioctl(fd, VIDIOC_S_CTRL, &Setting)) {
+		printf("V4L2_CID_EXPOSURE error = %d \n", errno);
+	}
 
 	Setting.id = V4L2_CID_GAIN;
 	Setting.value = gain;
-	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
-	if (ret < 0) {
-		printf("V4L2_CID_GAIN ret = %d \n", ret);
-		return -1;
+	if (0 > ioctl(fd, VIDIOC_S_CTRL, &Setting)) {
+		printf("V4L2_CID_GAIN error = %d \n", errno);
 	}
 
-	Setting.id = V4L2_CID_EXPOSURE;
-	Setting.value = expose;
-	ret = ioctl(fd, VIDIOC_S_CTRL, &Setting);
-	if (ret < 0) {
-		printf("V4L2_CID_EXPOSURE ret = %d \n", ret);
-		return -2;
-	}
+
 	//remove three frame
+#if 0
 	get_one_frame(fd);
 	get_one_frame(fd);
 	get_one_frame(fd);
+#endif
 }
 
 

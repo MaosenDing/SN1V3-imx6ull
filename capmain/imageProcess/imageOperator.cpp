@@ -15,33 +15,6 @@
 
 using namespace std;
 
-
-
-//************************************
-// Method:    CapImg
-// FullName:  CapImg
-// Access:    public 
-// Returns:   ERR_STA
-// Qualifier:
-// Parameter: float ImGain
-// Parameter: float imExpo
-// Parameter: float imHf
-// Parameter: float imVf
-// Parameter: IMAGEDATA & outImage
-// Des: 拍摄图片 未实现
-//************************************
-ERR_STA CapImg(float ImGain, float imExpo, float imHf, float imVf, IMAGEDATA & outImage)
-{
-
-
-
-
-	//outImage.Image_data = std::make_shared<std::vector<char>>();
-	return err_UNKNOWN;
-}
-
-
-
 //************************************
 // Method:    SavImg
 // FullName:  SavImg
@@ -65,12 +38,9 @@ ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData)
 
 	if (ImageData.itype == IT_JPG)
 	{
-		return saveBin(filPath, *(ImageData.Image_data));
+		return saveBin(filPath, (char *)ImageData.Image_data , ImageData.size());
 	}
-	if (ImageData.itype == IT_BIN_ONE_BYTE) //二值化  csv格式
-	{
-		return saveCsv(filPath, *ImageData.Image_data, ImageData.right);
-	}
+
 	else
 	{
 		SN1V2_ERROR_CODE_RET(err_Image_type_unsupported);
@@ -83,6 +53,7 @@ ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData)
 void fastbinaryzation(unsigned char * src, int thres, int insize);
 
 int getMaxVal(vector<uint8_t> &testArray);
+int getMaxVal(unsigned char * src, size_t sz);
 //************************************
 // Method:    BinaImg
 // FullName:  BinaImg
@@ -96,7 +67,7 @@ int getMaxVal(vector<uint8_t> &testArray);
 // 二值化数据 inputData -> outImage
 // 仅实现对灰度化图像的二值化
 //************************************
-#if 1
+#if 0
 ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & outImage)
 {
 	if (&inputData == &outImage)
@@ -179,25 +150,21 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 	}
 	SN1V2_ERROR_CODE_RET(err_UNKNOWN);
 }
-#endif
+
 
 ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 {
-	if (gth > 0 && gth <= 255 && bth > 0.000001f && bth < 1.0f)
-	{
-		if (procData.itype != IT_GRAY_ONE_BYTE)
-		{
+	if (gth > 0 && gth <= 255 && bth > 0.000001f && bth < 1.0f) {
+		if (procData.itype != IT_GRAY_ONE_BYTE) {
 			SN1V2_ERROR_CODE_RET(err_Image_type_unsupported);
 		}
 
-		if (!procData.Image_data->empty())
-		{
+		if (!procData.Image_data->empty()) {
 			vector<uint8_t> & testArray = *procData.Image_data;
 
 			int maxval = getMaxVal(testArray);
 			int realThres = maxval * bth;
-			if (maxval > gth)
-			{
+			if (maxval > gth) {
 				shared_ptr<vector<uint8_t>> tmpArray = procData.Image_data;
 
 				{
@@ -205,15 +172,12 @@ ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 #if 0
 					//二值化
 					for_each(tmpArray->begin(), tmpArray->end(), [realThres](uint8_t & p) {
-						if (p > realThres)
-						{
+						if (p > realThres) {
 							p = 255;
-						}
-						else
-						{
+						} else {
 							p = 0;
 						}
-					});
+						});
 #else
 					fastbinaryzation(&tmpArray->at(0), realThres, tmpArray->size());
 #endif
@@ -224,19 +188,45 @@ ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 #endif
 				procData.itype = IT_BIN_ONE_BYTE;
 				return err_ok;
-			}
-			else
-			{//有图就不记录错误
+			} else {//有图就不记录错误
 				SN1V2_INFO_CODE_RET(err_binaryzation_aim_null);
 			}
-		}
-		else
-		{//有图就不记录错误
+		} else {//有图就不记录错误
 			SN1V2_INFO_CODE_RET(err_Inval_image);
 		}
+	} else {
+		SN1V2_ERROR_CODE_RET(err_inval_para);
 	}
-	else
-	{
+	SN1V2_ERROR_CODE_RET(err_UNKNOWN);
+}
+
+
+#endif
+
+ERR_STA BinaImg(unsigned char * src, size_t sz, unsigned int gth, float bth)
+{
+	if (gth > 0 && gth <= 255 && bth > 0.000001f && bth < 1.0f) {
+
+		if (src && (sz > 0)) {
+			int maxval = getMaxVal(src, sz);
+			int realThres = maxval * bth;
+			if (maxval > gth) {
+				{
+					TIME_INTERVAL_SCOPE("test real bin :");
+					fastbinaryzation(src, realThres, sz);
+				}
+#if 0
+				//保存二值化图像
+				cout << "save bin error code =" << (int)saveBin((char *)"mybin", testArray) << endl;
+#endif
+				return err_ok;
+			} else {//有图就不记录错误
+				SN1V2_INFO_CODE_RET(err_binaryzation_aim_null);
+			}
+		} else {//有图就不记录错误
+			SN1V2_INFO_CODE_RET(err_Inval_image);
+		}
+	} else {
 		SN1V2_ERROR_CODE_RET(err_inval_para);
 	}
 	SN1V2_ERROR_CODE_RET(err_UNKNOWN);

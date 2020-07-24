@@ -144,6 +144,7 @@ static int capOnce(int argc, char * argv[])
 		//sleep(5);
 
 		timTableSet ts;
+		memset(&ts, 0, sizeof(timTableSet));
 		ts.tt = time(0);
 		dw.work(ts, 0);
 	}

@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include "video.h"
 #include <sys/prctl.h>
+#include <fstream>
 
 int init_cap(const char * videoName);
 int set_gain_expose(int fd, int gain, int expose);
@@ -82,6 +83,72 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 	}
 }
 
+static inline int convert_yuv_to_rgb_pixel(int y, int u, int v)
+{
+	unsigned int pixel32 = 0;
+	unsigned char *pixel = (unsigned char *)&pixel32;
+	int r, g, b;
+	r = y + (1.370705 * (v - 128));
+	g = y - (0.698001 * (v - 128)) - (0.337633 * (u - 128));
+	b = y + (1.732446 * (u - 128));
+	if (r > 255) r = 255;
+	if (g > 255) g = 255;
+	if (b > 255) b = 255;
+	if (r < 0) r = 0;
+	if (g < 0) g = 0;
+	if (b < 0) b = 0;
+	pixel[0] = r * 220 / 256;
+	pixel[1] = g * 220 / 256;
+	pixel[2] = b * 220 / 256;
+	return pixel32;
+}
+
+int convert_yuv_to_rgb_buffer(unsigned char *yuv, unsigned char *rgb, unsigned int width, unsigned int height)
+{
+	unsigned int in, out = 0;
+	unsigned int pixel_16;
+	unsigned char pixel_24[3];
+	unsigned int pixel32;
+	int y0, u, y1, v;
+
+	width = width & (~127);
+
+	for (in = 0; in < width * height * 2; in += 4) {
+		pixel_16 =
+			yuv[in + 3] << 24 |
+			yuv[in + 2] << 16 |
+			yuv[in + 1] << 8 |
+			yuv[in + 0];
+		y0 = (pixel_16 & 0x000000ff);
+		u = (pixel_16 & 0x0000ff00) >> 8;
+		y1 = (pixel_16 & 0x00ff0000) >> 16;
+		v = (pixel_16 & 0xff000000) >> 24;
+		pixel32 = convert_yuv_to_rgb_pixel(y0, u, v);
+		pixel_24[0] = (pixel32 & 0x000000ff);
+		pixel_24[1] = (pixel32 & 0x0000ff00) >> 8;
+		pixel_24[2] = (pixel32 & 0x00ff0000) >> 16;
+		rgb[out++] = pixel_24[0];
+		rgb[out++] = pixel_24[1];
+		rgb[out++] = pixel_24[2];
+		pixel32 = convert_yuv_to_rgb_pixel(y1, u, v);
+		pixel_24[0] = (pixel32 & 0x000000ff);
+		pixel_24[1] = (pixel32 & 0x0000ff00) >> 8;
+		pixel_24[2] = (pixel32 & 0x00ff0000) >> 16;
+		rgb[out++] = pixel_24[0];
+		rgb[out++] = pixel_24[1];
+		rgb[out++] = pixel_24[2];
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
+
 ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gain, const unsigned int expo
 	, const int horizenFlip, const int VeriFlip
 )
@@ -98,14 +165,19 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 	}
 
 	{
-		auto p0 = get_one_frame(video_fd);
-		auto p1 = get_one_frame(video_fd);
+		//auto p0 = get_one_frame(video_fd);
+		//auto p1 = get_one_frame(video_fd);
 	}
 	
 	shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
 
 	if (fram && fram->useFlag) {
-		memcpy(rgb565buff, fram->startAddr, insize);
+		unsigned char * tmpbuff = (unsigned char *)malloc(1920 * 1080 * 3);
+		convert_yuv_to_rgb_buffer(fram->startAddr, tmpbuff, 1920, 1080);
+		RGB888_2_565(tmpbuff, rgb565buff, 1920 * 1080);
+
+		free(tmpbuff);
+		//memcpy(rgb565buff, fram->startAddr, insize);
 		return err_ok;
 	}
 
@@ -119,7 +191,7 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 
 int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFlip)
 {
-	video_fd = init_cap("/dev/video0");
+	video_fd = init_cap("/dev/video1");
 
 	if (video_fd < 0) {
 		cerr << "set video error" << endl;

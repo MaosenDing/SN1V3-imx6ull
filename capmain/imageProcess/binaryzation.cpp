@@ -28,6 +28,14 @@ ERR_STA RGB565GRAY(unsigned char * LoadImg, int inputSize, shared_ptr<vector<uin
 	return err_ok;
 }
 
+void RGB565GRAY(unsigned char * LoadImg, int inputSize)
+{
+	int pixCount = inputSize / 2;
+	TIME_INTERVAL_SCOPE("rgb gray operator:");
+	RGB565GRAY((uint16_t*)LoadImg, LoadImg, pixCount);
+}
+
+
 void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 {
 	const unsigned int RGB565_RED = 0xf800;
@@ -35,6 +43,7 @@ void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 	const unsigned int RGB565_BLUE = 0x001f;
 
 	uint16_t *dst16 = (uint16_t*)dst;
+	pixCount = pixCount & (~127);
 	while (pixCount--) {
 		*dst16 = ((srcdata[0] >> 3) & RGB565_BLUE) |
 			((srcdata[1] << 3) & RGB565_GREEN) |
@@ -359,25 +368,25 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 
 
 #ifndef CORTEX
-int getMaxVal(vector<uint8_t> &testArray)
+int getMaxVal(unsigned char * src,size_t sz)
 {
-	vector<uint8_t>::iterator max;
+	unsigned char * max;
 	{
 		TIME_INTERVAL_SCOPE("get max :");
-		max = max_element(testArray.begin(), testArray.end());
+		max = max_element(src, src + sz);
 	}
 #if 0
 	cout << "get max gray =" << (int)*max << endl;
 #endif
 	return *max;
 }
+
+
 #else
-int getMaxVal(vector<uint8_t> &testArray)
+int getMaxVal(unsigned char * src, size_t num)
 {
 	TIME_INTERVAL_SCOPE("get max :");
 
-	unsigned char * src = &testArray[0];
-	size_t num = testArray.size();
 	unsigned char max = 0;
 #if 1
 	for (size_t i = 0; i < (num & (~(256 - 1))); i++) {
@@ -428,11 +437,16 @@ int getMaxVal(vector<uint8_t> &testArray)
 		}			
 	}
 #endif
+#if 0
 	printf("max val = %d\r\n", max);
+#endif
 	return max;
 }
 #endif
-
+int getMaxVal(vector<uint8_t> &testArray)
+{
+	return getMaxVal(&testArray[0], testArray.size());
+}
 
 
 
