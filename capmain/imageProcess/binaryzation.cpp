@@ -452,7 +452,116 @@ int getMaxVal(vector<uint8_t> &testArray)
 
 
 
+#define RANGE_LIMIT(x) (x > 255 ? 255 : (x < 0 ? 0 : x))
+
+#ifndef CORTEX
+void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
+{
+	int rows, cols;
+	int y0, y1, u, v, r, g, b;
+	unsigned char *yuv_buf;
+	unsigned short *rgb_buf;
+
+	yuv_buf = (unsigned char *)inbuf;
+	rgb_buf = (unsigned short *)outbuf;
+
+	for (int pos = 0; pos < ((height * width /2) &(~127)) ;pos++) {
+
+		y0 = yuv_buf[0];
+		u = yuv_buf[1] - 128;
+		y1 = yuv_buf[2];
+		v = yuv_buf[3] - 128;		
+
+		r = RANGE_LIMIT(y0 + v + ((v * 103) >> 8));
+		g = RANGE_LIMIT(y0 - ((u * 88) >> 8) - ((v * 183) >> 8));
+		b = RANGE_LIMIT(y0 + u + ((u * 198) >> 8));
+		*rgb_buf++ = (((r & 0xf8) << 8) | ((g & 0xfc) << 3) | ((b & 0xf8) >> 3));
+
+		r = RANGE_LIMIT(y1 + v + ((v * 103) >> 8));
+		g = RANGE_LIMIT(y1 - ((u * 88) >> 8) - ((v * 183) >> 8));
+		b = RANGE_LIMIT(y1 + u + ((u * 198) >> 8));
+		*rgb_buf++ = (((r & 0xf8) << 8) | ((g & 0xfc) << 3) | ((b & 0xf8) >> 3));
+
+		yuv_buf += 4;
+	}
+}
+#else
+void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
+{
+
+	unsigned char *yuv_buf;
+	unsigned char *rgb_buf;
+
+	yuv_buf = (unsigned char *)inbuf;
+	rgb_buf = (unsigned char *)outbuf;
+
+	const int16x8_t const_128 = vdupq_n_s16(128);
+
+	const uint8x8_t const_88 = vdup_n_u8(88);
+	const uint8x8_t const_198 = vdup_n_u8(198);
+	const uint8x8_t const_8 = vdup_n_u8(8);
+	const uint8x8_t const_103 = vdup_n_u8(103);
 
 
+	for (int pos = 0; pos < ((height * width / 2 /8) &(~127)); pos++) {
+
+		uint8x8x4_t yuv = vld4_u8(yuv_buf);
+
+		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
+		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
+
+		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
+		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
+
+		int16x8_t rtmp = vshrq_n_s16(vmulq_n_s16(v, 103), 8);
+		rtmp = vaddq_s16(rtmp, v);
+		rtmp = vaddq_s16(rtmp, y0);
+		uint8x8_t r = vqmovn_u16(vreinterpretq_u16_s16(rtmp));
+
+		int16x8_t gtmp0 = vshrq_n_s16(vmulq_n_s16(u, 88), 8);
+		int16x8_t gtmp1 = vshrq_n_s16(vmulq_n_s16(v, 183), 8);
+		int16x8_t gtmp2 = vsubq_s16(y0, gtmp0);
+		gtmp2 = vsubq_s16(y0, gtmp1);
+		uint8x8_t g = vqmovn_u16(vreinterpretq_u16_s16(gtmp2));
+
+		int16x8_t btmp0 = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
+		btmp0 = vaddq_s16(btmp0, u);
+		btmp0 = vaddq_s16(btmp0, y0);
+		uint8x8_t b = vqmovn_u16(vreinterpretq_u16_s16(btmp0));
+
+		uint8x8x2_t ret0;
+		ret0.val[1] = vsri_n_u8(r, g, 5);
+		g = vshl_n_u8(g, 3);
+		ret0.val[0] = vsri_n_u8(g, b, 3);
+		vst2_u8(rgb_buf, ret0);
+
+
+		int16x8_t rtmp1 = vshrq_n_s16(vmulq_n_s16(v, 103), 8);
+		rtmp1 = vaddq_s16(rtmp1, v);
+		rtmp1 = vaddq_s16(rtmp1, y1);
+		uint8x8_t r1 = vqmovn_u16(vreinterpretq_u16_s16(rtmp1));
+
+		int16x8_t g1tmp0 = vshrq_n_s16(vmulq_n_s16(u, 88), 8);
+		int16x8_t g1tmp1 = vshrq_n_s16(vmulq_n_s16(v, 183), 8);
+		int16x8_t g1tmp2 = vsubq_s16(y1, g1tmp0);
+		g1tmp2 = vsubq_s16(y1, g1tmp1);
+		uint8x8_t g1 = vqmovn_u16(vreinterpretq_u16_s16(g1tmp2));
+
+		int16x8_t b1tmp0 = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
+		b1tmp0 = vaddq_s16(b1tmp0, u);
+		b1tmp0 = vaddq_s16(b1tmp0, y1);
+		uint8x8_t b1 = vqmovn_u16(vreinterpretq_u16_s16(b1tmp0));
+
+		uint8x8x2_t ret1;
+		ret1.val[1] = vsri_n_u8(r1, g1, 5);
+		g1 = vshl_n_u8(g1, 3);
+		ret1.val[0] = vsri_n_u8(g1, b1, 3);
+		vst2_u8(rgb_buf + 16, ret1);
+
+		yuv_buf += 32;
+		rgb_buf += 32;
+	}
+}
+#endif
 
 
