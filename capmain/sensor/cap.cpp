@@ -145,16 +145,8 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 	shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
 
 	if (fram && fram->useFlag) {
-		//unsigned char * tmpbuff = (unsigned char *)malloc(1920 * 1080 * 3);
-		//convert_yuv_to_rgb_buffer(fram->startAddr, tmpbuff, 1920, 1080);
-		//RGB888_2_565(tmpbuff, rgb565buff, 1920 * 1080);
-
-		//free(tmpbuff);
-
+		TimeInterval ppp2("yuv:");
 		YUV422ToRGB565(fram->startAddr, rgb565buff, 1920, 1080);
-
-
-		//memcpy(rgb565buff, fram->startAddr, insize);
 		return err_ok;
 	}
 

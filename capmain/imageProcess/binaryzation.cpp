@@ -513,50 +513,39 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
 		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
 
-		int16x8_t rtmp = vshrq_n_s16(vmulq_n_s16(v, 103), 8);
-		rtmp = vaddq_s16(rtmp, v);
-		rtmp = vaddq_s16(rtmp, y0);
-		uint8x8_t r = vqmovn_u16(vreinterpretq_u16_s16(rtmp));
+		int16x8_t rcfg = vshrq_n_s16(vmulq_n_s16(v, 103), 8);
+		rcfg = vaddq_s16(rcfg, v);
 
 		int16x8_t gtmp0 = vshrq_n_s16(vmulq_n_s16(u, 88), 8);
 		int16x8_t gtmp1 = vshrq_n_s16(vmulq_n_s16(v, 183), 8);
-		int16x8_t gtmp2 = vsubq_s16(y0, gtmp0);
-		gtmp2 = vsubq_s16(y0, gtmp1);
-		uint8x8_t g = vqmovn_u16(vreinterpretq_u16_s16(gtmp2));
+		int16x8_t gcfg = vaddq_s16(gtmp0, gtmp1);		
 
-		int16x8_t btmp0 = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
-		btmp0 = vaddq_s16(btmp0, u);
-		btmp0 = vaddq_s16(btmp0, y0);
-		uint8x8_t b = vqmovn_u16(vreinterpretq_u16_s16(btmp0));
+		int16x8_t bcfg = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
+		bcfg = vaddq_s16(bcfg, u);
 
-		uint8x8x2_t ret0;
-		ret0.val[1] = vsri_n_u8(r, g, 5);
-		g = vshl_n_u8(g, 3);
-		ret0.val[0] = vsri_n_u8(g, b, 3);
-		vst2_u8(rgb_buf, ret0);
+		int16x8_t rtmp00 = vaddq_s16(y0, rcfg);
+		uint8x8_t r0 = vqmovn_u16(vreinterpretq_u16_s16(rtmp00));
+		int16x8_t gtmp00 = vsubq_s16(y0, gcfg);
+		uint8x8_t g0 = vqmovn_u16(vreinterpretq_u16_s16(gtmp00));
+		int16x8_t btmp00 = vaddq_s16(y0, bcfg);
+		uint8x8_t b0 = vqmovn_u16(vreinterpretq_u16_s16(btmp00));
 
+		uint8x8x4_t ret;
+		ret.val[1] = vsri_n_u8(r0, g0, 5);
+		g0 = vshl_n_u8(g0, 3);
+		ret.val[0] = vsri_n_u8(g0, b0, 3);
 
-		int16x8_t rtmp1 = vshrq_n_s16(vmulq_n_s16(v, 103), 8);
-		rtmp1 = vaddq_s16(rtmp1, v);
-		rtmp1 = vaddq_s16(rtmp1, y1);
-		uint8x8_t r1 = vqmovn_u16(vreinterpretq_u16_s16(rtmp1));
+		int16x8_t rtmp10 = vaddq_s16(y1, rcfg);
+		uint8x8_t r1 = vqmovn_u16(vreinterpretq_u16_s16(rtmp10));
+		int16x8_t gtmp10 = vsubq_s16(y1, gcfg);
+		uint8x8_t g1 = vqmovn_u16(vreinterpretq_u16_s16(gtmp10));
+		int16x8_t btmp10 = vaddq_s16(y1, bcfg);
+		uint8x8_t b1 = vqmovn_u16(vreinterpretq_u16_s16(btmp10));
 
-		int16x8_t g1tmp0 = vshrq_n_s16(vmulq_n_s16(u, 88), 8);
-		int16x8_t g1tmp1 = vshrq_n_s16(vmulq_n_s16(v, 183), 8);
-		int16x8_t g1tmp2 = vsubq_s16(y1, g1tmp0);
-		g1tmp2 = vsubq_s16(y1, g1tmp1);
-		uint8x8_t g1 = vqmovn_u16(vreinterpretq_u16_s16(g1tmp2));
-
-		int16x8_t b1tmp0 = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
-		b1tmp0 = vaddq_s16(b1tmp0, u);
-		b1tmp0 = vaddq_s16(b1tmp0, y1);
-		uint8x8_t b1 = vqmovn_u16(vreinterpretq_u16_s16(b1tmp0));
-
-		uint8x8x2_t ret1;
-		ret1.val[1] = vsri_n_u8(r1, g1, 5);
+		ret.val[3] = vsri_n_u8(r1, g1, 5);
 		g1 = vshl_n_u8(g1, 3);
-		ret1.val[0] = vsri_n_u8(g1, b1, 3);
-		vst2_u8(rgb_buf + 16, ret1);
+		ret.val[2] = vsri_n_u8(g1, b1, 3);
+		vst4_u8(rgb_buf , ret);
 
 		yuv_buf += 32;
 		rgb_buf += 32;
