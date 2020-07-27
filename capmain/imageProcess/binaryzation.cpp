@@ -213,34 +213,13 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 
 void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 {
-#if 0
-	asm  volatile(
-		"vld1.u8 d0,[%0] \n \t"
-		"vld1.u8 d1,[%0] \n \t"
+	
 
-		"mov r7,#7 \n \t"
-		"vdup.8 d3,r7 \n \t"
+	int16x8_t dat = vld1q_s16((int16_t *)srcdata);
 
+	uint8x8_t ret = vqmovun_s16(dat);
 
-		"vmul.u8 d2,d0,d3 \n \t"
-		//"add %1,%1,#16 \n\t"
-		//"vld1.8 {d2,d3} ,[%0]! \n \t "
-		//"vmovn.u16 d2,q1 \n \t"
-		"vst1.8 {d2},[%1] \n \t"
-
-		:
-	: "r"(srcdata), "r"(dst), "r"(pixCount)
-		: "q0", "q1" , "r7"
-		);
-#else
-	uint8x16_t dat = vld1q_u8(srcdata);
-	uint8x16_t dat2 = vld1q_u8(srcdata + 16);
-
-	uint8x16_t ret = vmaxq_u8(dat, dat2);
-
-	vst1q_u8(dst, ret);
-
-#endif
+	vst1_u8(dst, ret);
 }
 
 
@@ -488,7 +467,6 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 #else
 void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 {
-
 	unsigned char *yuv_buf;
 	unsigned char *rgb_buf;
 
@@ -497,14 +475,17 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 
 	const int16x8_t const_128 = vdupq_n_s16(128);
 
-	const uint8x8_t const_88 = vdup_n_u8(88);
-	const uint8x8_t const_198 = vdup_n_u8(198);
 	const uint8x8_t const_8 = vdup_n_u8(8);
-	const uint8x8_t const_103 = vdup_n_u8(103);
 
+	int16_t dat[4] = { 88,198,103,183 };
 
+	int16x4_t const_dat = vld1_s16(dat);
+	
 	for (int pos = 0; pos < ((height * width / 2 /8) &(~127)); pos++) {
-
+		__asm__ __volatile__(
+			"pld [%0,#32] \n"
+			:
+		: "r" (yuv_buf));
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
@@ -513,22 +494,23 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
 		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
 
-		int16x8_t rcfg = vshrq_n_s16(vmulq_n_s16(v, 103), 8);
+		int16x8_t rcfg = vshrq_n_s16(vmulq_lane_s16(v, const_dat,2), 8);
 		rcfg = vaddq_s16(rcfg, v);
 
-		int16x8_t gtmp0 = vshrq_n_s16(vmulq_n_s16(u, 88), 8);
-		int16x8_t gtmp1 = vshrq_n_s16(vmulq_n_s16(v, 183), 8);
-		int16x8_t gcfg = vaddq_s16(gtmp0, gtmp1);		
+		int16x8_t gtmp0 = vmulq_lane_s16(u, const_dat, 0);
+		int16x8_t gtmp1 = vmulq_lane_s16(v, const_dat, 3);
+
+		int16x8_t gcfg = vshrq_n_s16(vaddq_s16(gtmp0, gtmp1),8);
 
 		int16x8_t bcfg = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
 		bcfg = vaddq_s16(bcfg, u);
 
 		int16x8_t rtmp00 = vaddq_s16(y0, rcfg);
-		uint8x8_t r0 = vqmovn_u16(vreinterpretq_u16_s16(rtmp00));
+		uint8x8_t r0 = vqmovun_s16(rtmp00);
 		int16x8_t gtmp00 = vsubq_s16(y0, gcfg);
-		uint8x8_t g0 = vqmovn_u16(vreinterpretq_u16_s16(gtmp00));
+		uint8x8_t g0 = vqmovun_s16(gtmp00);
 		int16x8_t btmp00 = vaddq_s16(y0, bcfg);
-		uint8x8_t b0 = vqmovn_u16(vreinterpretq_u16_s16(btmp00));
+		uint8x8_t b0 = vqmovun_s16(btmp00);
 
 		uint8x8x4_t ret;
 		ret.val[1] = vsri_n_u8(r0, g0, 5);
@@ -536,11 +518,11 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 		ret.val[0] = vsri_n_u8(g0, b0, 3);
 
 		int16x8_t rtmp10 = vaddq_s16(y1, rcfg);
-		uint8x8_t r1 = vqmovn_u16(vreinterpretq_u16_s16(rtmp10));
+		uint8x8_t r1 = vqmovun_s16(rtmp10);
 		int16x8_t gtmp10 = vsubq_s16(y1, gcfg);
-		uint8x8_t g1 = vqmovn_u16(vreinterpretq_u16_s16(gtmp10));
+		uint8x8_t g1 = vqmovun_s16(gtmp10);
 		int16x8_t btmp10 = vaddq_s16(y1, bcfg);
-		uint8x8_t b1 = vqmovn_u16(vreinterpretq_u16_s16(btmp10));
+		uint8x8_t b1 = vqmovun_s16(btmp10);
 
 		ret.val[3] = vsri_n_u8(r1, g1, 5);
 		g1 = vshl_n_u8(g1, 3);

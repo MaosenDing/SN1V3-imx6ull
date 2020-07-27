@@ -73,17 +73,18 @@ void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
 int processTest2(int argc, char * argv[])
 {
 #define NUM (32)
-	uint8_t test[NUM];
+	int16_t test[NUM] = {-4000,0,127,128,4000};
 	uint8_t out[NUM];
 
 
 
-	for (int in = 0; in < NUM; in++) {
-		test[in] = in;
-	}
+	//for (int in = 0; in < NUM; in++) {
+	//	test[in] = in;
+	//}
 
 
-	neon_test(test, out, 1);
+	void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
+	neon_test((uint8_t*)test, out, 1);
 
 	for (size_t i = 0; i < NUM; i++) {
 		printf("index %d = %d\n",i,out[i]);

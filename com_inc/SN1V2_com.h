@@ -33,16 +33,28 @@
 		int bottom;
 		//每个像素点所占空间大小 -1表示jpg压缩 0表示未初始化
 		int byte_per_pix;
-
-		//char *Image_data;//图像数据
-		std::shared_ptr<std::vector<uint8_t> > Image_data;
+		int size()
+		{
+			return right * bottom;
+		}
+		int delflg = 0;
+		unsigned char *Image_data;//图像数据
+		//std::shared_ptr<std::vector<uint8_t> > Image_data;
 
 
 		IMAGEDATA() :itype(IT_NULL),
 			left(0),right(0),top(0),bottom(0),
-			byte_per_pix(0),Image_data(new std::vector<uint8_t>())
+			byte_per_pix(0),Image_data(0)
 		{
 		}
+		~IMAGEDATA()
+		{
+			if (delflg && Image_data) {
+				free(Image_data);
+			}
+		}
+
+
 		ERR_STA clone(int x, int y,int width,int height, std::shared_ptr<IMAGEDATA> & outPoint);
 		IMAGEDATA & operator = (IMAGEDATA &);
 		
@@ -51,9 +63,15 @@
 		//使用请前确保分配内存和使用范围
 		inline unsigned char & at(int x, int y)
 		{
-			return Image_data->at(x + y*right);
+			return Image_data[x + y * right];
 			//return (*Image_data)[x + y*right];
 		}
+
+		inline unsigned char & at(int x)
+		{
+			return Image_data[x];
+		}
+
 
 	private:
 		IMAGEDATA(IMAGEDATA &);
@@ -83,9 +101,11 @@
 	//灰度化 无边界检测
 	void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount);
 	ERR_STA RGB565GRAY(unsigned char * LoadImg, int inputSize, std::shared_ptr<std::vector<uint8_t> > & outdata);
+	void RGB565GRAY(unsigned char * LoadImg, int inputSize);//灰度化后数据回写原地址
 	//二值化图像
 	ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & outImage);
 	ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth);
+	ERR_STA BinaImg(unsigned char * src, size_t sz, unsigned int gth, float bth);
 	//获取二值化亮区边界
 	ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right ,int flgFast = 0);
 	//获取最大连通区域
@@ -146,10 +166,6 @@
 		time_t timGetImg;
 		time_t TableTimeGetImg;
 	};
-
-	//处理RGB图像
-	ERR_STA ImageProcessRGB(const char *saveName, unsigned char * LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer);
-
 
 	enum scanf_type {
 		type_with_colon,
