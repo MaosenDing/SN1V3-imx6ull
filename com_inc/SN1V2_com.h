@@ -107,7 +107,7 @@
 	ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth);
 	ERR_STA BinaImg(unsigned char * src, size_t sz, unsigned int gth, float bth);
 	//获取二值化亮区边界
-	ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right ,int flgFast = 0);
+	ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, int & right ,int flgFast = 1);
 	//获取最大连通区域
 	ERR_STA RegImg(IMAGEDATA & inImage, int & pixCnt);
 

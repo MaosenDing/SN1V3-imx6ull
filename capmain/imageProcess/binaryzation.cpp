@@ -533,6 +533,175 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 		rgb_buf += 32;
 	}
 }
+
+void YUV422ToGray_B(const void* inbuf, void* outbuf, int width, int height)
+{
+	unsigned char *yuv_buf;
+	unsigned char *rgb_buf;
+
+	yuv_buf = (unsigned char *)inbuf;
+	rgb_buf = (unsigned char *)outbuf;
+
+	const int16x8_t const_128 = vdupq_n_s16(128);
+
+	const uint8x8_t const_8 = vdup_n_u8(8);
+
+	int16_t dat[4] = { 88,198,103,183 };
+
+	int16x4_t const_dat = vld1_s16(dat);
+
+	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
+		__asm__ __volatile__(
+			"pld [%0,#32] \n"
+			:
+		: "r" (yuv_buf));
+		uint8x8x4_t yuv = vld4_u8(yuv_buf);
+
+		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
+		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
+
+		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
+		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
+
+		int16x8_t bcfg = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
+		bcfg = vaddq_s16(bcfg, u);
+
+		int16x8_t btmp00 = vaddq_s16(y0, bcfg);
+		uint8x8_t b0 = vqmovun_s16(btmp00);
+
+		uint8x8x2_t ret;
+		ret.val[0] = b0;
+		int16x8_t btmp10 = vaddq_s16(y1, bcfg);
+		uint8x8_t b1 = vqmovun_s16(btmp10);
+
+		ret.val[1] = b1;
+		vst2_u8(rgb_buf, ret);
+
+		yuv_buf += 32;
+		rgb_buf += 16;
+	}
+}
+
+
+void YUV422ToGray_G(const void* inbuf, void* outbuf, int width, int height)
+{
+	unsigned char *yuv_buf;
+	unsigned char *rgb_buf;
+
+	yuv_buf = (unsigned char *)inbuf;
+	rgb_buf = (unsigned char *)outbuf;
+
+	const int16x8_t const_128 = vdupq_n_s16(128);
+
+	const uint8x8_t const_8 = vdup_n_u8(8);
+
+	int16_t dat[4] = { 88,198,103,183 };
+
+	int16x4_t const_dat = vld1_s16(dat);
+
+	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
+		__asm__ __volatile__(
+			"pld [%0,#32] \n"
+			:
+		: "r" (yuv_buf));
+		uint8x8x4_t yuv = vld4_u8(yuv_buf);
+
+		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
+		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
+
+		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
+		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
+
+		int16x8_t gtmp0 = vmulq_lane_s16(u, const_dat, 0);
+		int16x8_t gtmp1 = vmulq_lane_s16(v, const_dat, 3);
+
+		int16x8_t gcfg = vshrq_n_s16(vaddq_s16(gtmp0, gtmp1), 8);
+
+		int16x8_t gtmp00 = vsubq_s16(y0, gcfg);
+		uint8x8_t g0 = vqmovun_s16(gtmp00);
+
+		uint8x8x2_t ret;
+		ret.val[0] = g0;
+
+		int16x8_t gtmp10 = vsubq_s16(y1, gcfg);
+		uint8x8_t g1 = vqmovun_s16(gtmp10);
+
+		ret.val[0] = g1;
+		vst2_u8(rgb_buf, ret);
+
+		yuv_buf += 32;
+		rgb_buf += 16;
+	}
+}
+
+void YUV422ToGray_R(const void* inbuf, void* outbuf, int width, int height)
+{
+	unsigned char *yuv_buf;
+	unsigned char *rgb_buf;
+
+	yuv_buf = (unsigned char *)inbuf;
+	rgb_buf = (unsigned char *)outbuf;
+
+	const int16x8_t const_128 = vdupq_n_s16(128);
+
+	const uint8x8_t const_8 = vdup_n_u8(8);
+
+	int16_t dat[4] = { 88,198,103,183 };
+
+	int16x4_t const_dat = vld1_s16(dat);
+
+	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
+		__asm__ __volatile__(
+			"pld [%0,#32] \n"
+			:
+		: "r" (yuv_buf));
+		uint8x8x4_t yuv = vld4_u8(yuv_buf);
+
+		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
+		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
+
+		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
+		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
+
+		int16x8_t rcfg = vshrq_n_s16(vmulq_lane_s16(v, const_dat, 2), 8);
+		rcfg = vaddq_s16(rcfg, v);
+
+		int16x8_t rtmp00 = vaddq_s16(y0, rcfg);
+		uint8x8_t r0 = vqmovun_s16(rtmp00);
+
+		uint8x8x2_t ret;
+		ret.val[0] = r0;
+
+
+		int16x8_t rtmp10 = vaddq_s16(y1, rcfg);
+		uint8x8_t r1 = vqmovun_s16(rtmp10);
+		ret.val[1] = r1;
+
+		vst2_u8(rgb_buf, ret);
+
+		yuv_buf += 32;
+		rgb_buf += 16;
+	}
+}
+
+
+void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int flg)
+{
+	if (flg == 1) {
+		YUV422ToGray_R(inbuf, outbuf, width, height);
+	}
+
+	if (flg == 2) {
+		YUV422ToGray_G(inbuf, outbuf, width, height);
+	}
+
+	if (flg == 3) {
+		YUV422ToGray_B(inbuf, outbuf, width, height);
+	}
+}
+
+
+
 #endif
 
 

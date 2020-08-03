@@ -83,40 +83,6 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 	}
 }
 
-static inline void convert_yuv_to_rgb_pixel(int y, int u, int v,uint16_t * rgb565)
-{
-	int r = y + v + ((103 * v) >> 8);
-	int g = y - ((u * 88) >> 8) - ((v * 183) >> 8);
-	int b = y + u + (u * 198) >> 8;
-	*rgb565 = (((r & 0xf8) << 8) | ((g & 0xfc) << 3) | ((b & 0xf8) >> 3));
-}
-
-int convert_yuv_to_rgb_buffer(unsigned char *yuv, unsigned char *rgb, unsigned int width, unsigned int height)
-{
-	unsigned int in, out = 0;
-	unsigned int pixel_16;
-	unsigned char pixel_24[3];
-	unsigned int pixel32;
-	int y0, u, y1, v;
-
-	width = width & (~127);
-
-	for (in = 0; in < width * height * 2; in += 4) {
-
-		y0 = yuv[in + 0];
-		u = yuv[in + 1];
-		y1 = yuv[in + 2];
-		v = yuv[in + 3];
-
-
-		convert_yuv_to_rgb_pixel(y0, u, v, (uint16_t*)&rgb[in]);
-
-		convert_yuv_to_rgb_pixel(y1, u, v, (uint16_t*)&rgb[in + 2]);
-
-	}
-	return 0;
-}
-
 void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height);
 
 
@@ -141,8 +107,13 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 		//auto p0 = get_one_frame(video_fd);
 		//auto p1 = get_one_frame(video_fd);
 	}
-	
-	shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
+
+	shared_ptr< CAP_FRAME> fram;
+	{
+		TimeInterval ppp2("CAP_FRAME:");
+		fram = get_one_frame(video_fd);
+	}
+
 
 	if (fram && fram->useFlag) {
 		TimeInterval ppp2("yuv:");
@@ -152,8 +123,6 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 
 	SN1V2_ERROR_CODE_RET(err_sensor_catch);
 }
-
-
 
 
 

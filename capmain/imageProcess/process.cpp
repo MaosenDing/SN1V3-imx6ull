@@ -33,7 +33,7 @@ ERR_STA getLightBound(IMAGEDATA & inImage, int & top, int & bottom, int & left, 
 	right = -1;
 
 	uint32_t * src32 = (uint32_t *)&inImage.at(0, 0);
-	if (flgFast && (heigth % 8 == 0) && (width % 128 == 0)) {
+	if (flgFast && (width % 8 == 0)) {
 		//向量化
 		for (int y = 0; y < heigth; y++) {
 			for (int x = 0; x < width / 4; x++) {

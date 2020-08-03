@@ -142,11 +142,14 @@ static int capOnce(int argc, char * argv[])
 		dw.test_for_cap_once = 1;
 
 		//sleep(5);
+		int logflg = argc >= 6 ? 1 : 0;
 
-		timTableSet ts;
-		memset(&ts, 0, sizeof(timTableSet));
-		ts.tt = time(0);
-		dw.work(ts, 0);
+		do {
+			timTableSet ts;
+			memset(&ts, 0, sizeof(timTableSet));
+			ts.tt = time(0);
+			dw.work(ts, 0);
+		} while (logflg);
 	}
 	return 0;
 }

@@ -25,6 +25,7 @@
 #include <iostream>
 #include <math.h>
 #include "timeTableV2.h"
+#include <fstream>
 using namespace std;
 
 
@@ -55,17 +56,19 @@ int processTest(int argc, char * argv[])
 	shared_ptr<unsigned char >basemem(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
 	RGB888_2_565(&dat[0], &*basemem, getwidth * getheigth);
 
-
-	for (int i = 0; i < 1; i++) {
+	ofstream logout("/timlog.txt");
+	for (int i = 0; i < 10000000; i++) {
+		auto start = std::chrono::system_clock::now();
 		shared_ptr<unsigned char >ppp(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
 		memcpy(&*ppp, &*basemem, imgSize);
-		TimeInterval ppp2("test:");
+		//TimeInterval ppp2("test:");
 		ImageProcessRGB("tp/test.jpg"
 			, std::move(ppp)
 			, imgSize, getwidth, getheigth
 			, res, thres, thresPer
 			, BINjpgSaveFlag, MinCntGrp);
-
+		auto end = std::chrono::system_clock::now();
+		logout << std::chrono::duration_cast<std::chrono::duration<float>>(end - start).count() << endl;
 	}
 	return 0;
 }
@@ -91,4 +94,15 @@ int processTest2(int argc, char * argv[])
 	}
 	return 0;
 }
+
+#include <syslog.h>
+
+
+
+
+
+
+
+
+
 
