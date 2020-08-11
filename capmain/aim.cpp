@@ -494,7 +494,7 @@ static int loopcap(int argc, char * argv[])
 
 int processTest(int argc, char * argv[]);
 int processTest2(int argc, char * argv[]);
-
+int testsunpos(int argc, char* argv[]);
 
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
@@ -512,6 +512,7 @@ MAIN_CMD cmd_group[] = {
 	{"loopcap",loopcap},
 	{"pro",processTest},
 	{"pro2",processTest2},
+	{"pos",testsunpos},
 };
 
 

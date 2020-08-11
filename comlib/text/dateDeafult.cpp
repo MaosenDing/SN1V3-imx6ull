@@ -117,15 +117,27 @@ CFG_INFO T1[] = {
 	T1_Set_data_force(15,Wiresless_SV,dateType::STRING16,stingDefault,version_set),
 
 	T1_Set_data(16,HeliostatType,dateType::STRING16,stingDefault),
-	T1_Set_data(17,SN2ID,dateType::STRING16,stingDefault),
-	T1_Set_data(18,latitude,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(19,longtitude,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(20,elevation,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(21,Temperature,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(22,Pressure,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(23,HeliostatPointX,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(24,HeliostatPointY,dateType::DOUBLE64,doubleDefault),
-	T1_Set_data(25,HeliostatPointZ,dateType::DOUBLE64,doubleDefault),
+
+	T1_Set_data(18,latitude,dateType::DOUBLE64,setDefault(double,40)),
+	T1_Set_data(19,longtitude,dateType::DOUBLE64,setDefault(double,97)),
+	T1_Set_data(20,elevation,dateType::DOUBLE64,setDefault(double,1400)),
+	T1_Set_data(21,Temperature,dateType::DOUBLE64,setDefault(double,8.7)),
+	T1_Set_data(22,Pressure,dateType::DOUBLE64,setDefault(double,817)),
+
+	T1_Set_data(23,DeltaT,dateType::DOUBLE64,setDefault(double,70)),
+
+	T1_Set_data(24,HeliostatPointX,dateType::DOUBLE64,setDefault(double,-100)),
+	T1_Set_data(25,HeliostatPointY,dateType::DOUBLE64,setDefault(double,100)),
+	T1_Set_data(26,HeliostatPointZ,dateType::DOUBLE64,setDefault(double,3)),
+
+
+	T1_Set_data(27,AimPointX1,dateType::DOUBLE64,setDefault(double,0)),
+	T1_Set_data(28,AimPointY1,dateType::DOUBLE64,setDefault(double,0)),
+	T1_Set_data(29,AimPointZ1,dateType::DOUBLE64,setDefault(double,98)),
+
+	T1_Set_data(30,AimPointX2,dateType::DOUBLE64,setDefault(double,0)),
+	T1_Set_data(31,AimPointY2,dateType::DOUBLE64,setDefault(double,0)),
+	T1_Set_data(32,AimPointZ2,dateType::DOUBLE64,setDefault(double,123)),
 };
 
 CFG_INFO T2[] = {
@@ -251,6 +263,18 @@ CFG_INFO T6[] = {
 	T6_Set_data(22,SN2_P4,dateType::INT32,setDefault(int ,1)),//SN2用T8表频率(行/秒)
 	T6_Set_data(23,SN2_P5,dateType::FLOAT32,setDefault(float ,20)),//SN2用最大转角速度（度/秒）
 	T6_Set_data(24,SN2_P6,dateType::FLOAT32,setDefault(float ,1)),//SN2用法线最大扫描距离（米）
+
+	T6_Set_data(25,cam_rotAnglex,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(26,cam_rotAngley,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(27,cam_rotAnglez,dateType::FLOAT32,setDefault(float ,0)),
+
+	T6_Set_data(28,cam_viewAngleh,dateType::FLOAT32,setDefault(float ,145)),
+	T6_Set_data(29,cam_viewAnglev,dateType::FLOAT32,setDefault(float ,67)),
+
+	T6_Set_data(30,MappingCoefficients1,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(31,MappingCoefficients2,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(32,MappingCoefficients3,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(33,MappingCoefficients4,dateType::FLOAT32,setDefault(float ,0)),
 
 	//是否保存原始图像
 	T6_Set_data(35,SaveOrg,dateType::BOOLTYPE,boolDefault),

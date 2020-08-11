@@ -377,7 +377,6 @@ int printData2String(char * tmpbuff,int maxbuf ,const void * baseaddr, const CFG
 
 	case dateType::FLOAT32:
 	{
-		printf("test = %p\n", dataAddr);
 		return snprintf(tmpbuff, 64, "%f", *(float *)dataAddr);
 	}
 	case dateType::DOUBLE64:
@@ -521,6 +520,7 @@ void testpro()
 		st.append(grp->groupName);
 		st.append("\n");
 		printTable2String(st, (char *)&tg_table + grp->diff, grp->group, grp->sz, writeUseful);
+		//printTable2String(st, (char *)&tg_table + grp->diff, grp->group, grp->sz, writeAll);
 		cout << st << endl;
 	}
 }

@@ -1,8 +1,20 @@
 
+%SN1_P1,1080
+%SN1_P2,1920
+%SN1_P3,2.8e-6
+%SN1_P4,8e-3
+%SN1_P4_1,8e-3
 
 
 
+%cam_rotAnglex,0
+%cam_rotAngley,0
+%cam_rotAnglez,0
 
+%viewAngleh,145
+%viewAnglev,67
 
-
-
+%MappingCoefficients1,0
+%MappingCoefficients2,0
+%MappingCoefficients3,0
+%MappingCoefficients4,0

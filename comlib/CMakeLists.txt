@@ -12,6 +12,7 @@ else()
 add_library(comlib STATIC ${fil})
 endif()
 
+
 #errHandle
 add_subdirectory(errHandle)
 #datapro
@@ -24,6 +25,8 @@ add_subdirectory(text)
 add_subdirectory(CRE)
 #CRE
 add_subdirectory(JD)
+#sunpos
+add_subdirectory(sunpos)
 
 
 target_link_libraries(comlib
@@ -35,11 +38,16 @@ timework
 datapro
 errHandle
 JD
+sunpos
 "-Wl,--no-whole-archive"
 )
 
 IF (CPU STREQUAL "A7")
 set(GLOG_DIR "/share/imx/gloginstall/lib/cmake/glog")
+ENDIF()
+
+IF (CPU STREQUAL "A53")
+set(GLOG_DIR "/share/a53/gloginstall/lib/cmake/glog")
 ENDIF()
 
 IF (CPU STREQUAL "arm9")

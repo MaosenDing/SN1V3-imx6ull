@@ -84,15 +84,26 @@ extern "C" {
 		char DRI2_SV[16];
 		char Wiresless_SV[16];
 		char HeliostatType[16];
-		char SN2ID[16];
 		double latitude;
 		double longtitude;
 		double elevation;
 		double Temperature;
 		double Pressure;
+
+		double DeltaT;
 		double HeliostatPointX;
 		double HeliostatPointY;
 		double HeliostatPointZ;
+
+		double AimPointX1;
+		double AimPointY1;
+		double AimPointZ1;
+
+		double AimPointX2;
+		double AimPointY2;
+		double AimPointZ2;
+
+
 	}T1_table;
 
 
@@ -216,6 +227,20 @@ extern "C" {
 		int32_t SN2_P4;//SN2用T8表频率(行/秒)
 		int32_t SN2_P5;//SN2用最大转角速度（度/秒）
 		int32_t SN2_P6;//SN2用法线最大扫描距离（米）
+
+		//相机内部参数
+		float cam_rotAnglex;
+		float cam_rotAngley;
+		float cam_rotAnglez;
+
+		float cam_viewAngleh;
+		float cam_viewAnglev;
+
+		float MappingCoefficients1;
+		float MappingCoefficients2;
+		float MappingCoefficients3;
+		float MappingCoefficients4;
+
 
 		int SaveOrg; //是否保留原视图片
 		int SaveBin;//是否保留二值化图片

@@ -299,14 +299,10 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 #else
 void fastbinaryzation(unsigned char * src, int thres, int insize)
 {
-#if 0
+#if 1
 	uint8x16_t comp = vdupq_n_u8(thres);
 	insize /= 32;
 	while (insize--) {
-		__asm__ __volatile__(
-			"pld [%0,#32] \n"
-			:
-		: "r" (src));
 
 		uint8x16_t dat = vld1q_u8(src);
 		uint8x16_t dat2 = vld1q_u8(src + 16);
@@ -482,10 +478,6 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 	int16x4_t const_dat = vld1_s16(dat);
 	
 	for (int pos = 0; pos < ((height * width / 2 /8) &(~127)); pos++) {
-		__asm__ __volatile__(
-			"pld [%0,#32] \n"
-			:
-		: "r" (yuv_buf));
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
@@ -551,10 +543,6 @@ void YUV422ToGray_B(const void* inbuf, void* outbuf, int width, int height)
 	int16x4_t const_dat = vld1_s16(dat);
 
 	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
-		__asm__ __volatile__(
-			"pld [%0,#32] \n"
-			:
-		: "r" (yuv_buf));
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
@@ -600,10 +588,6 @@ void YUV422ToGray_G(const void* inbuf, void* outbuf, int width, int height)
 	int16x4_t const_dat = vld1_s16(dat);
 
 	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
-		__asm__ __volatile__(
-			"pld [%0,#32] \n"
-			:
-		: "r" (yuv_buf));
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
@@ -651,10 +635,6 @@ void YUV422ToGray_R(const void* inbuf, void* outbuf, int width, int height)
 	int16x4_t const_dat = vld1_s16(dat);
 
 	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
-		__asm__ __volatile__(
-			"pld [%0,#32] \n"
-			:
-		: "r" (yuv_buf));
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));

@@ -188,7 +188,7 @@ int exec_exchange_data_message(WIFI_INFO & wifi, WIFI_BASE_FUNCTION * fun, int c
 			transmit_session(wifi, sec);
 
 			ret = wait_rec_session(wifi
-				, [](WIFI_BASE_SESSION & session, void * pri) -> bool {return session.code_num == ((int)pri | 0x80); }
+				, [](WIFI_BASE_SESSION & session, void * pri) -> bool {return session.code_num == ((long int)pri | 0x80); }
 			, (void *)code, wifi.max_delay_ms_muc_response);
 
 			if (ret && ret->frame_index != -2) {

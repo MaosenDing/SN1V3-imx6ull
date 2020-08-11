@@ -11,3 +11,22 @@
 %MDC2_SV_5,1.1
 
 
+
+%latitude,40.32957375
+%longtitude,97.27770556
+%elevation,1415.5
+%Temperature,7.8
+%Pressure,847.2
+%DeltaT,70
+%HeliostatPointX,-100
+%HeliostatPointY,100
+%HeliostatPointZ,3
+
+%AimPointX1,0
+%AimPointY1,0
+%AimPointZ1,98
+
+%AimPointX2,0
+%AimPointY2,0
+%AimPointZ2,123
+

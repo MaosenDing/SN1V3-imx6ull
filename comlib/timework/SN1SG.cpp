@@ -7,6 +7,7 @@
 #include "SN1V2_com.h"
 
 
+
 struct stu1{
 	double SAt;
 	double SAz;

@@ -25,7 +25,7 @@ void * getSHM(key_t key, int sz)
 succ:
 	void *p = shmat(sid, nullptr, 0);
 
-	if ((int)p != -1) {
+	if ((long int)p != -1) {
 		return p;
 	}
 	return nullptr;
