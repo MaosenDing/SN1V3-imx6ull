@@ -26,6 +26,13 @@ MatrixXd TA43(63, 9);
 
 void init()
 {
+	static int i = 0;
+	if (i == 0) {
+		i++;
+	} else {
+		return;
+	}
+
 
     L0_T << 0, 175347046, 0, 0,
         1, 3341656, 4.6692568, 6283.07585,
@@ -318,7 +325,7 @@ double sign(double num)
     }
 }
 
-Vector2f SP(double Year,double Month, double Day, double Hour, double Minute, double Second,double Delta_T,double  longitude,double latitude, double E,double P,double T)
+void SP(double Year,double Month, double Day, double Hour, double Minute, double Second,double Delta_T,double  longitude,double latitude, double E,double P,double T, Vector2f & ret)
 {
     init();
 
@@ -468,6 +475,7 @@ Vector2f SP(double Year,double Month, double Day, double Hour, double Minute, do
    double Az = PHI;
 
    Vector2f angle(At, Az);
-   return angle;
+
+   ret = angle;
 }
 

@@ -4,10 +4,12 @@
 #include <iostream>
 #include "timeTableV2.h"
 #include <chrono>
+#include <memory>
+#include "SunPosTable.h"
 #define PI 3.1415926535
 using namespace Eigen;
 using namespace std;
-Vector2f SP(double Year, double Month, double Day, double Hour, double Minute, double Second, double Delta_T, double  longitude, double latitude, double E, double P, double T);
+void SP(double Year, double Month, double Day, double Hour, double Minute, double Second, double Delta_T, double  longitude, double latitude, double E, double P, double T,Vector2f & ret);
 
 
 Vector3f calSunRayIn(Vector2f & sunAngle,Vector3f & helioPoint,Vector3f & aimPoint,float T)
@@ -231,19 +233,75 @@ int testsunpos(int argc,char* argv[])
 
 	return 0;
 }
-#else
-int testsunpos(int argc, char* argv[])
-{
-	return 0;
-}
 #endif
 
+shared_ptr< vector < SUNPOS> > GenerateSunTable(
+	int year, int mon, int day, int startHour, int endHour,
+	double lati, double longti,
+	double temperature, double pressure, double delta_T, double elevation,
+	double focus, double cam_pixSize,//焦距 相元大小
+	double cam_rotAnglex, double cam_rotAngley, double cam_rotAnglez,//相机安装角度
+	double heliopoint_x, double heliopoint_y, double heliopoint_z,//定日镜坐标
+	double aimpoint_x, double aimpoint_y, double aim_point_z,//指向点坐标
+	double aimpoint1_x, double aimpoint1_y, double aim_point1_z,//指向点坐标
+	double Coef1, double Coef2, double Coef3, double Coef4,//矫正系数
+	int viewAnglev, int viewAngleh,//行列
+	double cam_viewAngle_h, double cam_viewAngle_v
+)
+{
+	Vector3f b(heliopoint_x, heliopoint_y, heliopoint_z);
+	cout << "b" << endl << b << endl;
+	Vector3f c1(aimpoint_x, aimpoint_y, aim_point_z);
+	cout << "c1" << endl << c1 << endl;
+	Vector3f c2(aimpoint1_x, aimpoint1_y, aim_point1_z);
+	cout << "c2" << endl << c2 << endl;
+
+	Vector3f d;
+	//T4参数表获得
+	Vector3f e(cam_rotAnglex, cam_rotAngley, cam_rotAnglez);
+	cout << "e" << endl << e << endl;
+	Vector2f f(focus, focus);//焦距 
+	cout << "f" << endl << f << endl;
+
+	Vector2f g(viewAnglev, viewAngleh);
+	cout << "g" << endl << g << endl;
+	Vector2f h(cam_viewAngle_h, cam_viewAngle_v);
+	cout << "h" << endl << h << endl;
+	Vector4f MappingCoefficients(Coef1, Coef2, Coef3, Coef4);
+	cout << "MappingCoefficients" << endl << MappingCoefficients << endl;
 
 
+	Vector2f angle;
+	Vector2i  ZR;
+	auto ret = make_shared< vector < SUNPOS> >();
 
+	for (int hour = startHour; hour < endHour; hour++) {
+		for (int min = 0; min < 60; min++) {
+			for (int sec = 0; sec < 60; sec += 5) {
+				SUNPOS tmppos;
+				tmppos.tt = hour * 3600 + min * 60 + sec;
 
+				SP(year, mon, day, hour, min, sec, delta_T, longti, lati, elevation, pressure, temperature, angle);
+				Vector2f angle2 = angle;
 
+				d = calSunRayIn(angle, b, c1, 15);
+				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients);
 
+				tmppos.ZR_u = ZR[0];
+				tmppos.ZR_v = ZR[1];
+
+				d = calSunRayIn(angle2, b, c2, 15);
+				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients);
+
+				tmppos.SD_u = ZR[0];
+				tmppos.SD_v = ZR[1];
+
+				ret->emplace_back(tmppos);
+			}
+		}
+	}
+	return ret;
+}
 
 
 
