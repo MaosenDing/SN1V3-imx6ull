@@ -512,7 +512,6 @@ MAIN_CMD cmd_group[] = {
 	{"loopcap",loopcap},
 	{"pro",processTest},
 	{"pro2",processTest2},
-	{"pos",testsunpos},
 	{"table",createTable},
 };
 

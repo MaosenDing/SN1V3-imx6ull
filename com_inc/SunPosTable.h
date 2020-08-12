@@ -15,6 +15,11 @@ struct SUNPOS{
 	double SD_v;
 	double SD_At;
 	double SD_Az;
+
+	double a0;
+	double a1;
+	double a2;
+	double a3;
 };
 
 

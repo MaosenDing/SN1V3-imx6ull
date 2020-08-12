@@ -12,7 +12,7 @@ using namespace std;
 void SP(double Year, double Month, double Day, double Hour, double Minute, double Second, double Delta_T, double  longitude, double latitude, double E, double P, double T,Vector2f & ret);
 
 
-Vector3f calSunRayIn(Vector2f & sunAngle,Vector3f & helioPoint,Vector3f & aimPoint,float T)
+Vector3f calSunRayIn(Vector2f & sunAngle,Vector3f & helioPoint,Vector3f & aimPoint,float T, Vector2f & Helio_angle)
 {
 /*	
 # 函数：计算太阳的三维入射矢量
@@ -38,6 +38,13 @@ Vector3f calSunRayIn(Vector2f & sunAngle,Vector3f & helioPoint,Vector3f & aimPoi
 
 	float Az_ZR = atan2(Normal_f_ZR[1], Normal_f_ZR[0]);
 	float At_ZR = PI / 2 - asin(Normal_f_ZR[2]);
+
+
+	float helio_Az = Az_ZR / PI * 180; //方位角，角度
+	float helio_At = At_ZR / PI * 180; //俯仰角，角度
+	Helio_angle << helio_Az, helio_At;//方位角，俯仰角
+
+
 
 	Matrix3f Ry_ZR;
 	Ry_ZR << cos(At_ZR), 0, sin(At_ZR), 0, 1, 0, -sin(At_ZR), 0, cos(At_ZR);
@@ -175,65 +182,6 @@ Vector2i calSunImgPoint(Vector3f RayIn,Vector3f cam_rotAngle,Vector2f cam_Length
 	return out;
 }
 
-	//测试主要函数
-#if 0
-int testsunpos(int argc,char* argv[])
-{
-	Vector3f b(1, 2, 3);
-	Vector3f c(3,4,5);
-	Vector3f d;
-	//T4参数表获得
-	Vector3f e(-1 / PI * 180, 1 / PI * 180, 1 / PI * 180);
-	Vector2f f(1.37e-3, 1.37e-3);//焦距 
-	Vector2f g(1080, 1920);
-	Vector2f h(150, 75);
-
-	Vector4f MappingCoefficients(-0.032804, 0.014267, -0.031747, 0.015501);
-
-
-	for (size_t i = 0; i < 100; i++) {
-		auto start = std::chrono::system_clock::now();
-
-
-		Vector2f angle;
-		angle = SP(2020, 7, 27, 6, 1, 20, 70, 121.506, 31.088, 14, 1014, 17);
-		//angle 太阳高度角  方位角
-		//b 定日镜坐标
-		//c1 指向点坐标1 c2 指向点坐标1
-		//15 开场角度
-		d1 = calSunRayIn(angle, b, c1, 15);
-		d2 = calSunRayIn(angle, b, c2, 15);
-		//太阳入射矢量 xyz
-
-/*
-#函数：计算入射矢量在相机平面上的成像点坐标：cam_Imgxy=[x,y](列，行),单位像素
-#输入：（1）入射矢量：RayIn=[x,y,z],三维矢量，3行1列
-#     （2）相机自身旋转角度：cam_rotAngle=[Z1,y1,Z2],1行3列，[自旋角，俯仰角，方位角]，
-#            先绕Z轴自旋，后绕Y轴转俯仰，最后绕Z轴转方位，单位角度
-#     （3）相机焦距：cam_Length=[fx,fy],fx和fy表示列行方向焦距，单位米
-#     （4）像元尺寸：cam_pixSize ,单位米
-#     （5）图像大小：cam_imgSize=[行，列]，单位像素
-#     （6）相机视角大小：[水平最大视角，垂直最大视角]，单位角度
-#     （7）鱼眼相机的旋转参数：FisheyeImgRointR=[k1,k2,k3,k4],1行4列
-#输出：入射矢量在相机平面中的像素坐标：cam_imgXY=[x,y](列，行),单位像素
-#报错：（1）错误：[3001,3001]-->太阳高度角小于T度,当发生时候跳入下一次计算
-#     （2）错误：[3002,3002]-->目标超出相机视场
-#     （3）错误：[3003,3003]-->目标超出图像大小
-*/
-		Vector2i  ZR = calSunImgPoint(d1, e, f, 2.8e-6, g, h, MappingCoefficients);
-		Vector2i  DR = calSunImgPoint(d2, e, f, 2.8e-6, g, h, MappingCoefficients);
-		auto end = std::chrono::system_clock::now();
-		cout << std::chrono::duration_cast<std::chrono::duration<float>>(end - start).count() << endl;
-	}
-
-	//std::cout << angle << std::endl;
-	//std::cout << "-----------------" << std::endl;
-	//std::cout << pp << std::endl;
-
-
-	return 0;
-}
-#endif
 
 shared_ptr< vector < SUNPOS> > GenerateSunTable(
 	int year, int mon, int day, int startHour, int endHour,
@@ -284,22 +232,49 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 				SP(year, mon, day, hour, min, sec, delta_T, longti, lati, elevation, pressure, temperature, angle);
 				Vector2f angle2 = angle;
 
-				d = calSunRayIn(angle, b, c1, 15);
+				Vector2f Helio_angle0;
+				d = calSunRayIn(angle, b, c1, 15, Helio_angle0);
 				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients);
+
 
 				tmppos.ZR_u = ZR[0];
 				tmppos.ZR_v = ZR[1];
+				tmppos.a0 = Helio_angle0[0];
+				tmppos.a1 = Helio_angle0[1];
 
-				d = calSunRayIn(angle2, b, c2, 15);
+				Vector2f Helio_angle1;
+				d = calSunRayIn(angle2, b, c2, 15, Helio_angle1);
 				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients);
 
 				tmppos.SD_u = ZR[0];
 				tmppos.SD_v = ZR[1];
+				tmppos.a2 = Helio_angle1[0];
+				tmppos.a3 = Helio_angle1[1];
+
 
 				ret->emplace_back(tmppos);
 			}
 		}
 	}
+
+
+	vector<SUNPOS> & grp = *ret;
+	if (grp.size()) {
+		grp[0].ZR_At = 0;
+		grp[0].ZR_Az = 0;
+		grp[0].SD_At = 0;
+		grp[0].SD_Az = 0;
+		for (size_t i = 1; i < grp.size(); i++) {
+			SUNPOS & pre = grp[i - 1];
+			SUNPOS & itr = grp[i];
+
+			itr.ZR_At = itr.a1 - pre.a1;
+			itr.ZR_Az = itr.a0 - pre.a0;
+			itr.SD_At = itr.a3 - pre.a3;
+			itr.SD_Az = itr.a2 - pre.a2;
+		}
+	}
+
 	return ret;
 }
 

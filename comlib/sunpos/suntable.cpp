@@ -30,7 +30,7 @@ int createTable(int argc, char* argv[])
 
 	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(2020, 8, 12, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
 		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4, tg_table.T6.SN1_P3,
-		tg_table.T6.cam_rotAnglex,tg_table.T6.cam_rotAngley,tg_table.T6.cam_rotAnglez,		
+		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
 		tg_table.T1.AimPointX1, tg_table.T1.AimPointY1, tg_table.T1.AimPointZ1,
 		tg_table.T1.AimPointX2, tg_table.T1.AimPointY2, tg_table.T1.AimPointZ2,
@@ -38,26 +38,25 @@ int createTable(int argc, char* argv[])
 		tg_table.T6.SN1_P1, tg_table.T6.SN1_P2,
 		tg_table.T6.cam_viewAngleh, tg_table.T6.cam_viewAnglev);
 
-	ofstream filout("1.txt",ios::trunc);
+	ofstream filout("1.txt", ios::trunc);
 
 	char buff[256];
 
-	for (auto & point : *tab )
-	{
+	for (auto & point : *tab) {
 		int hour = point.tt / 3600;
 		int min = point.tt / 60 % 60;
 		int sec = point.tt % 60;
 
-		int size = snprintf(buff, 256, "%d:%d:%d,%f,%f,%f,%f\n",
-			hour,min,sec,
+		int size = snprintf(buff, 256,
+			"%02d:%02d:%02d,%f,%f,%f,%f"
+			",%f,%f,%f,%f"
+			"\n",
+			hour, min, sec,
 			point.ZR_u, point.ZR_v, point.SD_u, point.SD_v
-			//point.ZR_At, point.ZR_Az, point.SD_At, point.SD_Az
+			, point.ZR_At, point.ZR_Az, point.SD_At, point.SD_Az
 		);
 		filout.write(buff, size);
 	}
-
-
-	printf("size = %d\n", tab->size());
 
 	return 0;
 }
