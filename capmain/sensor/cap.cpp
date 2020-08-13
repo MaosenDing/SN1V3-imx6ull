@@ -52,7 +52,7 @@ int rgb565_to_jpeg(unsigned char * rgbst, int pwidth, int pheigth, int fname)
 
 	return 0;
 }
-
+ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth);
 ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 	, const int horizenFlip, const int VeriFlip
 )
@@ -69,17 +69,17 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 	if (ret < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_set);
 	}
-	int i = 0;
-	while (true) {
+	for (int i = 0; i < 1000; i++) {
+		TimeInterval tim("once:");
 		shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
 
-		char name[64];
+		//char name[64];
 
-		snprintf(name, 64, "/home/cap/test%d.jpg", i++);
+		//snprintf(name, 64, "/home/cap/test%d.jpg", i++);
 
-		if (fram && fram->useFlag) {
-			SaveRGB565Jpg(name, fram->startAddr, 1600, 1200);
-		}
+		//if (fram && fram->useFlag) {
+		//	SaveyuyvJpg(name, fram->startAddr, 1920, 1080);
+		//}
 	}
 }
 

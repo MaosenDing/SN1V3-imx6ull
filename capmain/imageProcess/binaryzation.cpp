@@ -213,13 +213,11 @@ void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 
 void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 {
+	uint8x8x2_t dat = vld2_u8((uint8_t *)srcdata);
+
+	uint8x8x2_t ret = vtrn_u8(dat.val[0], dat.val[1]);
 	
-
-	int16x8_t dat = vld1q_s16((int16_t *)srcdata);
-
-	uint8x8_t ret = vqmovun_s16(dat);
-
-	vst1_u8(dst, ret);
+	vst2_u8(dst, ret);
 }
 
 
@@ -525,6 +523,81 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 		rgb_buf += 32;
 	}
 }
+
+void YUV422ToRGB888(const void* inbuf, void* outbuf, int width, int height)
+{
+	unsigned char *yuv_buf;
+	unsigned char *rgb_buf;
+
+	yuv_buf = (unsigned char *)inbuf;
+	rgb_buf = (unsigned char *)outbuf;
+
+	const int16x8_t const_128 = vdupq_n_s16(128);
+
+	const uint8x8_t const_8 = vdup_n_u8(8);
+
+	int16_t dat[4] = { 88,198,103,183 };
+
+	int16x4_t const_dat = vld1_s16(dat);
+
+	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
+		uint8x8x4_t yuv = vld4_u8(yuv_buf);
+
+		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
+		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
+
+		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
+		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
+
+		int16x8_t rcfg = vshrq_n_s16(vmulq_lane_s16(v, const_dat, 2), 8);
+		rcfg = vaddq_s16(rcfg, v);
+
+		int16x8_t gtmp0 = vmulq_lane_s16(u, const_dat, 0);
+		int16x8_t gtmp1 = vmulq_lane_s16(v, const_dat, 3);
+
+		int16x8_t gcfg = vshrq_n_s16(vaddq_s16(gtmp0, gtmp1), 8);
+
+		int16x8_t bcfg = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
+		bcfg = vaddq_s16(bcfg, u);
+
+		int16x8_t rtmp00 = vaddq_s16(y0, rcfg);
+		uint8x8_t r0 = vqmovun_s16(rtmp00);
+		int16x8_t gtmp00 = vsubq_s16(y0, gcfg);
+		uint8x8_t g0 = vqmovun_s16(gtmp00);
+		int16x8_t btmp00 = vaddq_s16(y0, bcfg);
+		uint8x8_t b0 = vqmovun_s16(btmp00);
+
+
+		int16x8_t rtmp10 = vaddq_s16(y1, rcfg);
+		uint8x8_t r1 = vqmovun_s16(rtmp10);
+		int16x8_t gtmp10 = vsubq_s16(y1, gcfg);
+		uint8x8_t g1 = vqmovun_s16(gtmp10);
+		int16x8_t btmp10 = vaddq_s16(y1, bcfg);
+		uint8x8_t b1 = vqmovun_s16(btmp10);
+		//交叉字节
+		uint8x8x2_t p0 = vzip_u8(r0, r1);
+		uint8x8x2_t p1 = vzip_u8(g0, g1);
+		uint8x8x2_t p2 = vzip_u8(b0, b1);
+
+		uint8x8x3_t ret0;
+		uint8x8x3_t ret1;
+
+		ret0.val[0] = p0.val[0];
+		ret0.val[1] = p1.val[0];
+		ret0.val[2] = p2.val[0];
+		ret1.val[0] = p0.val[1];
+		ret1.val[1] = p1.val[1];
+		ret1.val[2] = p2.val[1];
+
+		vst3_u8(rgb_buf, ret0);
+		vst3_u8(rgb_buf + 24, ret1);
+
+		yuv_buf += 32;
+		rgb_buf += 48;
+	}
+}
+
+
 
 void YUV422ToGray_B(const void* inbuf, void* outbuf, int width, int height)
 {

@@ -74,17 +74,17 @@ int init_cap(const char * videoName)
 
 	//////
 	struct v4l2_requestbuffers req;
-	req.count = 1;
+	req.count = 3;
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_MMAP;
 	if (-1 == ioctl(fd, VIDIOC_REQBUFS, &req)) {
 		printf("VIDIOC_REQBUFS set error \n");
 	}
 
-	//if (req.count < 2) {
-	//	printf("Insufficient buffer memory \n");
-	//	exit(EXIT_FAILURE);
-	//}
+	if (req.count < 2) {
+		printf("Insufficient buffer memory \n");
+		exit(EXIT_FAILURE);
+	}
 
 	unsigned int n_buffers = 0;
 	for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
@@ -109,7 +109,7 @@ int init_cap(const char * videoName)
 	////
 	unsigned int i;
 	enum v4l2_buf_type type;
-	for (i = 0; i < 1; i++) {
+	for (i = 0; i < 3; i++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;

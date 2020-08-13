@@ -130,8 +130,63 @@ ERR_STA SaveRGB565Jpg(char * fName, unsigned char * rgb565, int width, int heigt
 		return (err_ok);
 	}
 }
+void YUV422ToRGB888(const void* inbuf, void* outbuf, int width, int height);
+ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth)
+{
+	FILE * outfile = nullptr;
+	outfile = fopen(fName, "wb");
+
+	vector<unsigned char > data;
+	try {
+		data.resize(width* heigth * 3);
+	} catch (std::bad_alloc &bd) {
+		fprintf(stderr, "len = %fm\n", width* heigth * 3 / 1024.0 / 1024.0);
+		SN1V2_ERROR_CODE_RET(err_out_of_memory);
+	}
+
+	unsigned long len = width * heigth * 3;
+	YUV422ToRGB888(yuyv, &data[0], width, heigth);
+
+	if (outfile == nullptr) {
+		cout << "open file " << fName << " fail" << endl;
+		SN1V2_ERROR_CODE_RET(err_cannot_open_file);
+	} else {
+		shared_ptr<FILE> fil(outfile, fclose);
+		jpeg_compress_struct jcs;
+		jpeg_error_mgr jerr;
+
+		JSAMPROW row_point[1];
+		//int row_stride;
+
+		jcs.err = jpeg_std_error(&jerr);
+		jpeg_create_compress(&jcs);
+		jpeg_stdio_dest(&jcs, fil.get());
 
 
+		jcs.image_width = width;
+		jcs.image_height = heigth;
+		jcs.input_components = 3;
+		jcs.in_color_space = JCS_RGB;
+
+		jpeg_set_defaults(&jcs);
+		jpeg_set_quality(&jcs, 80, boolean::TRUE);
+		jpeg_start_compress(&jcs, boolean::TRUE);
+#if 1
+		for (int i = 0; i < heigth; i++) {
+			//row_point[0] = &regImg.at(0, i);
+			row_point[0] = &data[i * width * 3];
+			jpeg_write_scanlines(&jcs, row_point, 1);
+		}
+#else
+		row_point[0] = &regImg.at(0, 0);
+		jpeg_write_scanlines(&jcs, row_point, heigth);
+#endif
+
+		jpeg_finish_compress(&jcs);
+		jpeg_destroy_compress(&jcs);
+		return (err_ok);
+	}
+}
 ERR_STA SaveRGB565Jpg(char * fName, IMAGEDATA & regImg)
 {
 	if (regImg.itype != IT_RGB565)

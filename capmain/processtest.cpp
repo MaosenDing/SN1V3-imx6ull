@@ -73,17 +73,33 @@ int processTest(int argc, char * argv[])
 	return 0;
 }
 void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
+
+
+struct tesppp {
+	int i;
+	~tesppp()
+	{
+		printf("%d destruction\n", i);
+	}
+};
+
+void testthread(shared_ptr<tesppp> p ,int index)
+{
+	p->i = index;
+	printf("get index = %d\n", index);
+}
+
+
+
 int processTest2(int argc, char * argv[])
 {
 #define NUM (32)
-	int16_t test[NUM] = {-4000,0,127,128,4000};
+	uint8_t test[NUM];
 	uint8_t out[NUM];
 
-
-
-	//for (int in = 0; in < NUM; in++) {
-	//	test[in] = in;
-	//}
+	for (int in = 0; in < NUM; in++) {
+		test[in] = in;
+	}
 
 
 	void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
@@ -92,6 +108,15 @@ int processTest2(int argc, char * argv[])
 	for (size_t i = 0; i < NUM; i++) {
 		printf("index %d = %d\n",i,out[i]);
 	}
+
+	for (size_t i = 0; i < 2; i++) {
+		auto p = make_shared<tesppp>();
+		thread ppp(testthread, move(p), i);
+		ppp.detach();
+	}
+
+	sleep(10);
+
 	return 0;
 }
 
