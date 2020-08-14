@@ -683,7 +683,7 @@ void YUV422ToGray_G(const void* inbuf, void* outbuf, int width, int height)
 		int16x8_t gtmp10 = vsubq_s16(y1, gcfg);
 		uint8x8_t g1 = vqmovun_s16(gtmp10);
 
-		ret.val[0] = g1;
+		ret.val[1] = g1;
 		vst2_u8(rgb_buf, ret);
 
 		yuv_buf += 32;
@@ -736,7 +736,6 @@ void YUV422ToGray_R(const void* inbuf, void* outbuf, int width, int height)
 		rgb_buf += 16;
 	}
 }
-
 
 void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int flg)
 {

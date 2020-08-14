@@ -52,7 +52,26 @@ int rgb565_to_jpeg(unsigned char * rgbst, int pwidth, int pheigth, int fname)
 
 	return 0;
 }
+#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/pool/pool.hpp>
+
+boost::pool<> mempl(2 * 1920 * 1080);
+
 ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth);
+void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height);
+void compress(void * p, int i)
+{
+	//TimeInterval tim("compress:");
+	char name[64];
+	snprintf(name, 64, "/tmp/cap/test%d.jpg", i% 10);
+	SaveyuyvJpg(name, (unsigned char *)p, 1920, 1080);
+	mempl.free(p);
+}
+
+
+
+
 ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 	, const int horizenFlip, const int VeriFlip
 )
@@ -69,21 +88,27 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 	if (ret < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_set);
 	}
-	for (int i = 0; i < 1000; i++) {
+	boost::asio::thread_pool pool(10);
+
+	for (int i = 0; i < 10000000000; i++) {
 		TimeInterval tim("once:");
 		shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
-
-		//char name[64];
-
-		//snprintf(name, 64, "/home/cap/test%d.jpg", i++);
-
-		//if (fram && fram->useFlag) {
-		//	SaveyuyvJpg(name, fram->startAddr, 1920, 1080);
-		//}
+		if (fram && fram->useFlag) {
+			TimeInterval tim("pp:");
+			void *p = mempl.malloc();
+			if (p) {
+				if (fram && fram->useFlag) {
+					TimeInterval tim("pp2:");
+					memcpy(p, fram->startAddr, fram->length);
+					fram.reset();
+					boost::asio::post(pool, bind(compress, p, i));
+				}
+			}
+		}
 	}
 }
 
-void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height);
+
 
 
 void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
@@ -101,11 +126,6 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 
 	if (ret < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_set);
-	}
-
-	{
-		//auto p0 = get_one_frame(video_fd);
-		//auto p1 = get_one_frame(video_fd);
 	}
 
 	shared_ptr< CAP_FRAME> fram;
@@ -143,5 +163,47 @@ int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFl
 	return -1;
 }
 
+void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int flg);
+ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg, int width, int heigth);
+ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int gain, const unsigned int expo
+	, const int horizenFlip, const int VeriFlip,char * savename
+)
+{
+	ERR_STA err;
 
+	if (video_fd < 0) {
+		SN1V2_ERROR_CODE_RET(err_sensor_open);
+	}
+	int ret = set_gain_expose(video_fd, gain, expo);
+
+	if (ret < 0) {
+		SN1V2_ERROR_CODE_RET(err_sensor_set);
+	}
+
+	shared_ptr< CAP_FRAME> fram;
+	{
+		TimeInterval ppp2("CAP_FRAME:");
+		fram = get_one_frame(video_fd);
+	}
+
+
+	if (fram && fram->useFlag) {
+#if 1
+		TimeInterval ppp2("gray:");
+		if (savename) {
+			unsigned char * buff = (unsigned char *)malloc(1920 * 1080 * 2);
+			YUV422ToRGB565(fram->startAddr, buff, 1920, 1080);
+			SaveRGB565Jpg(savename, buff, 1920, 1080);
+			free(buff);
+		}
+#endif
+		{
+			TimeInterval ppp2("gray22222:");
+			YUV422ToGray(fram->startAddr, graybuff, 1920, 1080, 3);
+		}
+		return err_ok;
+	}
+
+	SN1V2_ERROR_CODE_RET(err_sensor_catch);
+}
 

@@ -94,7 +94,10 @@ ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT 
 	, const int horFlip, const int VerFlip
 );
 
-
+ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
+	, const int horFlip, const int VerFlip
+);
 static int capOnce(int argc, char * argv[])
 {
 	cout << "table generate" << endl;
@@ -138,7 +141,7 @@ static int capOnce(int argc, char * argv[])
 			cfg.FLAG_SAVE_BIN = 1;
 			cfg.FLAG_SAVE_ORG = 1;
 		}
-		capWork dw(capOnce, cfg, nullptr, testCSC, &ImageCapRGB);
+		capWork dw(capOnce, cfg, nullptr, testCSC, &ImageCap);
 		dw.test_for_cap_once = 1;
 
 		//sleep(5);
@@ -482,7 +485,7 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 static int loopcap(int argc, char * argv[])
 {
 	int gain = 20;
-	int expose = 100;
+	int expose = 200;
 	if (argc >= 3) {
 		gain = atoi(argv[2]);
 		expose = atoi(argv[3]);

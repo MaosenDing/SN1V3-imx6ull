@@ -83,6 +83,9 @@ struct tesppp {
 	}
 };
 
+#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/post.hpp>
+
 void testthread(shared_ptr<tesppp> p ,int index)
 {
 	p->i = index;
@@ -108,11 +111,13 @@ int processTest2(int argc, char * argv[])
 	for (size_t i = 0; i < NUM; i++) {
 		printf("index %d = %d\n",i,out[i]);
 	}
-
-	for (size_t i = 0; i < 2; i++) {
+	boost::asio::thread_pool pool(10);
+	
+	for (size_t i = 0; i < 10; i++) {		
 		auto p = make_shared<tesppp>();
-		thread ppp(testthread, move(p), i);
-		ppp.detach();
+		boost::asio::post(pool, bind(testthread, p, i));
+		boost::asio::post(pool, bind(testthread, p, i+100));
+		sleep(1);
 	}
 
 	sleep(10);

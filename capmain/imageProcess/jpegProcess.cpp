@@ -64,6 +64,53 @@ ERR_STA SaveGRAYJpg(char * fName, IMAGEDATA & regImg)
 	}
 }
 
+ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg,int width,int heigth)
+{
+	//struct jpeg_common_struct
+	FILE * outfile = nullptr;
+	outfile = fopen(fName, "wb");
+
+	if (outfile == nullptr) {
+		cout << "open file " << fName << " fail" << endl;
+		SN1V2_ERROR_CODE_RET(err_cannot_open_file);
+	} else {
+		shared_ptr<FILE> fil(outfile, fclose);
+		jpeg_compress_struct jcs;
+		jpeg_error_mgr jerr;
+
+		JSAMPROW row_point[1];
+		//int row_stride;
+
+		jcs.err = jpeg_std_error(&jerr);
+		jpeg_create_compress(&jcs);
+		jpeg_stdio_dest(&jcs, fil.get());
+
+
+		jcs.image_width = width;
+		jcs.image_height = heigth;
+		jcs.input_components = 1;
+		jcs.in_color_space = JCS_GRAYSCALE;
+
+		jpeg_set_defaults(&jcs);
+		jpeg_set_quality(&jcs, 80, boolean::TRUE);
+		jpeg_start_compress(&jcs, boolean::TRUE);
+#if 1
+		for (int i = 0; i < heigth; i++) {
+			row_point[0] = &regImg[width * i];
+			jpeg_write_scanlines(&jcs, row_point, 1);
+		}
+#else
+		row_point[0] = &regImg.at(0, 0);
+		jpeg_write_scanlines(&jcs, row_point, heigth);
+#endif
+
+		jpeg_finish_compress(&jcs);
+		jpeg_destroy_compress(&jcs);
+		return (err_ok);
+	}
+}
+
+
 extern "C" bool rgb565_to_rgb888(unsigned char * psrc, unsigned char * pdst, int width, int height, unsigned long *len);
 
 ERR_STA SaveRGB565Jpg(char * fName, unsigned char * rgb565, int width, int heigth)

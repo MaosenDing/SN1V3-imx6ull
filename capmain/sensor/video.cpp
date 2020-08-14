@@ -29,7 +29,8 @@ struct buffer {
 	void *start;
 	unsigned int length;
 };
-buffer buffers[3];
+#define REQ_BUFF_NUM (10)
+buffer buffers[REQ_BUFF_NUM];
 
 int init_cap(const char * videoName)
 {
@@ -66,7 +67,7 @@ int init_cap(const char * videoName)
 	fmt.fmt.pix.width = WIDTH_INIT;
 	fmt.fmt.pix.height = HEIGTH_INIT;
 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
-
+	//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 	if (-1 == ioctl(fd, VIDIOC_S_FMT, &fmt)) {
 		printf("VIDIOC_S_FMT set error \n");
@@ -74,7 +75,7 @@ int init_cap(const char * videoName)
 
 	//////
 	struct v4l2_requestbuffers req;
-	req.count = 3;
+	req.count = REQ_BUFF_NUM;
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	req.memory = V4L2_MEMORY_MMAP;
 	if (-1 == ioctl(fd, VIDIOC_REQBUFS, &req)) {
@@ -109,7 +110,7 @@ int init_cap(const char * videoName)
 	////
 	unsigned int i;
 	enum v4l2_buf_type type;
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < REQ_BUFF_NUM; i++) {
 		struct v4l2_buffer buf;
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
@@ -204,7 +205,8 @@ shared_ptr< CAP_FRAME> get_one_frame(int fd)
 	ret->heigth = HEIGTH_INIT;
 	ret->width = WIDTH_INIT;
 	ret->startAddr = (unsigned char*)buffers[buf.index].start;
-	ret->length = buf.length;
+	//ret->length = buf.length;
+	ret->length = buf.bytesused;
 	ret->useFlag = 1;
 
 	return ret;

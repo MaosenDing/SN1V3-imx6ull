@@ -658,7 +658,43 @@ ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg,
 	return err;
 }
 
+ERR_STA ImageProcessGRAY(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer, bool BINjpgSaveFlag = true, unsigned int MinCntGrp = 50)
+{
+	TIME_INTERVAL_SCOPE("ImageProcessGRAY:");
 
+	ERR_STA err = err_ok;
+	int pixcnt = inputSize ;
+	//制作二值化图片
+	shared_ptr<IMAGEDATA> BinImage = make_shared<IMAGEDATA>();
+	{
+		BinImage->Image_data = LoadImg.get();
+		BinImage->left = 0;
+		BinImage->right = width;
+		BinImage->top = 0;
+		BinImage->bottom = height;
+		BinImage->byte_per_pix = 1;
+		BinImage->itype = IT_BIN_ONE_BYTE;;
+		{
+			TIME_INTERVAL_SCOPE("bin operator:");
+			err = BinaImg(LoadImg.get(), pixcnt, thres, thresPer);
+		}
+	}
+
+	if (err == err_ok && BINjpgSaveFlag == true) {
+		auto start = chrono::system_clock::now();
+		SaveGRAYJpg((char *)saveName, *BinImage);
+		auto tim = std::chrono::duration_cast<std::chrono::duration<float>>(chrono::system_clock::now() - start).count();
+		LOG_IF(WARNING, tim > 1) << "jpg compress&save:" << tim << "S";
+	}
+
+
+	if (err == err_ok) 
+	{
+		TIME_INTERVAL_SCOPE("image process operator:");
+		err = BinProcess(*BinImage, res, MinCntGrp);
+	}
+	return err;
+}
 
 #include <sys/stat.h>
 
@@ -709,6 +745,8 @@ ERR_STA ImageTestRGBFile(const char * fName, const char * srcPath, const char * 
 
 ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gain, const unsigned int expo
 	, const int horizenFlip, const int VeriFlip);
+
+
 ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
 	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
 	, const int horflip, const int verFlip
@@ -742,6 +780,45 @@ ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT 
 			}
 
 			return ImageProcessRGB(FnameBuff, std::move(ppp), imgSize, width, height, res, thres, thresPer, BINjpgSaveFlag, MinCntGrp);
+		}
+	} catch (std::bad_alloc & bd) {
+		return	err_out_of_memory;
+	}
+	return err_UNKNOWN;
+}
+
+ERR_STA cap_once_gray(unsigned char * rgb565buff, int &insize, const unsigned int gain, const unsigned int expo
+	, const int horizenFlip, const int VeriFlip, char * savename);
+
+ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
+	, const int horflip, const int verFlip
+)
+{
+	ERR_STA err;
+	int imgSize = width * height;
+
+	try {
+		shared_ptr<unsigned char >ppp(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
+
+		res.timGetImg = time(nullptr);
+
+		char FnameBuff[64];
+
+		tm reftime;
+		localtime_r(&res.timGetImg, &reftime);
+		sprintf(FnameBuff, "%s/%02d-%02d-%02d.jpg", dstPath, reftime.tm_hour, reftime.tm_min, reftime.tm_sec);
+		char ORGBUFF[64] = {0};
+		if (ORGjpgSaveFlag == true) {
+			snprintf(ORGBUFF, 64, "%s.org.jpeg", FnameBuff);
+		}
+
+		if ((err = cap_once_gray(ppp.get(), imgSize, gain, expo, horflip, verFlip, ORGBUFF)) != err_ok) {
+			LOG(ERROR) << "cap error code = " << (int)err;
+			return err;
+		} else {
+			sprintf(FnameBuff, "%s/%02d-%02d-%02d.jpg", dstPath, reftime.tm_hour, reftime.tm_min, reftime.tm_sec);
+			return ImageProcessGRAY(FnameBuff, std::move(ppp), imgSize, width, height, res, thres, thresPer, BINjpgSaveFlag, MinCntGrp);
 		}
 	} catch (std::bad_alloc & bd) {
 		return	err_out_of_memory;
