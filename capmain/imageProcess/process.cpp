@@ -496,25 +496,25 @@ enum error_bound {
 
 static void fixBound(IMAGEDATA & inImage, error_bound er, int &left, int &right, int& top, int &bottom)
 {
-	if (er && bound_top) {
+	if (er & bound_top) {
 		for (int i = 0; i < inImage.right; i++) {
 			inImage.at(i, top) = 0;
 		}
 		top += 1;
 	}
-	if (er && bound_bottom) {
+	if (er & bound_bottom) {
 		for (int i = 0; i < inImage.right; i++) {
 			inImage.at(i, bottom) = 0;
 		}
 		bottom -= 1;
 	}
-	if (er && bound_left) {
+	if (er & bound_left) {
 		for (int i = 0; i < inImage.bottom; i++) {
 			inImage.at(left, i) = 0;
 		}
 		left += 1;
 	}
-	if (er && bound_right) {
+	if (er & bound_right) {
 		for (int i = 0; i < inImage.bottom; i++) {
 			inImage.at(right, i) = 0;
 		}
@@ -529,7 +529,7 @@ static error_bound check_bound(IMAGEDATA & inImage, int top, int bottom, int lef
 		boudf |= bound_top;
 	}
 
-	if (bottom >= inImage.bottom) {
+	if (bottom >= (inImage.bottom - 1)) {
 		boudf |= bound_bottom;
 	}
 
@@ -537,7 +537,7 @@ static error_bound check_bound(IMAGEDATA & inImage, int top, int bottom, int lef
 		boudf |= bound_left;
 	}
 
-	if (right >= inImage.right) {
+	if (right >= (inImage.right - 1)) {
 		boudf |= bound_right;
 	}
 	return (error_bound)boudf;
@@ -562,7 +562,7 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 		int clone_top = top - 1;
 		int clone_width = right - left + 1 + 2;
 		int clone_heigth = bottom - top + 1 + 2;
-		
+
 		err = inImage.clone(clone_left, clone_top, clone_width, clone_heigth, processImage);
 
 		if (err != err_ok) {
@@ -813,7 +813,7 @@ ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & r
 			snprintf(ORGBUFF, 64, "%s.org.jpeg", FnameBuff);
 		}
 
-		if ((err = cap_once_gray(ppp.get(), imgSize, gain, expo, horflip, verFlip, ORGBUFF)) != err_ok) {
+		if ((err = cap_once_gray(ppp.get(), imgSize, gain, expo, horflip, verFlip, 0)) != err_ok) {
 			LOG(ERROR) << "cap error code = " << (int)err;
 			return err;
 		} else {

@@ -77,6 +77,7 @@ ERR_STA IMAGEDATA::clone(int x, int y, int width, int height, std::shared_ptr<IM
 	if (inright > this->right || inDown > this->bottom || x < 0 || y < 0)
 	{
 		SN1V2_WARN_LOG("init x = %d,y = %d,width = %d, height = %d", x, y, width, height);
+		SN1V2_WARN_LOG("%d,%d,%d,%d", inright, this->right, inDown, this->bottom);
 		SN1V2_WARN_CODE_RET(err_Inval_image);
 	}
 

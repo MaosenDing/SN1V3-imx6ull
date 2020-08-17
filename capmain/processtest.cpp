@@ -125,14 +125,101 @@ int processTest2(int argc, char * argv[])
 	return 0;
 }
 
-#include <syslog.h>
+#include "SunPosTable.h"
+#include "sn1v3cfg.h"
+#include "tableWork.h"
+#include "configOperator.h"
+
+ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
+	, const int horflip, const int verFlip
+);
+
+int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> & tab, SUNPOS & retcfg);
+int createTable(int argc, char* argv[]);
+int tableGenerate3(int argc, char * argv[])
+{
+	cout << "table generate3" << endl;
 
 
+	int ret;
+	ERR_STA err;
 
+	Tg_table tg_table;
+	scanfAllTable(tg_table, Mask_All);
 
+	logInit("aim", "./aim", google::GLOG_ERROR);
 
+	my_cap_init(10000, 20000, 0, 0);
+	time_t now = time(0);
+	tm t2;
 
+	localtime_r(&now, &t2);
 
+	const int year = t2.tm_year + 1900;
+	const int mon = t2.tm_mon + 1;
+	const int day = t2.tm_mday;
 
+	//创建拍摄暂存目录
+	char storPath[24];
+	sprintf(storPath, "%04d_%02d_%02d", year, mon, day);
+	mkdir(storPath, 0777);
+
+	//照片存储目录
+	char photoPath[24];
+#if 0
+	if (strlen(cfg.ForceSavePath)) {
+		SN1V2_ERR_LOG("force save jpeg in %s\n", cfg.ForceSavePath);
+		cfg.FLAG_SAVE_BIN = 1;
+		cfg.FLAG_SAVE_ORG = 1;
+
+		sprintf(photoPath, "%s/%04d_%02d_%02d", cfg.ForceSavePath, year, mon, day);
+		mkdir(photoPath, 0777);
+	} else
+#endif
+	{
+		strcpy(photoPath, storPath);
+	}
+	createTable(argc,argv);
+	auto tab = createTable(tg_table, year, mon, day);
+	int lastsec = 0;
+	int workflg = 1;
+	if (tab) {
+		printf("size = %d\n", tab->size());
+		while (workflg) {
+			PROCESS_RESULT res;
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, false, false, 50, 10, 100, 0, 0);
+			float x_diff = 0, y_diff = 0;
+			if (err == err_ok) {
+				x_diff = res.diff_x;
+				y_diff = res.diff_y;
+				printf("pos = %f,%f\n", res.diff_x, res.diff_y);
+			} else {
+				x_diff = 4000;
+				y_diff = 4000;
+				printf("pos = null\n");
+			}
+
+			time_t timGetImg = time(nullptr);
+			tm reftime;
+			localtime_r(&timGetImg, &reftime);
+
+			SUNPOS tabsun;
+			if (0 == find_useful_pos(reftime.tm_hour, reftime.tm_min, reftime.tm_sec, *tab, tabsun)) {
+				float zrat = 0, zraz = 0;
+				int speedat = 0, speedaz = 0;
+				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4, tg_table.T6.SN1_P4
+					, &zrat, &zraz, &speedat, &speedaz);
+				 
+				printf("conalg = %f,%f,%d,%d\n", zraz, zraz, speedat, speedaz);
+
+			} else {
+				printf("find fail\n");
+			}
+		}
+	}
+
+	return 0;
+}
 
 

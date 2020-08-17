@@ -499,6 +499,9 @@ int processTest(int argc, char * argv[]);
 int processTest2(int argc, char * argv[]);
 int testsunpos(int argc, char* argv[]);
 int createTable(int argc, char* argv[]);
+
+int tableGenerate3(int argc, char * argv[]);
+
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
@@ -507,6 +510,7 @@ MAIN_CMD cmd_group[] = {
 	{ "CREsave" ,creSaveTest},
 	{"ip",ipchange_pp},
 	{ "tableGen2" ,tableGenerate2 },
+	{ "tableGen3" ,tableGenerate3 },
 	{ "tv" , test_converter},
 	{ "deg" , degtest},
 	{"scanf",scanftest},

@@ -146,7 +146,7 @@ int set_gain_expose(int fd, int gain, int expose)
 	struct v4l2_control  Setting;
 
 	Setting.id = V4L2_CID_EXPOSURE_AUTO;
-	Setting.value = 1;
+	Setting.value = V4L2_EXPOSURE_MANUAL;
 	if (0 > ioctl(fd, VIDIOC_S_CTRL, &Setting)) {
 		printf("V4L2_CID_EXPOSURE_AUTO error = %d \n", errno);
 	}

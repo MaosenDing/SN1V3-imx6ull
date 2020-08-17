@@ -28,7 +28,7 @@ int createTable(int argc, char* argv[])
 	Tg_table tg_table;
 	scanfAllTable(tg_table, Mask_All);
 
-	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(2020, 8, 12, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
+	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(2020, 8, 17, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
 		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4, tg_table.T6.SN1_P3,
 		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
@@ -60,4 +60,47 @@ int createTable(int argc, char* argv[])
 
 	return 0;
 }
+
+shared_ptr< vector < SUNPOS > > createTable(Tg_table &tg_table,int year,int mon,int day)
+{
+	printf("createTable : year = %d ,mon = %d ,day = %d\n", year, mon, day);
+	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
+		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4, tg_table.T6.SN1_P3,
+		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
+		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
+		tg_table.T1.AimPointX1, tg_table.T1.AimPointY1, tg_table.T1.AimPointZ1,
+		tg_table.T1.AimPointX2, tg_table.T1.AimPointY2, tg_table.T1.AimPointZ2,
+		tg_table.T6.MappingCoefficients1, tg_table.T6.MappingCoefficients2, tg_table.T6.MappingCoefficients3, tg_table.T6.MappingCoefficients4,
+		tg_table.T6.SN1_P1, tg_table.T6.SN1_P2,
+		tg_table.T6.cam_viewAngleh, tg_table.T6.cam_viewAnglev);
+	return tab;
+}
+
+
+static int compare_sec(const void * a, const void * b)
+{
+	SUNPOS * suna = (SUNPOS *)a;
+	SUNPOS * sunb = (SUNPOS *)b;
+
+	return suna->tt / 5 - sunb->tt / 5;
+}
+
+int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> & tab, SUNPOS & retcfg)
+{
+	int using_sec = hour * 3600 + min * 60 + sec;
+
+	SUNPOS tmppos;
+	tmppos.tt = using_sec;
+
+	SUNPOS * ret = (SUNPOS *)bsearch(&tmppos, &tab[0], tab.size(), sizeof(SUNPOS), compare_sec);
+
+	if (ret) {
+		retcfg = *ret;
+		return 0;
+	}
+	return -1;
+}
+
+
+
 

@@ -197,27 +197,31 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 	double cam_viewAngle_h, double cam_viewAngle_v
 )
 {
+
 	Vector3f b(heliopoint_x, heliopoint_y, heliopoint_z);
-	cout << "b" << endl << b << endl;
 	Vector3f c1(aimpoint_x, aimpoint_y, aim_point_z);
-	cout << "c1" << endl << c1 << endl;
 	Vector3f c2(aimpoint1_x, aimpoint1_y, aim_point1_z);
-	cout << "c2" << endl << c2 << endl;
 
 	Vector3f d;
 	//T4参数表获得
 	Vector3f e(cam_rotAnglex, cam_rotAngley, cam_rotAnglez);
-	cout << "e" << endl << e << endl;
 	Vector2f f(focus, focus);//焦距 
-	cout << "f" << endl << f << endl;
 
 	Vector2f g(viewAnglev, viewAngleh);
-	cout << "g" << endl << g << endl;
 	Vector2f h(cam_viewAngle_h, cam_viewAngle_v);
-	cout << "h" << endl << h << endl;
 	Vector4f MappingCoefficients(Coef1, Coef2, Coef3, Coef4);
-	cout << "MappingCoefficients" << endl << MappingCoefficients << endl;
 
+#define  SHOW_PAR 0
+#if SHOW_PAR
+	cout << "b" << endl << b << endl;
+	cout << "c1" << endl << c1 << endl;
+	cout << "c2" << endl << c2 << endl;
+	cout << "e" << endl << e << endl;
+	cout << "f" << endl << f << endl;
+	cout << "g" << endl << g << endl;
+	cout << "h" << endl << h << endl;
+	cout << "MappingCoefficients" << endl << MappingCoefficients << endl;
+#endif
 
 	Vector2f angle;
 	Vector2i  ZR;
