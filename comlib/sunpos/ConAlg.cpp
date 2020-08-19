@@ -28,11 +28,12 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 		float nt = sqrt(del_x*del_x + del_y * del_y);
 		if (nt < 10)//判断像素差是否大于阈值K
 		{
-
+#if 0
 			float J11 = -q * ut*vt / fx;
 			float J12 = vt;
 			float J21 = -(fy*fy + q * q*vt*vt) / (fy*q);
 			float J22 = -ut;
+#endif
 			float JJ11 = -(fx*q*ut) / (vt*(fx*fx + q * q * ut*ut + q * q * vt*vt));
 			float JJ12 = -(fx*q) / (fx*fx + q * q * ut*ut + q * q * vt*vt);
 			float JJ21 = (fy*fy + q * q * vt*vt) / (vt*(fy*fy + q * q * ut*ut + q * q * vt*vt));

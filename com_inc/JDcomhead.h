@@ -137,6 +137,7 @@ struct JDPROSTRUCT
 int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
 void disp_x_buff(FILE * fp,unsigned char * buff, int num);
+void disp_x_buff(unsigned char * buff, int num);
 
 int JD_run_poll(JD_INFO& jif, int TimeOutMS, PROTOCOL_TYPE typ);
 

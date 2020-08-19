@@ -24,6 +24,6 @@ void SetWatchFile(const char * fil
 
 float Angle_Convert(unsigned char *dat);
 unsigned int Angle_Convert_UShort(float angle);
-
+void Angle_Convert_UShort(float angle, unsigned char * outbuff);
 #endif
 

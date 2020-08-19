@@ -34,7 +34,7 @@ private:
 
 	std::chrono::time_point<std::chrono::system_clock> start;
 };
-#if 1
+#if 0
 #define TIME_INTERVAL_SCOPE(d)   TimeInterval __LINE__##__FUNCTION__ (d)
 #else
 #define TIME_INTERVAL_SCOPE(d)

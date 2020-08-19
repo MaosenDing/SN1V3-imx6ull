@@ -129,7 +129,8 @@ int processTest2(int argc, char * argv[])
 #include "sn1v3cfg.h"
 #include "tableWork.h"
 #include "configOperator.h"
-
+#include "JDcomhead.h"
+#include "jd_share.h"
 ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
 	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
 	, const int horflip, const int verFlip
@@ -137,6 +138,117 @@ ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & r
 
 int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> & tab, SUNPOS & retcfg);
 int createTable(int argc, char* argv[]);
+
+
+static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
+{
+	//recoder the head
+	jfr.jd_frame_head = rxbuf;
+	//jd command
+	jfr.jd_command = rxbuf[2];
+	jfr.seq = rxbuf[3];
+	//aim address
+	//maybe the device address
+	jfr.jd_aim.byte_value.low_byte = rxbuf[4];
+	jfr.jd_aim.byte_value.mlow_byte = rxbuf[5];
+	jfr.jd_aim.byte_value.mhigh_byte = rxbuf[6];
+	jfr.jd_aim.byte_value.high_byte = 0x00;
+	//jd data load
+	jfr.jd_data_len = rxbuf[7] - 10;
+	if (jfr.jd_data_len > 0) {
+		jfr.jd_data_buff = &rxbuf[8];
+	} else {
+		jfr.jd_data_buff = nullptr;
+	}
+}
+
+shared_ptr< JD_FRAME> JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
+{
+	for (int i = 0; i < num; i++) {
+		int remainLen = num - i;
+		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA)) {
+			if (remainLen > 7) {
+				int recpackLen = rxbuf[i + 7];
+
+				if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF) == 1) {
+					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc ok\n");
+					auto jfr = make_shared< JD_FRAME>();
+					make_rec_pack(rxbuf + i, num - i, *jfr);
+
+					return jfr;
+				} else {
+					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc error\n");
+				}
+			}
+		}
+	}
+	return shared_ptr< JD_FRAME>();
+}
+
+void ctrl_deg(float deg1, float deg2)
+{
+	char namebuff[64];
+	unsigned char buff[1024];
+	strcpy(namebuff, "/dev/ttyUSB0");
+
+	int fd = UARTX_Init(namebuff, 115200, 0, 8, 1, 0);	
+
+	JD_INFO jif;
+	jif.fd = fd;
+	//jif.dbg_pri_snd_word = 1;
+	JD_FRAME jfr;
+
+
+	while (true) {
+		//读取角度
+		jfr.jd_aim.byte_value.low_byte = 0xff;
+		jfr.jd_aim.byte_value.mlow_byte = 0xff;
+		jfr.jd_aim.byte_value.mhigh_byte = 0xff;
+		jfr.jd_command = 0x13;
+		JD_send(jif, jfr);
+		int rdsz = read(fd, buff, 1024);
+		if (rdsz) {
+
+			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
+			if (dat) {
+				deg1 = Angle_Convert(&dat->jd_data_buff[0]);
+				deg2 = Angle_Convert(&dat->jd_data_buff[3]);
+				printf("x = %f,%f\n", deg1, deg2);
+			}
+		}
+		//设定新角度
+		jfr.jd_aim.byte_value.low_byte = 0xff;
+		jfr.jd_aim.byte_value.mlow_byte = 0xff;
+		jfr.jd_aim.byte_value.mhigh_byte = 0xff;
+		jfr.jd_command = 0x0B;
+		
+		unsigned char sndbuf[20];
+		float aimf1 = 20;
+		float aimf2 = 20;
+
+		Angle_Convert_UShort(aimf1, sndbuf + 0);
+		Angle_Convert_UShort(aimf2, sndbuf + 3);
+		jfr.jd_send_buff = sndbuf;
+		jfr.jd_data_len = 6;
+		JD_send(jif, jfr);
+
+		rdsz = read(fd, buff, 1024);
+		if (rdsz) {
+
+			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
+			if (dat) {
+				printf("sendok\n");
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
 int tableGenerate3(int argc, char * argv[])
 {
 	cout << "table generate3" << endl;
@@ -149,8 +261,11 @@ int tableGenerate3(int argc, char * argv[])
 	scanfAllTable(tg_table, Mask_All);
 
 	logInit("aim", "./aim", google::GLOG_ERROR);
+	int gain = 10;
+	int expose = 100;
 
-	my_cap_init(10000, 20000, 0, 0);
+
+	my_cap_init(gain, expose, 0, 0);
 	time_t now = time(0);
 	tm t2;
 
@@ -184,11 +299,16 @@ int tableGenerate3(int argc, char * argv[])
 	auto tab = createTable(tg_table, year, mon, day);
 	int lastsec = 0;
 	int workflg = 1;
+
+	ctrl_deg(1, 2);
+
+
+
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, false, false, 50, 10, 100, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, false, false, 50, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
 				x_diff = res.diff_x;
@@ -218,7 +338,6 @@ int tableGenerate3(int argc, char * argv[])
 			}
 		}
 	}
-
 	return 0;
 }
 

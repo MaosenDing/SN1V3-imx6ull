@@ -242,5 +242,23 @@ unsigned int Angle_Convert_UShort(float angle)
 	return angle_out;
 }
 
+void Angle_Convert_UShort(float angle,unsigned char * outbuff)
+{
+	double angle_tmp = angle;
+	int angle_out;
+
+	angle_tmp = angle_tmp * 800;
+
+	angle_out = (int)angle_tmp;
+
+	if (outbuff)
+	{
+		outbuff[0] = (angle_out >> 0) & 0xff;
+		outbuff[1] = (angle_out >> 8) & 0xff;
+		outbuff[2] = (angle_out >> 16) & 0xff;
+	}
+}
+
+
 
 
