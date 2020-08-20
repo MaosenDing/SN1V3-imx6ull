@@ -52,7 +52,7 @@ SET(CMAKE_AR ${toolpathprefix}ar)
 SET(CMAKE_LD ${toolpathprefix}ld)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 --sysroot=/opt/fsl-imx-xwayland/4.14-sumo/sysroots/aarch64-poky-linux" )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -rdynamic -funwind-tables")
 #set(ENABLE_EXPORTS on)
 
 set(CMAKE_CROSSCOMPILING TRUE)

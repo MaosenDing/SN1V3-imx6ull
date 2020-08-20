@@ -215,13 +215,15 @@ typedef union
 
 float Angle_Convert(unsigned char *dat)
 {
+	if (!dat) {
+		return 0;
+	}
 	double angle_tmp;
 	UINT angle = { 0 };
 	angle.byte_value.low_byte = dat[0];
 	angle.byte_value.mlow_byte = dat[1];
 	angle.byte_value.mhigh_byte = dat[2];
-	if ((dat[2] & 0xF0) == 0xF0)
-	{
+	if ((dat[2] & 0xF0) == 0xF0) {
 		angle.byte_value.high_byte = 0xFF;
 	} else
 		angle.byte_value.high_byte = 0x00;

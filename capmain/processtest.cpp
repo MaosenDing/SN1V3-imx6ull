@@ -184,8 +184,10 @@ shared_ptr< JD_FRAME> JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO &
 	}
 	return shared_ptr< JD_FRAME>();
 }
-
-void ctrl_deg(float deg1, float deg2)
+static volatile float ctrl_deg1, ctrl_deg2;
+static std::condition_variable_any enable_ctrl;
+static std::timed_mutex mutex_ctrl;
+void ctrl_thread(void)
 {
 	char namebuff[64];
 	unsigned char buff[1024];
@@ -197,9 +199,10 @@ void ctrl_deg(float deg1, float deg2)
 	jif.fd = fd;
 	//jif.dbg_pri_snd_word = 1;
 	JD_FRAME jfr;
-
-
 	while (true) {
+		unique_lock<timed_mutex> lck(mutex_ctrl);
+		enable_ctrl.wait(lck);
+		float deg1, deg2;
 		//读取角度
 		jfr.jd_aim.byte_value.low_byte = 0xff;
 		jfr.jd_aim.byte_value.mlow_byte = 0xff;
@@ -223,8 +226,13 @@ void ctrl_deg(float deg1, float deg2)
 		jfr.jd_command = 0x0B;
 		
 		unsigned char sndbuf[20];
-		float aimf1 = 20;
-		float aimf2 = 20;
+		if ((fabs(ctrl_deg1) < 0.00001f) || (fabs(ctrl_deg2) < 0.00001f)) {
+			continue;
+		}
+
+		float aimf1 = deg1 + ctrl_deg1;
+		float aimf2 = deg2 + ctrl_deg2;
+		printf("using deg %f,%f\n", ctrl_deg1, ctrl_deg2);
 
 		Angle_Convert_UShort(aimf1, sndbuf + 0);
 		Angle_Convert_UShort(aimf2, sndbuf + 3);
@@ -233,6 +241,8 @@ void ctrl_deg(float deg1, float deg2)
 		JD_send(jif, jfr);
 
 		rdsz = read(fd, buff, 1024);
+		ctrl_deg1 = 0;
+		ctrl_deg2 = 0;
 		if (rdsz) {
 
 			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
@@ -242,11 +252,6 @@ void ctrl_deg(float deg1, float deg2)
 		}
 	}
 }
-
-
-
-
-
 
 
 int tableGenerate3(int argc, char * argv[])
@@ -261,8 +266,8 @@ int tableGenerate3(int argc, char * argv[])
 	scanfAllTable(tg_table, Mask_All);
 
 	logInit("aim", "./aim", google::GLOG_ERROR);
-	int gain = 10;
-	int expose = 100;
+	int gain = 100;
+	int expose = 150;
 
 
 	my_cap_init(gain, expose, 0, 0);
@@ -300,8 +305,8 @@ int tableGenerate3(int argc, char * argv[])
 	int lastsec = 0;
 	int workflg = 1;
 
-	ctrl_deg(1, 2);
-
+	thread t_ctrl(ctrl_thread);
+	t_ctrl.detach();
 
 
 	if (tab) {
@@ -328,11 +333,12 @@ int tableGenerate3(int argc, char * argv[])
 			if (0 == find_useful_pos(reftime.tm_hour, reftime.tm_min, reftime.tm_sec, *tab, tabsun)) {
 				float zrat = 0, zraz = 0;
 				int speedat = 0, speedaz = 0;
-				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4, tg_table.T6.SN1_P4
+				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y
 					, &zrat, &zraz, &speedat, &speedaz);
-				 
-				printf("conalg = %f,%f,%d,%d\n", zraz, zraz, speedat, speedaz);
-
+				ctrl_deg1 = zrat;
+				ctrl_deg2 = zraz;
+				printf("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
+				enable_ctrl.notify_all();
 			} else {
 				printf("find fail\n");
 			}
