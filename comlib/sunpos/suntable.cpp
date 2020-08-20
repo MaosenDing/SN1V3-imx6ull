@@ -11,14 +11,16 @@ shared_ptr< vector < SUNPOS > > GenerateSunTable(
 	int year, int mon, int day, int startHour, int endHour,
 	double lati, double longti,
 	double temperature, double pressure, double delta_T, double elevation,
-	double focus, double cam_pixSize,//焦距 相元大小
+	double focus_x,double focus_y, double cam_pixSize,//焦距 相元大小
 	double cam_rotAnglex, double cam_rotAngley, double cam_rotAnglez,//相机安装角度
 	double heliopoint_x, double heliopoint_y, double heliopoint_z,//定日镜坐标
 	double aimpoint_x, double aimpoint_y, double aim_point_z,//指向点坐标
 	double aimpoint1_x, double aimpoint1_y, double aim_point1_z,//指向点坐标
 	double Coef1, double Coef2, double Coef3, double Coef4,//矫正系数
 	int viewAnglev, int viewAngleh,//行列
-	double cam_viewAngle_h, double cam_viewAngle_v
+	double cam_viewAngle_h, double cam_viewAngle_v,
+	float centerU,float centerV
+
 );
 
 
@@ -29,14 +31,16 @@ int createTable(int argc, char* argv[])
 	scanfAllTable(tg_table, Mask_All);
 
 	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(2020, 8, 17, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
-		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4, tg_table.T6.SN1_P3,
+		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y, tg_table.T6.SN1_P3,
 		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
 		tg_table.T1.AimPointX1, tg_table.T1.AimPointY1, tg_table.T1.AimPointZ1,
 		tg_table.T1.AimPointX2, tg_table.T1.AimPointY2, tg_table.T1.AimPointZ2,
 		tg_table.T6.MappingCoefficients1, tg_table.T6.MappingCoefficients2, tg_table.T6.MappingCoefficients3, tg_table.T6.MappingCoefficients4,
 		tg_table.T6.SN1_P1, tg_table.T6.SN1_P2,
-		tg_table.T6.cam_viewAngleh, tg_table.T6.cam_viewAnglev);
+		tg_table.T6.cam_viewAngleh, tg_table.T6.cam_viewAnglev,
+		tg_table.T6.centerU, tg_table.T6.centerV
+	);
 
 	ofstream filout("1.txt", ios::trunc);
 
@@ -65,14 +69,16 @@ shared_ptr< vector < SUNPOS > > createTable(Tg_table &tg_table,int year,int mon,
 {
 	printf("createTable : year = %d ,mon = %d ,day = %d\n", year, mon, day);
 	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
-		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4, tg_table.T6.SN1_P3,
+		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y, tg_table.T6.SN1_P3,
 		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
 		tg_table.T1.AimPointX1, tg_table.T1.AimPointY1, tg_table.T1.AimPointZ1,
 		tg_table.T1.AimPointX2, tg_table.T1.AimPointY2, tg_table.T1.AimPointZ2,
 		tg_table.T6.MappingCoefficients1, tg_table.T6.MappingCoefficients2, tg_table.T6.MappingCoefficients3, tg_table.T6.MappingCoefficients4,
 		tg_table.T6.SN1_P1, tg_table.T6.SN1_P2,
-		tg_table.T6.cam_viewAngleh, tg_table.T6.cam_viewAnglev);
+		tg_table.T6.cam_viewAngleh, tg_table.T6.cam_viewAnglev,
+		tg_table.T6.centerU, tg_table.T6.centerV
+	);
 	return tab;
 }
 

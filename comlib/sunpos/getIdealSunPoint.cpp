@@ -111,7 +111,7 @@ Vector3f vectorRot3D(Vector3f rotAxis,float rotAng, Vector3f vector)
 	return out;
 }
 
-Vector2i calSunImgPoint(Vector3f RayIn,Vector3f cam_rotAngle,Vector2f cam_Length,float cam_pixSize,Vector2f cam_imgSize,Vector2f cam_viewAngle,Vector4f FisheyeImgRointR)
+Vector2i calSunImgPoint(Vector3f RayIn, Vector3f cam_rotAngle, Vector2f cam_Length, float cam_pixSize, Vector2f cam_imgSize, Vector2f cam_viewAngle, Vector4f FisheyeImgRointR, Vector2f centerUV)
 {
 	/*
 	#函数：计算入射矢量在相机平面上的成像点坐标：cam_Imgxy=[x,y](列，行),单位像素
@@ -165,7 +165,7 @@ Vector2i calSunImgPoint(Vector3f RayIn,Vector3f cam_rotAngle,Vector2f cam_Length
 	Vector4f theta_temp(pow(Point_theta,3), pow(Point_theta, 5), pow(Point_theta, 7), pow(Point_theta, 9));
 	float Point_theta2 = Point_theta + FisheyeImgRointR.transpose() *theta_temp;
 
-	Vector2f R(cam_Length[0]*Point_theta2,cam_Length[1]*Point_theta2);
+	Vector2f R(cam_Length[0]*cam_pixSize*Point_theta2,cam_Length[1]*cam_pixSize*Point_theta2);//改动1
 	Vector2f imgPoint(R[1] * cos(PinholeImgPointAng) / cam_pixSize, - 1 * R[0] * sin(PinholeImgPointAng) / cam_pixSize);
 
 	float abs_x = abs(imgPoint[0]);
@@ -177,8 +177,7 @@ Vector2i calSunImgPoint(Vector3f RayIn,Vector3f cam_rotAngle,Vector2f cam_Length
 		return flag;
 	}
 
-	imgPoint =  imgPoint + cam_imgSize/2;
-	Vector2i out(int(round(imgPoint[1])), int(round(imgPoint[0])));
+	Vector2i out(int(round(imgPoint[1] + centerUV[0])), int(round(imgPoint[0] + centerUV[1])));  //改动2 ：行列-》列行
 	return out;
 }
 
@@ -187,14 +186,15 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 	int year, int mon, int day, int startHour, int endHour,
 	double lati, double longti,
 	double temperature, double pressure, double delta_T, double elevation,
-	double focus, double cam_pixSize,//焦距 相元大小
+	double focus_x , double focus_y, double cam_pixSize,//焦距 相元大小
 	double cam_rotAnglex, double cam_rotAngley, double cam_rotAnglez,//相机安装角度
 	double heliopoint_x, double heliopoint_y, double heliopoint_z,//定日镜坐标
 	double aimpoint_x, double aimpoint_y, double aim_point_z,//指向点坐标
 	double aimpoint1_x, double aimpoint1_y, double aim_point1_z,//指向点坐标
 	double Coef1, double Coef2, double Coef3, double Coef4,//矫正系数
 	int viewAnglev, int viewAngleh,//行列
-	double cam_viewAngle_h, double cam_viewAngle_v
+	double cam_viewAngle_h, double cam_viewAngle_v,
+	float centerU,float centerV
 )
 {
 
@@ -205,7 +205,7 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 	Vector3f d;
 	//T4参数表获得
 	Vector3f e(cam_rotAnglex, cam_rotAngley, cam_rotAnglez);
-	Vector2f f(focus, focus);//焦距 
+	Vector2f f(focus_x, focus_y);//焦距 
 
 	Vector2f g(viewAnglev, viewAngleh);
 	Vector2f h(cam_viewAngle_h, cam_viewAngle_v);
@@ -225,6 +225,7 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 
 	Vector2f angle;
 	Vector2i  ZR;
+	Vector2f centerUV(centerU, centerV);
 	auto ret = make_shared< vector < SUNPOS> >();
 
 	for (int hour = startHour; hour < endHour; hour++) {
@@ -238,7 +239,7 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 
 				Vector2f Helio_angle0;
 				d = calSunRayIn(angle, b, c1, 15, Helio_angle0);
-				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients);
+				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients, centerUV);
 
 
 				tmppos.ZR_u = ZR[0];
@@ -248,7 +249,7 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 
 				Vector2f Helio_angle1;
 				d = calSunRayIn(angle2, b, c2, 15, Helio_angle1);
-				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients);
+				ZR = calSunImgPoint(d, e, f, cam_pixSize, g, h, MappingCoefficients, centerUV);
 
 				tmppos.SD_u = ZR[0];
 				tmppos.SD_v = ZR[1];
@@ -283,6 +284,39 @@ shared_ptr< vector < SUNPOS> > GenerateSunTable(
 }
 
 
+int getidealmain(int argc, char* argv[])
+{
+	Vector3f b(-100, 100, 3);
+	Vector3f c(0, 0, 98);
+	Vector3f Rayin(0.197, -0.357, 0.913);
+	//T4参数表获得
+	Vector3f angleXYZ(0.04761203743457128, -0.6556470204718018, -0.17746299323266249 + 90);
+	Vector2f fxfy(1244.818893, 1240.489169);//焦距 
+	Vector2f imgSize(1080, 1920);
+	Vector2f viewAngle(170, 95);
 
+	Vector4f MappingCoefficients(-0.014484, -0.136218, 0.478277, -0.657337);
+	Vector2f centerUV(885.6, 526.9);
+
+	Vector2f angle;
+	Vector2f Helio_angle;//[方位角，俯仰角]，单位角度
+
+	for (size_t i = 0; i < 1; i++) {
+		auto start = std::chrono::system_clock::now();
+		SP(2020, 8, 12, 10, 0, i, 70, 97.277, 40.329, 1415.5, 847.2, 7.8, angle);
+
+		//angle 太阳高度角  方位角
+		//b 定日镜坐标
+		//c1 指向点坐标1 c2 指向点坐标1
+		//15 开场角度
+		//太阳入射矢量 xyz
+		Vector2i  ZR = calSunImgPoint(Rayin, angleXYZ, fxfy, 2.7e-6, imgSize, viewAngle, MappingCoefficients, centerUV);
+
+		auto end = std::chrono::system_clock::now();
+		cout << std::chrono::duration_cast<std::chrono::duration<float>>(end - start).count() << endl;
+		std::cout << ZR << std::endl;
+	}
+	return 0;
+}
 
 

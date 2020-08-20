@@ -203,7 +203,8 @@ extern "C" {
 		int32_t SN1_P1;//行像素
 		int32_t SN1_P2;//列像素
 		float SN1_P3;//像元大小
-		float SN1_P4;//焦距
+		float SN1_P4_x;//焦距
+		float SN1_P4_y;//焦距
 		int32_t SN1_P5;//增益
 		int32_t SN1_P6;//曝光
 		int32_t SN1_P7;//水平翻转 true/false
@@ -235,6 +236,9 @@ extern "C" {
 
 		float cam_viewAngleh;
 		float cam_viewAnglev;
+
+		float centerU;
+		float centerV;
 
 		float MappingCoefficients1;
 		float MappingCoefficients2;

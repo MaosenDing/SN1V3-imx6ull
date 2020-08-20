@@ -239,52 +239,57 @@ CFG_INFO T6[] = {
 	T6_Set_data(1,SN1_P1,dateType::INT32,setDefault(int,1200)),
 	T6_Set_data(2,SN1_P2,dateType::INT32,setDefault(int ,1600)),
 	T6_Set_data(3,SN1_P3,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(4,SN1_P4,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(5,SN1_P5,dateType::INT32,setDefault(int ,20)),//增益
-	T6_Set_data(6,SN1_P6,dateType::INT32,setDefault(int ,100)),//曝光
-	T6_Set_data(7,SN1_P7,dateType::BOOLTYPE,boolDefault),//水平翻转
-	T6_Set_data(8,SN1_P8,dateType::BOOLTYPE,boolDefault),//竖直翻转
-	T6_Set_data(9,SN1_P9,dateType::INT32,setDefault(int ,200)),//灰度阈值
-	T6_Set_data(10,SN1_P10,dateType::FLOAT32,setDefault(float ,0.8)),//二值化阈值
-	T6_Set_data(11,SN1_P11,dateType::FLOAT32,setDefault(float ,0.7)),//圆度阈值
-	T6_Set_data(12,SN1_P12,dateType::FLOAT32,setDefault(float ,0.8)),//上午有效百分比
-	T6_Set_data(13,SN1_P13,dateType::FLOAT32,setDefault(float ,0.8)),//下午有效百分比
-	T6_Set_data(14,SN1_P14,dateType::FLOAT32,setDefault(float ,20)),//太阳高度角阈值
-	T6_Set_data(15,SN1_P15,dateType::INT32,boolDefault),//主动修正标志  bool
-	T6_Set_data(16,SN1_P16,dateType::INT32,boolDefault),//校正标志位 bool
-	T6_Set_data(17,SN1_P17,dateType::INT32,setDefault(int ,10)),//采集间隔时间
-	T6_Set_data(18,SN1_P18,dateType::FLOAT32,setDefault(float ,0.95)),//1mrad
-	T6_Set_data(19,SN1_P19,dateType::FLOAT32,setDefault(float ,0.95)),//2mrad
+	T6_Set_data(4,SN1_P4_x,dateType::FLOAT32,setDefault(float ,1920/2)),
+	T6_Set_data(5,SN1_P4_y,dateType::FLOAT32,setDefault(float ,1080/2)),
+	T6_Set_data(6,SN1_P5,dateType::INT32,setDefault(int ,20)),//增益
+	T6_Set_data(7,SN1_P6,dateType::INT32,setDefault(int ,100)),//曝光
+	T6_Set_data(8,SN1_P7,dateType::BOOLTYPE,boolDefault),//水平翻转
+	T6_Set_data(9,SN1_P8,dateType::BOOLTYPE,boolDefault),//竖直翻转
+	T6_Set_data(10,SN1_P9,dateType::INT32,setDefault(int ,200)),//灰度阈值
+	T6_Set_data(11,SN1_P10,dateType::FLOAT32,setDefault(float ,0.8)),//二值化阈值
+	T6_Set_data(12,SN1_P11,dateType::FLOAT32,setDefault(float ,0.7)),//圆度阈值
+	T6_Set_data(13,SN1_P12,dateType::FLOAT32,setDefault(float ,0.8)),//上午有效百分比
+	T6_Set_data(14,SN1_P13,dateType::FLOAT32,setDefault(float ,0.8)),//下午有效百分比
+	T6_Set_data(15,SN1_P14,dateType::FLOAT32,setDefault(float ,20)),//太阳高度角阈值
+	T6_Set_data(16,SN1_P15,dateType::INT32,boolDefault),//主动修正标志  bool
+	T6_Set_data(17,SN1_P16,dateType::INT32,boolDefault),//校正标志位 bool
+	T6_Set_data(18,SN1_P17,dateType::INT32,setDefault(int ,10)),//采集间隔时间
+	T6_Set_data(19,SN1_P18,dateType::FLOAT32,setDefault(float ,0.95)),//1mrad
+	T6_Set_data(20,SN1_P19,dateType::FLOAT32,setDefault(float ,0.95)),//2mrad
 
 
-	T6_Set_data(19,SN2_P1,dateType::FLOAT32,floatDefault),//目标sn3相机坐标x
-	T6_Set_data(20,SN2_P2,dateType::FLOAT32,floatDefault),//目标sn3相机坐标y
-	T6_Set_data(21,SN2_P3,dateType::FLOAT32,floatDefault),//目标sn3相机坐标z
-	T6_Set_data(22,SN2_P4,dateType::INT32,setDefault(int ,1)),//SN2用T8表频率(行/秒)
-	T6_Set_data(23,SN2_P5,dateType::FLOAT32,setDefault(float ,20)),//SN2用最大转角速度（度/秒）
-	T6_Set_data(24,SN2_P6,dateType::FLOAT32,setDefault(float ,1)),//SN2用法线最大扫描距离（米）
+	T6_Set_data(21,SN2_P1,dateType::FLOAT32,floatDefault),//目标sn3相机坐标x
+	T6_Set_data(22,SN2_P2,dateType::FLOAT32,floatDefault),//目标sn3相机坐标y
+	T6_Set_data(23,SN2_P3,dateType::FLOAT32,floatDefault),//目标sn3相机坐标z
+	T6_Set_data(24,SN2_P4,dateType::INT32,setDefault(int ,1)),//SN2用T8表频率(行/秒)
+	T6_Set_data(25,SN2_P5,dateType::FLOAT32,setDefault(float ,20)),//SN2用最大转角速度（度/秒）
+	T6_Set_data(26,SN2_P6,dateType::FLOAT32,setDefault(float ,1)),//SN2用法线最大扫描距离（米）
 
-	T6_Set_data(25,cam_rotAnglex,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(26,cam_rotAngley,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(27,cam_rotAnglez,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(27,cam_rotAnglex,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(28,cam_rotAngley,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(29,cam_rotAnglez,dateType::FLOAT32,setDefault(float ,0)),
 
-	T6_Set_data(28,cam_viewAngleh,dateType::FLOAT32,setDefault(float ,145)),
-	T6_Set_data(29,cam_viewAnglev,dateType::FLOAT32,setDefault(float ,67)),
+	T6_Set_data(30,cam_viewAngleh,dateType::FLOAT32,setDefault(float ,145)),
+	T6_Set_data(31,cam_viewAnglev,dateType::FLOAT32,setDefault(float ,67)),
 
-	T6_Set_data(30,MappingCoefficients1,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(31,MappingCoefficients2,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(32,MappingCoefficients3,dateType::FLOAT32,setDefault(float ,0)),
-	T6_Set_data(33,MappingCoefficients4,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(32,centerU,dateType::FLOAT32,setDefault(float ,1920/2)),
+	T6_Set_data(33,centerV,dateType::FLOAT32,setDefault(float ,1080/2)),
+
+
+	T6_Set_data(34,MappingCoefficients1,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(35,MappingCoefficients2,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(36,MappingCoefficients3,dateType::FLOAT32,setDefault(float ,0)),
+	T6_Set_data(37,MappingCoefficients4,dateType::FLOAT32,setDefault(float ,0)),
 
 	//是否保存原始图像
-	T6_Set_data(35,SaveOrg,dateType::BOOLTYPE,boolDefault),
+	T6_Set_data(38,SaveOrg,dateType::BOOLTYPE,boolDefault),
 	//是否保存二值化图像
-	T6_Set_data(36,SaveBin,dateType::BOOLTYPE,boolDefault),
+	T6_Set_data(39,SaveBin,dateType::BOOLTYPE,boolDefault),
 	//保存路径
-	T6_Set_data(37,SavePath,dateType::STRING64,stingDefault),
+	T6_Set_data(40,SavePath,dateType::STRING64,stingDefault),
 
-	T6_Set_data(38,Sn3gain,dateType::INT32,setDefault(float ,0)),
-	T6_Set_data(39,Sn3expo,dateType::INT32,setDefault(float ,0)),
+	T6_Set_data(41,Sn3gain,dateType::INT32,setDefault(float ,0)),
+	T6_Set_data(42,Sn3expo,dateType::INT32,setDefault(float ,0)),
 };
 
 
