@@ -7,9 +7,9 @@
 
 
 
-%cam_rotAnglex,-2
-%cam_rotAngley,2
-%cam_rotAnglez,2
+%cam_rotAnglex,0
+%cam_rotAngley,0
+%cam_rotAnglez,0
 
 %viewAngleh,170
 %viewAnglev,95

@@ -29,7 +29,7 @@ struct buffer {
 	void *start;
 	unsigned int length;
 };
-#define REQ_BUFF_NUM (10)
+#define REQ_BUFF_NUM (2)
 buffer buffers[REQ_BUFF_NUM];
 
 int init_cap(const char * videoName)
@@ -82,10 +82,10 @@ int init_cap(const char * videoName)
 		printf("VIDIOC_REQBUFS set error \n");
 	}
 
-	if (req.count < 2) {
-		printf("Insufficient buffer memory \n");
-		exit(EXIT_FAILURE);
-	}
+	//if (req.count < 2) {
+	//	printf("Insufficient buffer memory \n");
+	//	exit(EXIT_FAILURE);
+	//}
 
 	unsigned int n_buffers = 0;
 	for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {

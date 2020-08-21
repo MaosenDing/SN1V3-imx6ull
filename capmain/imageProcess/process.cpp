@@ -808,12 +808,14 @@ ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & r
 		tm reftime;
 		localtime_r(&res.timGetImg, &reftime);
 		sprintf(FnameBuff, "%s/%02d-%02d-%02d.jpg", dstPath, reftime.tm_hour, reftime.tm_min, reftime.tm_sec);
+		char *dstptr = 0;
 		char ORGBUFF[64] = {0};
 		if (ORGjpgSaveFlag == true) {
 			snprintf(ORGBUFF, 64, "%s.org.jpeg", FnameBuff);
+			dstptr = ORGBUFF;
 		}
 
-		if ((err = cap_once_gray(ppp.get(), imgSize, gain, expo, horflip, verFlip, 0)) != err_ok) {
+		if ((err = cap_once_gray(ppp.get(), imgSize, gain, expo, horflip, verFlip, dstptr)) != err_ok) {
 			LOG(ERROR) << "cap error code = " << (int)err;
 			return err;
 		} else {

@@ -131,6 +131,10 @@ int processTest2(int argc, char * argv[])
 #include "configOperator.h"
 #include "JDcomhead.h"
 #include "jd_share.h"
+#include "SN1V2_error.h"
+#include "errHandle.h"
+
+
 ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
 	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
 	, const int horflip, const int verFlip
@@ -216,7 +220,7 @@ void ctrl_thread(void)
 			if (dat) {
 				deg1 = Angle_Convert(&dat->jd_data_buff[0]);
 				deg2 = Angle_Convert(&dat->jd_data_buff[3]);
-				printf("x = %f,%f\n", deg1, deg2);
+				//printf("x = %f,%f\n", deg1, deg2);
 			}
 		}
 		//设定新角度
@@ -226,13 +230,13 @@ void ctrl_thread(void)
 		jfr.jd_command = 0x0B;
 		
 		unsigned char sndbuf[20];
-		if ((fabs(ctrl_deg1) < 0.00001f) || (fabs(ctrl_deg2) < 0.00001f)) {
-			continue;
-		}
+		//if ((fabs(ctrl_deg1) < 0.00001f) || (fabs(ctrl_deg2) < 0.00001f)) {
+		//	continue;
+		//}
 
 		float aimf1 = deg1 + ctrl_deg1;
 		float aimf2 = deg2 + ctrl_deg2;
-		printf("using deg %f,%f\n", ctrl_deg1, ctrl_deg2);
+		printf("using deg %f,%f,%f,%f\n",deg1,deg2 , ctrl_deg1, ctrl_deg2);
 
 		Angle_Convert_UShort(aimf1, sndbuf + 0);
 		Angle_Convert_UShort(aimf2, sndbuf + 3);
@@ -266,8 +270,8 @@ int tableGenerate3(int argc, char * argv[])
 	scanfAllTable(tg_table, Mask_All);
 
 	logInit("aim", "./aim", google::GLOG_ERROR);
-	int gain = 100;
-	int expose = 150;
+	int gain = 50;
+	int expose = 100;
 
 
 	my_cap_init(gain, expose, 0, 0);
@@ -312,13 +316,14 @@ int tableGenerate3(int argc, char * argv[])
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {
+			//sleep(5);
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, false, false, 50, gain, expose, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, true, false, 50, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
-				x_diff = res.diff_x;
-				y_diff = res.diff_y;
-				printf("pos = %f,%f\n", res.diff_x, res.diff_y);
+				x_diff = res.diff_x + 1920/2;
+				y_diff = res.diff_y + 1080/2;
+				printf("pos = %f,%f\n", x_diff, y_diff);
 			} else {
 				x_diff = 4000;
 				y_diff = 4000;
@@ -335,9 +340,16 @@ int tableGenerate3(int argc, char * argv[])
 				int speedat = 0, speedaz = 0;
 				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y
 					, &zrat, &zraz, &speedat, &speedaz);
-				ctrl_deg1 = zrat;
-				ctrl_deg2 = zraz;
-				printf("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
+				if (speedaz == 0) {
+					zrat = zrat > 0 ? 1 : -1;
+					zraz = zraz > 0 ? 1 : -1;
+				}
+
+				ctrl_deg1 = zrat ;
+				ctrl_deg2 = zraz ;
+				
+				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf", x_diff, y_diff, x_diff - tabsun.ZR_u, y_diff - tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az);
+				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
 				enable_ctrl.notify_all();
 			} else {
 				printf("find fail\n");

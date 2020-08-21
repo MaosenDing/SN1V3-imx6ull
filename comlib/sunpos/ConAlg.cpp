@@ -28,24 +28,25 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 		float nt = sqrt(del_x*del_x + del_y * del_y);
 		if (nt < 10)//判断像素差是否大于阈值K
 		{
-#if 0
-			float J11 = -q * ut*vt / fx;
-			float J12 = vt;
-			float J21 = -(fy*fy + q * q*vt*vt) / (fy*q);
-			float J22 = -ut;
-#endif
-			float JJ11 = -(fx*q*ut) / (vt*(fx*fx + q * q * ut*ut + q * q * vt*vt));
-			float JJ12 = -(fx*q) / (fx*fx + q * q * ut*ut + q * q * vt*vt);
-			float JJ21 = (fy*fy + q * q * vt*vt) / (vt*(fy*fy + q * q * ut*ut + q * q * vt*vt));
-			float JJ22 = -(q*q * ut) / (fy*fy + q * q * ut*ut + q * q* vt*vt);
-			*At = -(JJ11*del_y + JJ12 * del_x)*r1;//At:俯仰增量角度
-			*Az = -(JJ21*del_y + JJ22 * del_x)*r2;// Az:方位增量角度
+			//float JJ11 = -(fx*q*ut) / (vt*(fx*fx + q * q * ut*ut + q * q * vt*vt));
+			//float JJ12 = -(fx*q) / (fx*fx + q * q * ut*ut + q * q * vt*vt);
+			//float JJ21 = (fy*fy + q * q * vt*vt) / (vt*(fy*fy + q * q * ut*ut + q * q * vt*vt));
+			//float JJ22 = -(q*q * ut) / (fy*fy + q * q * ut*ut + q * q* vt*vt);
+			//*At = -(JJ11*del_y + JJ12 * del_x)*r1 * 180 / 3.1415926;//At:俯仰增量角度
+			//*Az = -(JJ21*del_y + JJ22 * del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度
+			*At = atan2(q*del_x, fy)*r1 * 180 / 3.1415926;//At:俯仰增量角度
+			//*Az = -atan2(del_y, del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度
+			*Az = -atan2(q*(del_y), fx)*r2 * 180 / 3.1415926;			
 			*SpdSig_At = 1;//俯仰转速信号
 			*SpdSig_Az = 1;//方位转速信号
-		} else {
-			*At = atan2(q*del_x, fy)*r1;//At:俯仰增量角度
-			*Az = -atan2(del_y, del_x)*r2;// Az:方位增量角度
-			//*Az = -atan2(q*(del_y), fx)*r2;
+
+			*At = *At > 0 ? 0.03 : -0.03;
+			*Az = *Az > 0 ? 0.03 : -0.03;
+		} else 
+		{
+			*At = atan2(q*del_x, fy)*r1 * 180 / 3.1415926;//At:俯仰增量角度
+			//*Az = -atan2(del_y, del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度
+			*Az = -atan2(q*(del_y), fx)*r2 * 180 / 3.1415926;
 			*SpdSig_At = 0;//俯仰转速信号
 			*SpdSig_Az = 0;//方位转速信号
 		}

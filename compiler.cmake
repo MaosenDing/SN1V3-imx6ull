@@ -69,7 +69,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 add_definitions(-mcpu=cortex-a53)
 add_definitions("-O2")
-add_definitions("-g3")
+add_definitions("-g3 -DDEBUG")
 add_definitions(-Wall)
 add_definitions(-DCORTEX=1)
 
