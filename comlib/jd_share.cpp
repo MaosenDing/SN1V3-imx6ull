@@ -213,14 +213,11 @@ typedef union
 }UINT;
 
 
-float Angle_Convert(unsigned char *indat)
+float Angle_Convert(unsigned char *dat)
 {
-	if (!indat) {
+	if (!dat) {
 		return 0;
 	}
-
-	unsigned char dat[3];
-	memcpy(dat, indat, 3);
 
 	double angle_tmp;
 	UINT angle = { 0 };

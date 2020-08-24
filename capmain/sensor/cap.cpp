@@ -16,6 +16,8 @@
 #include <sys/prctl.h>
 #include <fstream>
 
+
+
 int init_cap(const char * videoName);
 int set_gain_expose(int fd, int gain, int expose);
 int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFlip);
@@ -56,7 +58,7 @@ int rgb565_to_jpeg(unsigned char * rgbst, int pwidth, int pheigth, int fname)
 #include <boost/asio/post.hpp>
 #include <boost/pool/pool.hpp>
 
-boost::pool<> mempl(2 * 1920 * 1080);
+boost::pool<> mempl2M(2 * 1920 * 1080);
 
 ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth);
 void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height);
@@ -64,9 +66,9 @@ void compress(void * p, int i)
 {
 	//TimeInterval tim("compress:");
 	char name[64];
-	snprintf(name, 64, "/tmp/cap/test%d.jpg", i% 10);
+	snprintf(name, 64, "/tmp/cap/test%d.jpg", i % 10);
 	SaveyuyvJpg(name, (unsigned char *)p, 1920, 1080);
-	mempl.free(p);
+	mempl2M.free(p);
 }
 
 
@@ -95,7 +97,7 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 		shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
 		if (fram && fram->useFlag) {
 			TimeInterval tim("pp:");
-			void *p = mempl.malloc();
+			void *p = mempl2M.malloc();
 			if (p) {
 				if (fram && fram->useFlag) {
 					TimeInterval tim("pp2:");
@@ -165,8 +167,35 @@ int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFl
 
 void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int flg);
 ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg, int width, int heigth);
+
+
+
+
+void saveThread(unsigned char * buff,char * name)
+{
+	static int index = 0;
+	char savename[64];
+	strcpy(savename, name);	
+	SaveRGB565Jpg(savename, buff, 1920, 1080);
+	mempl2M.free(buff);
+
+	char tmpsavename[64];
+	snprintf(tmpsavename, 64, "cp %s /tmp/cap/%d.jpg", savename, index);
+	system(tmpsavename);
+}
+
+static void saveJPG(char * savename, void * srcbuff)
+{
+	unsigned char * buff = (unsigned char *)mempl2M.malloc();
+	YUV422ToRGB565(srcbuff, buff, 1920, 1080);
+	saveThread(buff, savename);
+}
+
+
+
+
 ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int gain, const unsigned int expo
-	, const int horizenFlip, const int VeriFlip,char * savename
+	, const int horizenFlip, const int VeriFlip, char * savename
 )
 {
 	ERR_STA err;
@@ -191,10 +220,7 @@ ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int 
 #if 1
 		TimeInterval ppp2("gray:");
 		if (savename) {
-			unsigned char * buff = (unsigned char *)malloc(1920 * 1080 * 2);
-			YUV422ToRGB565(fram->startAddr, buff, 1920, 1080);
-			SaveRGB565Jpg(savename, buff, 1920, 1080);
-			free(buff);
+			saveJPG(savename, fram->startAddr);
 		}
 #endif
 		{

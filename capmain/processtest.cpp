@@ -217,9 +217,11 @@ void ctrl_thread(void)
 		if (rdsz) {
 
 			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
-			if (dat) {
-				deg1 = Angle_Convert(&dat->jd_data_buff[0]);
-				deg2 = Angle_Convert(&dat->jd_data_buff[3]);
+			if (dat && dat->jd_data_len >= 6) {
+				unsigned char tmpbuff[16];
+				memcpy(tmpbuff, dat->jd_data_buff, 6);
+				deg1 = Angle_Convert(&tmpbuff[0]);
+				deg2 = Angle_Convert(&tmpbuff[3]);
 				//printf("x = %f,%f\n", deg1, deg2);
 			}
 		}
@@ -304,7 +306,7 @@ int tableGenerate3(int argc, char * argv[])
 	{
 		strcpy(photoPath, storPath);
 	}
-	createTable(argc,argv);
+	createTable(argc, argv);
 	auto tab = createTable(tg_table, year, mon, day);
 	int lastsec = 0;
 	int workflg = 1;
@@ -312,17 +314,22 @@ int tableGenerate3(int argc, char * argv[])
 	thread t_ctrl(ctrl_thread);
 	t_ctrl.detach();
 
+	int sleepflg = 0;
+
 
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {
-			//sleep(5);
+			if (sleepflg) {
+				sleep(10);
+			}
+
 			PROCESS_RESULT res;
 			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, true, false, 50, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
-				x_diff = res.diff_x + 1920/2;
-				y_diff = res.diff_y + 1080/2;
+				x_diff = res.diff_x + 1920 / 2;
+				y_diff = res.diff_y + 1080 / 2;
 				printf("pos = %f,%f\n", x_diff, y_diff);
 			} else {
 				x_diff = 4000;
@@ -340,14 +347,27 @@ int tableGenerate3(int argc, char * argv[])
 				int speedat = 0, speedaz = 0;
 				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y
 					, &zrat, &zraz, &speedat, &speedaz);
+
+				float x_pos = x_diff - tabsun.ZR_u;
+				float y_pos = y_diff - tabsun.ZR_v;
+
 				if (speedaz == 0) {
-					zrat = zrat > 0 ? 1 : -1;
-					zraz = zraz > 0 ? 1 : -1;
+					if (x_pos*x_pos + y_pos * y_pos > 50 * 50) {
+						sleepflg = 1;
+						zrat = zrat > 0 ? 5 : -5;
+						zraz = zraz > 0 ? 5 : -5;
+					} else {
+						sleepflg = 0;
+						zrat = zrat > 0 ? 1 : -1;
+						zraz = zraz > 0 ? 1 : -1;
+					}
+				} else {
+					sleepflg = 0;
 				}
 
-				ctrl_deg1 = zrat ;
-				ctrl_deg2 = zraz ;
-				
+				ctrl_deg1 = zrat;
+				ctrl_deg2 = zraz;
+
 				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf", x_diff, y_diff, x_diff - tabsun.ZR_u, y_diff - tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az);
 				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
 				enable_ctrl.notify_all();

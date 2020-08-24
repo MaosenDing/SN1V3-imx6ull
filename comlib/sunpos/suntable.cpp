@@ -30,7 +30,17 @@ int createTable(int argc, char* argv[])
 	Tg_table tg_table;
 	scanfAllTable(tg_table, Mask_All);
 
-	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(2020, 8, 21, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
+	time_t now = time(0);
+	tm t2;
+
+	localtime_r(&now, &t2);
+
+	const int year = t2.tm_year + 1900;
+	const int mon = t2.tm_mon + 1;
+	const int day = t2.tm_mday;
+
+
+	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
 		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y, tg_table.T6.SN1_P3,
 		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
