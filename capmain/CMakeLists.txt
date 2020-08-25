@@ -1,8 +1,9 @@
 
 
 set(main aim.exe)
-add_executable(${main} aim.cpp processtest.cpp)
+add_executable(${main} aim.cpp processtest.cpp threadtest.cpp)
 
+target_link_libraries(${main} PRIVATE boost_thread)
 #sensor
 add_subdirectory(sensor)
 target_link_libraries(${main} PRIVATE sensor)

@@ -502,7 +502,7 @@ int createTable(int argc, char* argv[]);
 
 int tableGenerate3(int argc, char * argv[]);
 int getidealmain(int argc, char * argv[]);
-
+int threadtest(int argc, char * argv[]);
 MAIN_CMD cmd_group[] = {
 	{"RTF",rtf_test},
 	{"CPPREG",cppReg},
@@ -522,6 +522,7 @@ MAIN_CMD cmd_group[] = {
 	{"pro2",processTest2},
 	{"table",createTable},
 	{"getidealmain",getidealmain},
+	{"thread",threadtest},
 };
 
 

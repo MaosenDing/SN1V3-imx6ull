@@ -2,8 +2,8 @@
 %SN1_P1,1080
 %SN1_P2,1920
 %SN1_P3,2.7e-6
-%SN1_P4_x,1244.818893
-%SN1_P4_y,1240.489169
+%SN1_P4_x,668.2
+%SN1_P4_y,666.5
 
 
 
@@ -14,11 +14,11 @@
 %viewAngleh,170
 %viewAnglev,95
 
-%centerU,885.6
-%centerV,526.9
+%centerU,953.8
+%centerV,524.4
 
 
-%MappingCoefficients1,-0.017409
-%MappingCoefficients2,0.000763
-%MappingCoefficients3,-0.000239
-%MappingCoefficients4,-0.001644
+%MappingCoefficients1,-0.021349
+%MappingCoefficients2,0.005422
+%MappingCoefficients3,-0.007384
+%MappingCoefficients4,0.002739

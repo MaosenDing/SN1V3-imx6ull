@@ -139,7 +139,6 @@ ERR_STA SaveRGB565Jpg(char * fName, unsigned char * rgb565, int width, int heigt
 	}
 	else
 	{
-		fprintf(stderr, "save jpeg\n");
 		shared_ptr<FILE> fil(outfile, fclose);
 		jpeg_compress_struct jcs;
 		jpeg_error_mgr jerr;

@@ -169,13 +169,24 @@ void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int fl
 ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg, int width, int heigth);
 
 
+boost::asio::thread_pool pool(10);
 
-
-void saveThread(unsigned char * buff,char * name)
+void saveThread(unsigned char * srcbuff, char * name)
 {
 	static int index = 0;
-	char savename[64];
-	strcpy(savename, name);	
+	static char savename[64];
+
+	if (0 == strcmp(savename, name)) {
+		printf("skip %s\n", name);
+		return;
+	}
+	
+	unsigned char * buff = (unsigned char *)mempl2M.malloc();
+	YUV422ToRGB565(srcbuff, buff, 1920, 1080);
+
+	strcpy(savename, name);
+	printf("save %s\n", name);
+
 	SaveRGB565Jpg(savename, buff, 1920, 1080);
 	mempl2M.free(buff);
 
@@ -186,9 +197,7 @@ void saveThread(unsigned char * buff,char * name)
 
 static void saveJPG(char * savename, void * srcbuff)
 {
-	unsigned char * buff = (unsigned char *)mempl2M.malloc();
-	YUV422ToRGB565(srcbuff, buff, 1920, 1080);
-	saveThread(buff, savename);
+	boost::asio::post(pool, bind(saveThread, (unsigned char *)srcbuff, savename));
 }
 
 

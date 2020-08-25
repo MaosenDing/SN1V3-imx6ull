@@ -315,8 +315,9 @@ int tableGenerate3(int argc, char * argv[])
 	t_ctrl.detach();
 
 	int sleepflg = 0;
-
-
+	float x_pos = 0;
+	float y_pos = 0;
+	float r2 = 1;
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {
@@ -345,11 +346,21 @@ int tableGenerate3(int argc, char * argv[])
 			if (0 == find_useful_pos(reftime.tm_hour, reftime.tm_min, reftime.tm_sec, *tab, tabsun)) {
 				float zrat = 0, zraz = 0;
 				int speedat = 0, speedaz = 0;
-				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y
+
+				float x_pos_2 = abs(x_diff - tabsun.ZR_u) - abs(x_pos);
+				float y_pos_2 = abs(y_diff - tabsun.ZR_v) - abs(y_pos);
+
+				x_pos = abs(x_diff - tabsun.ZR_u);
+				y_pos = abs(y_diff - tabsun.ZR_v);
+				
+
+				if (x_pos_2 > 0) {
+					r2 = -r2;
+				}
+
+				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, r2, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y
 					, &zrat, &zraz, &speedat, &speedaz);
 
-				float x_pos = x_diff - tabsun.ZR_u;
-				float y_pos = y_diff - tabsun.ZR_v;
 
 				if (speedaz == 0) {
 					if (x_pos*x_pos + y_pos * y_pos > 50 * 50) {
