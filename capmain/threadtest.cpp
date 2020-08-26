@@ -33,12 +33,10 @@ struct datanode{
 };
 
 
-boost::sync_bounded_queue<datanode> testqueue(10);
-
-
-
 int threadtest(int argc, char * argv[])
 {
+	boost::sync_bounded_queue<datanode> testqueue(10);
+
 	printf("thread test\n");
 	testqueue.push((4));
 	testqueue.push((5));

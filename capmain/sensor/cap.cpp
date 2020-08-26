@@ -169,8 +169,6 @@ void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int fl
 ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg, int width, int heigth);
 
 
-boost::asio::thread_pool pool(10);
-
 void saveThread(unsigned char * srcbuff, char * name)
 {
 	static int index = 0;
@@ -197,7 +195,13 @@ void saveThread(unsigned char * srcbuff, char * name)
 
 static void saveJPG(char * savename, void * srcbuff)
 {
+#if 0
+	boost::asio::thread_pool pool(10);
 	boost::asio::post(pool, bind(saveThread, (unsigned char *)srcbuff, savename));
+#else
+	thread p (bind(saveThread, (unsigned char *)srcbuff, savename));
+	p.detach();
+#endif
 }
 
 
