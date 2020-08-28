@@ -498,7 +498,7 @@ static int loopcap(int argc, char * argv[])
 int processTest(int argc, char * argv[]);
 int processTest2(int argc, char * argv[]);
 int testsunpos(int argc, char* argv[]);
-int createTable(int argc, char* argv[]);
+int createTabletest(int argc, char* argv[]);
 
 int tableGenerate3(int argc, char * argv[]);
 int getidealmain(int argc, char * argv[]);
@@ -520,7 +520,7 @@ MAIN_CMD cmd_group[] = {
 	{"loopcap",loopcap},
 	{"pro",processTest},
 	{"pro2",processTest2},
-	{"table",createTable},
+	{"table",createTabletest},
 	{"getidealmain",getidealmain},
 	{"thread",threadtest},
 };

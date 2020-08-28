@@ -306,8 +306,11 @@ int tableGenerate3(int argc, char * argv[])
 	{
 		strcpy(photoPath, storPath);
 	}
-	createTable(argc, argv);
 	auto tab = createTable(tg_table, year, mon, day);
+	char tableName[36];
+	snprintf(tableName,36,"%d-%d-%d-table.txt");
+	saveSunTable(tab,tableName);
+
 	int lastsec = 0;
 	int workflg = 1;
 

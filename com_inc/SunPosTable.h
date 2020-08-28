@@ -31,5 +31,23 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 	, float *At, float *Az, int *SpdSig_At, int *SpdSig_Az
 );
 
+//保存表
+int saveSunTable(std::shared_ptr <std::vector <SUNPOS >> &tab ,const char * savePath);
+//生成表
+std::shared_ptr< std::vector < SUNPOS > > GenerateSunTable(
+	int year, int mon, int day, int startHour, int endHour,
+	double lati, double longti,
+	double temperature, double pressure, double delta_T, double elevation,
+	double focus_x,double focus_y, double cam_pixSize,//焦距 相元大小
+	double cam_rotAnglex, double cam_rotAngley, double cam_rotAnglez,//相机安装角度
+	double heliopoint_x, double heliopoint_y, double heliopoint_z,//定日镜坐标
+	double aimpoint_x, double aimpoint_y, double aim_point_z,//指向点坐标
+	double aimpoint1_x, double aimpoint1_y, double aim_point1_z,//指向点坐标
+	double Coef1, double Coef2, double Coef3, double Coef4,//矫正系数
+	int viewAnglev, int viewAngleh,//行列
+	double cam_viewAngle_h, double cam_viewAngle_v,
+	float centerU,float centerV
+);
+
 #endif
 
