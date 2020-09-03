@@ -1,3 +1,5 @@
 tmp
 .vscode
 MDC2*.bin
+.vscode-ctags
+gdbinit.sh
