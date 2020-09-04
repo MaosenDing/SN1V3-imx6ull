@@ -324,8 +324,12 @@ int tableGenerate3(int argc, char * argv[])
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {
-			if (sleepflg) {
+			if (sleepflg == 1) {
 				sleep(10);
+			}
+			else if(sleepflg == 2)
+			{
+				sleep(5); //与轨迹表周期一样长
 			}
 
 			PROCESS_RESULT res;
@@ -355,29 +359,11 @@ int tableGenerate3(int argc, char * argv[])
 
 				x_pos = abs(x_diff - tabsun.ZR_u);
 				y_pos = abs(y_diff - tabsun.ZR_v);
-				
 
-				if (x_pos_2 > 0) {
-					r2 = -r2;
-				}
-
-				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az, 1, r2, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y
-					, &zrat, &zraz, &speedat, &speedaz);
-
-
-				if (speedaz == 0) {
-					if (x_pos*x_pos + y_pos * y_pos > 50 * 50) {
-						sleepflg = 1;
-						zrat = zrat > 0 ? 5 : -5;
-						zraz = zraz > 0 ? 5 : -5;
-					} else {
-						sleepflg = 0;
-						zrat = zrat > 0 ? 1 : -1;
-						zraz = zraz > 0 ? 1 : -1;
-					}
-				} else {
-					sleepflg = 0;
-				}
+				ConAlg(x_diff, y_diff, tabsun.ZR_u, tabsun.ZR_v, tabsun.ZR_At,
+				       tabsun.ZR_Az, 1, 1, tg_table.T6.SN1_P3, tg_table.T6.SN1_P4_x,
+				       tg_table.T6.SN1_P4_y, x_pos_2, y_pos_2, &zrat, &zraz,
+				       &speedat, &speedaz, &sleepflg);
 
 				ctrl_deg1 = zrat;
 				ctrl_deg2 = zraz;
