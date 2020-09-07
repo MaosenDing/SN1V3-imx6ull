@@ -10,9 +10,11 @@ char ER[200];
 
 struct ppp {
 	double p[5];
-	double & operator[] (int index) { return p[index]; }
+	double &operator[](int index)
+	{
+		return p[index];
+	}
 };
-
 
 extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 {
@@ -21,8 +23,8 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 	if (NULL == (ResFile = fopen(ResDir, "r"))) {
 		sprintf(ER, "%d", -1);
 		return ER;
-	}//出错处理
-	double DH, DL, RI[3], AYR, AZR, AZR2, TMR[3], TMN[3], AY, AZ, SL;
+	} //出错处理
+	double DH, DL, RI[3], AYR, AZR, AZR2, TMR[3], TMN[3], AY, AZ, SL, SR;
 
 	double SSmax = 0;
 	int dnum = 0, SumSS = 0, i, j, k;
@@ -30,38 +32,38 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 	vector<ppp> ResData;
 	vector<int> SS;
 
-
 	// 读取偏差数据
 	char tempR[20];
 	while (!feof(ResFile)) {
 		ppp tmpRES;
 		int tmpSS;
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 时间，跳过
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 行偏差
+		fscanf(ResFile, "%[^,]%*c", tempR); // 时间，跳过
+		fscanf(ResFile, "%[^,]%*c", tempR); // 行偏差
 		DH = atof(tempR);
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 列偏差
+		fscanf(ResFile, "%[^,]%*c", tempR); // 列偏差
 		DL = atof(tempR);
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 单个面积
+		fscanf(ResFile, "%[^,]%*c", tempR); // 单个面积
 		tmpSS = atof(tempR);
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 方位轴转角，弧度
+		fscanf(ResFile, "%[^,]%*c", tempR); // 方位轴转角，弧度
 		tmpRES[0] = atof(tempR) / 180 * M_PI;
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 俯仰轴转角，弧度
+		fscanf(ResFile, "%[^,]%*c", tempR); // 俯仰轴转角，弧度
 		tmpRES[1] = atof(tempR) / 180 * M_PI;
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 入射矢量，rx
+		fscanf(ResFile, "%[^,]%*c", tempR); // 入射矢量，rx
 		RI[0] = atof(tempR);
-		fscanf(ResFile, "%[^,]%*c", tempR);		// 入射矢量，ry
+		fscanf(ResFile, "%[^,]%*c", tempR); // 入射矢量，ry
 		RI[1] = atof(tempR);
-		fscanf(ResFile, "%[^\n]%*c", tempR);		// 入射矢量，rz
+		fscanf(ResFile, "%[^\n]%*c", tempR); // 入射矢量，rz
 		RI[2] = atof(tempR);
 
 		if ((RI[0] == RI[1]) && (RI[0] == RI[2]) && (RI[2] == RI[1]))
 			continue;
 
-		SumSS = SumSS + tmpSS;                          // 总面积，求平均值用
-		TMR[0] = DH * SPS; 		// 实际法线,nx
-		TMR[1] = -DL * SPS; 		// 实际法线,ny
-		TMR[2] = SFL;			// 实际法线,nz
-		TMR[0] = TMR[0] / sqrt(pow(DH * SPS, 2) + pow(DL * SPS, 2) + pow(SFL, 2));	// 归一化
+		SumSS = SumSS + tmpSS; // 总面积，求平均值用
+
+		TMR[0] = DH * SPS; // 实际法线,nx
+		TMR[1] = -DL * SPS; // 实际法线,ny
+		TMR[2] = SFL; // 实际法线,nz
+		TMR[0] = TMR[0] / sqrt(pow(DH * SPS, 2) + pow(DL * SPS, 2) + pow(SFL, 2)); // 归一化
 		TMR[1] = TMR[1] / sqrt(pow(DH * SPS, 2) + pow(DL * SPS, 2) + pow(SFL, 2));
 		TMR[2] = TMR[2] / sqrt(pow(DH * SPS, 2) + pow(DL * SPS, 2) + pow(SFL, 2));
 
@@ -69,7 +71,8 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 		if (TMR[0] == 0)
 			AYR = M_PI / 2 - asin(RI[2] / sqrt(1 - pow(TMR[1], 2)));
 		else
-			AYR = M_PI / 2 - asin(RI[2] / sqrt(1 - pow(TMR[1], 2))) - TMR[0] / fabs(TMR[0])*acos(TMR[2] / sqrt(1 - pow(TMR[1], 2)));
+			AYR = M_PI / 2 - asin(RI[2] / sqrt(1 - pow(TMR[1], 2))) -
+			      TMR[0] / fabs(TMR[0]) * acos(TMR[2] / sqrt(1 - pow(TMR[1], 2)));
 		// 绕俯仰轴旋转
 		TMR[0] = TMR[0] * cos(AYR) + TMR[2] * sin(AYR);
 		TMR[2] = TMR[2] * cos(AYR) - TMR[0] * sin(AYR);
@@ -82,9 +85,9 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 		AZR = atan2(RI[1], RI[0]) - atan2(TMR[1], TMR[0]);
 		// 绕方位轴旋转
 		// 由图像算得的实际光轴
-		tmpRES[2] = TMN[0] * cos(AZR) - TMN[1] * sin(AZR);		// Ix
-		tmpRES[3] = TMN[1] * cos(AZR) + TMN[0] * sin(AZR);		// Iy
-		tmpRES[4] = TMN[2];										// Iz
+		tmpRES[2] = TMN[0] * cos(AZR) - TMN[1] * sin(AZR); // Ix
+		tmpRES[3] = TMN[1] * cos(AZR) + TMN[0] * sin(AZR); // Iy
+		tmpRES[4] = TMN[2]; // Iz
 		//ResData.push_back(tmpRES);
 		ResData.emplace_back(tmpRES);
 		SS.emplace_back(tmpSS);
@@ -93,7 +96,7 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 	fclose(ResFile);
 
 	// 面积数据筛选
-	TMR[0] = (double)SumSS / dnum;	// 面积平均值
+	TMR[0] = (double)SumSS / dnum; // 面积平均值
 	DL = 0;
 	for (i = 0; i < dnum; i = i + 1) {
 		if (SSmax < (double)SS[i])
@@ -102,15 +105,15 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 	}
 	if (SSmax == TMR[0]) {
 		SL = TMR[0] - 5;
+		SR = TMR[0] + 5;
 	} else {
-		TMR[2] = sqrt(TMR[1] / (dnum - 1));	// 面积标准差
-		SL = TMR[0] - TMR[2] * 2;		// 面积下限	
+		TMR[2] = sqrt(TMR[1] / (dnum - 1)); // 面积标准差
+		SL = TMR[0] - TMR[2] * 4; // 面积下限
+		SR = TMR[0] + TMR[2] * 4; // 面积下限
 	}
 
-
-
-
-	double H11 = 0, H12 = 0, H13 = 0, H14 = 0, H15 = 0, H16 = 0, H17 = 0, H18 = 0, H21 = 0, H22 = 0, H23 = 0, H24 = 0, H25 = 0, H26 = 0, H27 = 0, H28 = 0;
+	double H11 = 0, H12 = 0, H13 = 0, H14 = 0, H15 = 0, H16 = 0, H17 = 0, H18 = 0, H21 = 0,
+	       H22 = 0, H23 = 0, H24 = 0, H25 = 0, H26 = 0, H27 = 0, H28 = 0;
 	double SumH[8], SumH2[8][8];
 
 	for (SumSS = 0; SumSS <= 10; SumSS++) {
@@ -120,17 +123,16 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 		//FILE *sheetfile = fopen("D://SN//SN1test//Res.csv", "wb+");
 		// 面积筛选
 		for (i = 0; i < dnum; i = i + 1) {
-
-			if (SS[i] >= SL)	// 面积太小的不计算
+			if ((SS[i] >= SL) && (SS[i] <= SR)) // 面积太小的不计算
 			{
-
 				// 代入运动模型
 				AY = (ResData[i][1] + PEP[3]) / (1 + PEP[6]);
-				AZ = (ResData[i][0] + PEP[2]) / (1 + PEP[5]);
+				AZ = (ResData[i][0] + PEP[2]) /
+				     (1 + (ResData[i][0] > 0 ? 1.0 : -1.0) * PEP[5]);
 
-				TMR[0] = sin(PEP[1])*(cos(AY)*cos(PEP[4])*cos(PEP[7]) - sin(PEP[4])*sin(PEP[7])) + cos(PEP[1])*(cos(AZ)*cos(PEP[7])*sin(AY) - sin(AZ)*(-cos(AY)*cos(PEP[7])*sin(PEP[4]) - cos(PEP[4])*sin(PEP[7])));
-				TMR[1] = cos(PEP[0])*(cos(PEP[7])*sin(AY)*sin(AZ) + cos(AZ)*(-cos(AY)*cos(PEP[7])*sin(PEP[4]) - cos(PEP[4])*sin(PEP[7]))) - sin(PEP[0])*(cos(PEP[1])*(cos(AY)*cos(PEP[4])*cos(PEP[7]) - sin(PEP[4])*sin(PEP[7])) - sin(PEP[1])*(cos(AZ)*cos(PEP[7])*sin(AY) - sin(AZ)*(-cos(AY)*cos(PEP[7])*sin(PEP[4]) - cos(PEP[4])*sin(PEP[7]))));
-				TMR[2] = sin(PEP[0])*(cos(PEP[7])*sin(AY)*sin(AZ) + cos(AZ)*(-cos(AY)*cos(PEP[7])*sin(PEP[4]) - cos(PEP[4])*sin(PEP[7]))) + cos(PEP[0])*(cos(PEP[1])*(cos(AY)*cos(PEP[4])*cos(PEP[7]) - sin(PEP[4])*sin(PEP[7])) - sin(PEP[1])*(cos(AZ)*cos(PEP[7])*sin(AY) - sin(AZ)*(-cos(AY)*cos(PEP[7])*sin(PEP[4]) - cos(PEP[4])*sin(PEP[7]))));
+				TMR[0] = sin(PEP[1]) * (cos(AY) * cos(PEP[4]) * cos(PEP[7]) - sin(PEP[4]) * sin(PEP[7])) + cos(PEP[1]) * (cos(AZ) * cos(PEP[7]) * sin(AY) - sin(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7])));
+				TMR[1] = cos(PEP[0]) * (cos(PEP[7]) * sin(AY) * sin(AZ) + cos(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7]))) - sin(PEP[0]) * (cos(PEP[1]) * (cos(AY) * cos(PEP[4]) * cos(PEP[7]) - sin(PEP[4]) * sin(PEP[7])) - sin(PEP[1]) * (cos(AZ) * cos(PEP[7]) * sin(AY) - sin(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7]))));
+				TMR[2] = sin(PEP[0]) * (cos(PEP[7]) * sin(AY) * sin(AZ) + cos(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7]))) + cos(PEP[0]) * (cos(PEP[1]) * (cos(AY) * cos(PEP[4]) * cos(PEP[7]) - sin(PEP[4]) * sin(PEP[7])) - sin(PEP[1]) * (cos(AZ) * cos(PEP[7]) * sin(AY) - sin(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7]))));
 
 				//fprintf(sheetfile, "%.6f", TMR[0]);
 				//fprintf(sheetfile, "%s", ",");
@@ -140,16 +142,18 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 				//fprintf(sheetfile, "%s", ",");
 
 				// 偏差角计算
-				AYR = acos(TMR[2]) - acos(ResData[i][4]);		// 俯仰偏差角
+				AYR = acos(TMR[2]) - acos(ResData[i][4]); // 俯仰偏差角
 
 				if ((ResData[i][2] >= 0) && (ResData[i][3] >= 0))
 					AZR = atan2(fabs(ResData[i][3]), fabs(ResData[i][2]));
 				else if ((ResData[i][2] < 0) && (ResData[i][3] >= 0))
-					AZR = M_PI - atan2(fabs(ResData[i][3]), fabs(ResData[i][2]));
+					AZR = M_PI -
+					      atan2(fabs(ResData[i][3]), fabs(ResData[i][2]));
 				else if ((ResData[i][2] >= 0) && (ResData[i][3] < 0))
 					AZR = -atan2(fabs(ResData[i][3]), fabs(ResData[i][2]));
 				else
-					AZR = -M_PI + atan2(fabs(ResData[i][3]), fabs(ResData[i][2]));
+					AZR = -M_PI +
+					      atan2(fabs(ResData[i][3]), fabs(ResData[i][2]));
 
 				if ((TMR[0] >= 0) && (TMR[1] >= 0))
 					AZR2 = atan2(fabs(TMR[1]), fabs(TMR[0]));
@@ -159,20 +163,13 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 					AZR2 = -atan2(fabs(TMR[1]), fabs(TMR[0]));
 				else
 					AZR2 = -M_PI + atan2(fabs(TMR[1]), fabs(TMR[0]));
-				AZR = AZR2 - AZR;		// 方位偏差角
-
+				AZR = AZR2 - AZR; // 方位偏差角
 
 				//fprintf(sheetfile, "%.6f", AZR);
 				//fprintf(sheetfile, "%s", ",");
 				//fprintf(sheetfile, "%.6f", AYR);
 				//fprintf(sheetfile, "%s", ",");
 				//fprintf(sheetfile, "%s", "\r\n");
-
-#if 0
-				if (fabs(AZR) > 0.1)
-					continue;
-#endif
-
 
 				H11 = sin(AZ);
 				H12 = -cos(AZ);
@@ -327,7 +324,6 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 						}
 					}
 				}
-
 			}
 			for (i = 0; i <= 7; i++) {
 				if (i != k) {
