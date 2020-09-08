@@ -4,18 +4,30 @@ build="tmp"
 workPath="/imxroot"
 
 
-if [ $# -lt 1 ] ; then
-	ver=`date +%Y-%m-%d`
-else
-	ver=$1
-fi
+ver=`date +%Y-%m-%d`
+installword='install/strip'
+while getopts "v:d" arg
+do
+	case $arg in
+		v)
+			ver=$OPTARG
+			;;
+		d)
+			installword="install"
+			;;
+		?)
+			echo 'unknown argument'
+			;;
+	esac
+done
+
 
 mkdir ${build}
 cd ${build}
 cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.cmake -DCPU=A7
 cpunum=$(cat /proc/cpuinfo | grep processor | wc -l)
 make -j${cpunum}
-sudo make install/strip
+sudo make $installword
 
 cd ../update
 make clean

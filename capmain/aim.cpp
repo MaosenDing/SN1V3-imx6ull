@@ -495,39 +495,80 @@ static int loopcap(int argc, char * argv[])
 	return 0;
 }
 
-int processTest(int argc, char * argv[]);
-int processTest2(int argc, char * argv[]);
-int testsunpos(int argc, char* argv[]);
-int createTabletest(int argc, char* argv[]);
+#include <boost/crc.hpp>
+template<typename  p>
+uint16_t crctem(p & c1,void * buff,int num)
+{
+	c1.reset();
+	c1.process_bytes(buff, num);
+	return c1.checksum();
+}
 
-int tableGenerate3(int argc, char * argv[]);
-int getidealmain(int argc, char * argv[]);
-int threadtest(int argc, char * argv[]);
+static int crctest(int argc, char *argv[])
+{
+	const char *buff = "1234";
+	uint16_t crc1 = crc_make((unsigned char *)buff, 4, 0xffff);
+
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+	boost::crc_16_type c1;
+	crc1 = crctem(c1, (void *)buff, 4);
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+	boost::crc_ccitt_false_t c2;
+	crc1 = crctem(c2, (void *)buff, 4);
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+	boost::crc_ccitt_true_t c3;
+	crc1 = crctem(c3, (void *)buff, 4);
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+	boost::crc_xmodem_type c4;
+	crc1 = crctem(c4, (void *)buff, 4);
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+	boost::crc_xmodem_t c5;
+	crc1 = crctem(c5, (void *)buff, 4);
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+	boost::crc_optimal<16, 0x8005, 0xffff, 0, true, true> c6;
+	crc1 = crctem(c6, (void *)buff, 4);
+	disp_x_buff((unsigned char *)&crc1, 2);
+
+
+	return 0;
+}
+
+int processTest(int argc, char *argv[]);
+int processTest2(int argc, char *argv[]);
+int testsunpos(int argc, char *argv[]);
+int createTabletest(int argc, char *argv[]);
+
+int tableGenerate3(int argc, char *argv[]);
+int getidealmain(int argc, char *argv[]);
+int threadtest(int argc, char *argv[]);
 MAIN_CMD cmd_group[] = {
-	{"RTF",rtf_test},
-	{"CPPREG",cppReg},
-	{ "capOnce" ,capOnce},
-	{"coredump",coredump},
-	{ "CREsave" ,creSaveTest},
-	{"ip",ipchange_pp},
-	{ "tableGen2" ,tableGenerate2 },
-	{ "tableGen3" ,tableGenerate3 },
-	{ "tv" , test_converter},
-	{ "deg" , degtest},
-	{"scanf",scanftest},
-	{"testfind",testfind},
-	{"testTimeTableV2",testTimeTableV2},
-	{"loopcap",loopcap},
-	{"pro",processTest},
-	{"pro2",processTest2},
-	{"table",createTabletest},
-	{"getidealmain",getidealmain},
-	{"thread",threadtest},
+	{ "RTF", rtf_test },
+	{ "CPPREG", cppReg },
+	{ "capOnce", capOnce },
+	{ "coredump", coredump },
+	{ "CREsave", creSaveTest },
+	{ "ip", ipchange_pp },
+	{ "tableGen2", tableGenerate2 },
+	{ "tableGen3", tableGenerate3 },
+	{ "tv", test_converter },
+	{ "deg", degtest },
+	{ "scanf", scanftest },
+	{ "testfind", testfind },
+	{ "testTimeTableV2", testTimeTableV2 },
+	{ "loopcap", loopcap },
+	{ "pro", processTest },
+	{ "pro2", processTest2 },
+	{ "table", createTabletest },
+	{ "getidealmain", getidealmain },
+	{ "thread", threadtest },
+	{ "crctest", crctest },
 };
-
-
-
-
 
 int main(int argc, char *argv[])
 {

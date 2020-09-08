@@ -14,7 +14,6 @@ do
 			ver=$OPTARG
 			;;
 		d)
-			echo '123'
 			installword="install"
 			;;
 		?)
