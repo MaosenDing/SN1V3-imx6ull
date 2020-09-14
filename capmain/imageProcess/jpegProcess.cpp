@@ -190,7 +190,7 @@ ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth)
 		SN1V2_ERROR_CODE_RET(err_out_of_memory);
 	}
 
-	unsigned long len = width * heigth * 3;
+	// unsigned long len = width * heigth * 3;
 	YUV422ToRGB888(yuyv, &data[0], width, heigth);
 
 	if (outfile == nullptr) {
@@ -306,7 +306,7 @@ static int __getJPEGfromFile(FILE * fp, vector<unsigned char> &outData, int &w, 
 }
 
 
-int getJPEGfromFile(char * file, vector<unsigned char> &outData, int & w, int &h ,int & imgType)
+int getJPEGfromFile(const char * file, vector<unsigned char> &outData, int & w, int &h ,int & imgType)
 {
 	FILE *fp = fopen(file, "rb");
 

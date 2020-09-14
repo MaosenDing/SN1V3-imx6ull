@@ -30,7 +30,7 @@ using namespace std;
 
 
 void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
-int getJPEGfromFile(char * file, vector<unsigned char> &outData, int & w, int &h, int & imgType);
+int getJPEGfromFile(const char * file, vector<unsigned char> &outData, int & w, int &h, int & imgType);
 ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer, bool BINjpgSaveFlag = true, unsigned int MinCntGrp = 50);
 int processTest(int argc, char * argv[])
 {
@@ -188,7 +188,7 @@ shared_ptr< JD_FRAME> JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO &
 	}
 	return shared_ptr< JD_FRAME>();
 }
-static volatile float ctrl_deg1, ctrl_deg2;
+static volatile float ctrl_deg1 = 0 , ctrl_deg2 = 0;
 static std::condition_variable_any enable_ctrl;
 static std::timed_mutex mutex_ctrl;
 void ctrl_thread(void)
@@ -206,7 +206,7 @@ void ctrl_thread(void)
 	while (true) {
 		unique_lock<timed_mutex> lck(mutex_ctrl);
 		enable_ctrl.wait(lck);
-		float deg1, deg2;
+		float deg1 = 0, deg2 = 0;
 		//读取角度
 		jfr.jd_aim.byte_value.low_byte = 0xff;
 		jfr.jd_aim.byte_value.mlow_byte = 0xff;
@@ -264,10 +264,6 @@ int tableGenerate3(int argc, char * argv[])
 {
 	cout << "table generate3" << endl;
 
-
-	int ret;
-	ERR_STA err;
-
 	Tg_table tg_table;
 	scanfAllTable(tg_table, Mask_All);
 
@@ -308,10 +304,9 @@ int tableGenerate3(int argc, char * argv[])
 	}
 	auto tab = createTable(tg_table, year, mon, day);
 	char tableName[36];
-	snprintf(tableName,36,"%d-%d-%d-table.txt");
+	snprintf(tableName, 36, "%d-%d-%d-table.txt", year, mon, day);
 	saveSunTable(tab,tableName);
 
-	int lastsec = 0;
 	int workflg = 1;
 
 	thread t_ctrl(ctrl_thread);
@@ -320,7 +315,6 @@ int tableGenerate3(int argc, char * argv[])
 	int sleepflg = 0;
 	float x_pos = 0;
 	float y_pos = 0;
-	float r2 = 1;
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {

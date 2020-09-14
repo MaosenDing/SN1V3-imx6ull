@@ -80,7 +80,6 @@ ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
 {
 	my_cap_init(gain, expo, horizenFlip, VeriFlip);
 
-	ERR_STA err;
 
 	if (video_fd < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_open);
@@ -119,8 +118,6 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 	, const int horizenFlip, const int VeriFlip
 )
 {
-	ERR_STA err;
-
 	if (video_fd < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_open);
 	}
@@ -211,8 +208,6 @@ ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int 
 	, const int horizenFlip, const int VeriFlip, char * savename
 )
 {
-	ERR_STA err;
-
 	if (video_fd < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_open);
 	}

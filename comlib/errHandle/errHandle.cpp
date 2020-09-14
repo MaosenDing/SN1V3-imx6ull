@@ -26,7 +26,6 @@ static void SigHandle(const char * data, int insize)
 		errorFlag = 1;
 		const int MAX_CALLSTACK_DEPTH = 32;
 		void *traceback[MAX_CALLSTACK_DEPTH];
-		char **stackinfo_string;
 		int depth = backtrace(traceback, MAX_CALLSTACK_DEPTH);
 		backtrace_symbols_fd(traceback, depth, FileFailOutfd);
 	}

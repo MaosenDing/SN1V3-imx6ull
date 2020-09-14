@@ -88,7 +88,7 @@ JDAUTOSEND * jdsvc_stops()
 }
 int JD_stop_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
-	JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
+	__attribute__((unused)) JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
 
 	jsvc.trig_cpl(jif, jfr);
 

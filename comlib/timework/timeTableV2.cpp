@@ -15,7 +15,7 @@ static inline bool checkTime_type2(tm & reftm)
 }
 
 
-ERR_STA load_table(char * filename, std::list<timTableSetV2> & outTable)
+ERR_STA load_table(const char * filename, std::list<timTableSetV2> & outTable)
 {
 	ERR_STA err = err_UNKNOWN;
 	cout << "load type 2" << endl;

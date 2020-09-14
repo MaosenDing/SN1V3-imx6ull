@@ -86,8 +86,8 @@
 	ERR_STA WTF(char * filePath, char fdelimiter, char wtype, std::string & fdata);
 
 	//保存文件
-	ERR_STA saveBin(char * filePath, char * data, unsigned long dataSize);
-	ERR_STA saveBin(char * filePath, std::vector<uint8_t> & vdata);
+	ERR_STA saveBin(const char * filePath, char * data, unsigned long dataSize);
+	ERR_STA saveBin(const char * filePath, std::vector<uint8_t> & vdata);
 	ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData);
 	ERR_STA saveCsv(char * filePath, std::vector<uint8_t> & vdata, int lineWidth);
 	//载入文件
@@ -217,7 +217,7 @@
 
 
 	//载入时间表
-	ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable);
+	ERR_STA load_table(const char * filename, std::vector<timTableSet> & outTable);
 	//时间表裁剪
 	//void rm_past_tm(std::vector<unsigned int> &table);
 #define USING_DUMMY_CAP_SRC 0

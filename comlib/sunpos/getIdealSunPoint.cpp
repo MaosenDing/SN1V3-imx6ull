@@ -24,8 +24,8 @@ Vector3f calSunRayIn(Vector2f & sunAngle,Vector3f & helioPoint,Vector3f & aimPoi
 # 报错：输出错误[null,null,null]，表示太阳高度角小于T°
 */
 	if (sunAngle[0]<=T)
-	{	
-		Vector3f Rayin_h_ZR(NULL,NULL,NULL);
+	{
+		Vector3f Rayin_h_ZR(0, 0, 0);
 		return Rayin_h_ZR;
 	}
 

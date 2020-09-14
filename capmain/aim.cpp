@@ -132,11 +132,11 @@ static int capOnce(int argc, char * argv[])
 		//key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
 		//SN1_SHM * psn1 = (SN1_SHM *)getSHM(key, sizeof(SN1_SHM));
 
-		char capOnce[32] = "capOnce";
+		char capOnce[64] = "capOnce";
 		char testCSC[] = "test.csv";
 
 		if (strlen(cfg.ForceSavePath)) {
-			sprintf(capOnce, "%s/capOnce", cfg.ForceSavePath);
+			snprintf(capOnce, sizeof(capOnce), "%s/capOnce", cfg.ForceSavePath);
 			mkdir(capOnce, 0777);
 			cfg.FLAG_SAVE_BIN = 1;
 			cfg.FLAG_SAVE_ORG = 1;
@@ -276,19 +276,20 @@ int tableGenerate2(int argc, char * argv[])
 		const int day = t2.tm_mday;
 
 		//创建拍摄暂存目录
-		char storPath[24];
-		sprintf(storPath, "%04d_%02d_%02d", year, mon, day);
+		char storPath[128];
+		snprintf(storPath, sizeof(storPath), "%04d_%02d_%02d", year, mon, day);
 		mkdir(storPath, 0777);
 
 		//照片存储目录
 
-		char photoPath[24];
+		char photoPath[128];
 		if (strlen(cfg.ForceSavePath)) {
 			SN1V2_ERR_LOG("force save jpeg in %s\n", cfg.ForceSavePath);
 			cfg.FLAG_SAVE_BIN = 1;
 			cfg.FLAG_SAVE_ORG = 1;
 
-			sprintf(photoPath, "%s/%04d_%02d_%02d", cfg.ForceSavePath, year, mon, day);
+			snprintf(photoPath, sizeof(photoPath), "%s/%04d_%02d_%02d",
+				 cfg.ForceSavePath, year, mon, day);
 			mkdir(photoPath, 0777);
 		} else {
 			strcpy(photoPath, storPath);

@@ -69,7 +69,7 @@ static inline void getTmType_fullConfig(const char * pos, timTableSet & rtm)
 		);
 }
 
-ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
+ERR_STA load_table(const char * filename, std::vector<timTableSet> & outTable)
 {
 	ERR_STA err = err_UNKNOWN;
 	cout << "load type 2" << endl;
@@ -134,47 +134,6 @@ ERR_STA load_table(char * filename, std::vector<timTableSet> & outTable)
 		SN1V2_ERROR_CODE_RET(err_inval_path);
 	}
 	return err;
-}
-
-
-static ERR_STA load_table_fixed(vector<unsigned int> & outTable)
-{
-	tm  thisTm;
-	ERR_STA err = GetTim(thisTm);
-
-	thisTm.tm_hour = 0;
-	thisTm.tm_min = 0;
-	thisTm.tm_sec = 0;
-
-	time_t tms = mktime(&thisTm);
-
-	if (err == err_ok || tms > 0)
-	{
-		for (auto &p : outTable)
-		{
-			p += tms;
-		}
-
-		std::sort(outTable.begin(), outTable.end(), [](unsigned int a, unsigned b) {return a > b; });
-#if 0
-		for (size_t i = 0; i < 5; i++)
-		{
-			time_t tt = outTable.at(i);
-			tm ref;
-			localtime_r(&tt, &ref);
-
-			fprintf(stdout, "year = %d,mon = % d,day = %d""hour = %d,min = % d,sec = %d\n"
-				, ref.tm_year + 1900, ref.tm_mon + 1, ref.tm_mday
-				, ref.tm_hour, ref.tm_min, ref.tm_sec);
-		}
-#endif
-
-		return err_ok;
-	}
-	else
-	{
-		SN1V2_ERROR_CODE_RET(err_tim_data_error);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////

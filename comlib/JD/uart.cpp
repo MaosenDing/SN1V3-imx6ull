@@ -29,14 +29,6 @@ typedef struct {
 #define TIMEOUT_USEC 0   
 
 portinfo_t  portinfo;    //串口用结构体
-
-
-/*---------------------------内部调用-----------------------------*/
-static int UARTx_Open(int fd,const char *);
-static void UARTx_Close(int fd);
-static int UARTx_Set(int fdcom, portinfo_t uartinfo);
-
-
 /*----------------------------------------------------------------*/
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -96,7 +88,7 @@ static int UARTx_Open(int fd,char * portName)
 * 出口参数：
 * 返回值：
 */
-static void UARTx_Close(int fd)
+void UARTx_Close(int fd)
 {
 	close(fd);
 }

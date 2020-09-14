@@ -4,6 +4,7 @@
 #include "../wifi_ctrl.h"
 #include "svc_once_read.h"
 #include <mutex>
+#include <string.h>
 using namespace  std;
 
 
@@ -87,7 +88,7 @@ struct WIFI_FUNCTION_UPLOADFILE_FILE_DAT :public WIFI_BASE_FUNCTION
 		size_t sz = dat.size();
 		if (info.dbg_pri_msg) printf("out index = %d,", packindex);
 		const unsigned char * srcdat = &dat[0];
-		if (packindex > MaxIndex || packindex <= 0) {
+		if (packindex > (size_t)MaxIndex) {
 			if (info.dbg_pri_msg) printf("end frame\n");
 			return 0;
 		}

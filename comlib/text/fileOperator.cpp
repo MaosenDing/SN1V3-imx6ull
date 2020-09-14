@@ -324,7 +324,7 @@ ERR_STA WTF(char * filePath, char fdelimiter, char wtype, string & fdata)
 // Parameter: char * data
 // Parameter: unsigned long dataSize
 //************************************
-ERR_STA saveBin(char * filePath, char * data, unsigned long dataSize)
+ERR_STA saveBin(const char * filePath, char * data, unsigned long dataSize)
 {
 	if (filePath || dataSize || dataSize)
 	{
@@ -355,7 +355,7 @@ ERR_STA saveBin(char * filePath, char * data, unsigned long dataSize)
 }
 
 
-ERR_STA saveBin(char * filePath, vector<uint8_t> & vdata)
+ERR_STA saveBin(const char * filePath, vector<uint8_t> & vdata)
 {
 	if (filePath)
 	{
@@ -392,7 +392,7 @@ ERR_STA saveBin(char * filePath, vector<uint8_t> & vdata)
 shared_ptr<vector<string> > getAllFileName(char * path,const char * postfix)
 {
 	DIR *dfd;
-	char tmpname[256];
+	char tmpname[512];
 	shared_ptr<vector<string> > ret = make_shared<vector<string>>();
 	
 	if ((dfd = opendir(path)) == NULL)

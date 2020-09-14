@@ -24,7 +24,7 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 		sprintf(ER, "%d", -1);
 		return ER;
 	} //出错处理
-	double DH, DL, RI[3], AYR, AZR, AZR2, TMR[3], TMN[3], AY, AZ, SL, SR;
+	double DH, DL, RI[3], AYR, AZR, AZR2, TMR[3] = {0}, TMN[3], AY, AZ, SL, SR;
 
 	double SSmax = 0;
 	int dnum = 0, SumSS = 0, i, j, k;

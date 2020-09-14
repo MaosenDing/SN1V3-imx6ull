@@ -6,11 +6,14 @@
                 "${workspaceFolder}/**"
             ],
             "defines": [
-                "CORTEX"
+                "CORTEX",
+                "VERSION_MDC='VERSION_MDC'"
             ],
             "compilerPath": "/share/a53/buildroot-2020.02.3/output/host/bin/arm-buildroot-linux-gnueabihf-gcc",
             "cStandard": "gnu18",
-            "cppStandard": "gnu++14"
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "gcc-arm64",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4

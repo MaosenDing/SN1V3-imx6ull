@@ -52,8 +52,8 @@ ERR_STA SavImg(char * filPath, IMAGEDATA & ImageData)
 
 void fastbinaryzation(unsigned char * src, int thres, int insize);
 
-int getMaxVal(vector<uint8_t> &testArray);
-int getMaxVal(unsigned char * src, size_t sz);
+unsigned int getMaxVal(vector<uint8_t> &testArray);
+unsigned int getMaxVal(unsigned char * src, size_t sz);
 //************************************
 // Method:    BinaImg
 // FullName:  BinaImg
@@ -87,7 +87,7 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 		{
 			vector<uint8_t> & testArray = *inputData.Image_data;
 
-			int maxval = getMaxVal(testArray);
+			unsigned int maxval = getMaxVal(testArray);
 			int realThres = maxval * bth;
 			if (maxval > gth)
 			{
@@ -122,7 +122,7 @@ ERR_STA BinaImg(IMAGEDATA & inputData, unsigned int gth, float bth, IMAGEDATA & 
 				}
 #if 0
 				//保存二值化图像
-				cout << "save bin error code =" << (int)saveBin((char *)"mybin", testArray) << endl;
+				cout << "save bin error code =" << (int)saveBin("mybin", testArray) << endl;
 #endif
 				outImage.itype = IT_BIN_ONE_BYTE;
 				outImage.left = inputData.left;
@@ -162,7 +162,7 @@ ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 		if (!procData.Image_data->empty()) {
 			vector<uint8_t> & testArray = *procData.Image_data;
 
-			int maxval = getMaxVal(testArray);
+			unsigned int maxval = getMaxVal(testArray);
 			int realThres = maxval * bth;
 			if (maxval > gth) {
 				shared_ptr<vector<uint8_t>> tmpArray = procData.Image_data;
@@ -184,7 +184,7 @@ ERR_STA BinaImg(IMAGEDATA & procData, unsigned int gth, float bth)
 				}
 #if 0
 				//保存二值化图像
-				cout << "save bin error code =" << (int)saveBin((char *)"mybin", testArray) << endl;
+				cout << "save bin error code =" << (int)saveBin("mybin", testArray) << endl;
 #endif
 				procData.itype = IT_BIN_ONE_BYTE;
 				return err_ok;
@@ -208,7 +208,7 @@ ERR_STA BinaImg(unsigned char * src, size_t sz, unsigned int gth, float bth)
 	if (gth > 0 && gth <= 255 && bth > 0.000001f && bth < 1.0f) {
 
 		if (src && (sz > 0)) {
-			int maxval = getMaxVal(src, sz);
+			unsigned int maxval = getMaxVal(src, sz);
 			int realThres = maxval * bth;
 			if (maxval > gth) {
 				{
@@ -217,7 +217,7 @@ ERR_STA BinaImg(unsigned char * src, size_t sz, unsigned int gth, float bth)
 				}
 #if 0
 				//保存二值化图像
-				cout << "save bin error code =" << (int)saveBin((char *)"mybin", testArray) << endl;
+				cout << "save bin error code =" << (int)saveBin("mybin", testArray) << endl;
 #endif
 				return err_ok;
 			} else {//有图就不记录错误

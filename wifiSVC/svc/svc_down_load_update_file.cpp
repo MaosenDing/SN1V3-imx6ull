@@ -67,7 +67,7 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 			if (pid == 0) {
 				printf("exev %s\n", updatepath);
 				chmod(updatepath, 0777);
-				execv(updatepath, nullptr);
+				execl(updatepath, updatepath, (char *)NULL);
 				exit(0);
 			}
 		}

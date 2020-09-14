@@ -3,6 +3,13 @@ cmake_minimum_required(VERSION 3.0)
 option(ENABLE_SHARED_COM "enable shared com" ON)
 option(CMAKE_VERBOSE_MAKEFILE "make verbose=1" OFF)
 
+if(DEFINED ver)
+message("user version")
+else()
+message("auto version")
+string(TIMESTAMP ver "%Y-%m-%d")
+endif()
+
 add_definitions(-DVERSION_MDC="${ver}")
 message("using VERSION =${ver}")
 

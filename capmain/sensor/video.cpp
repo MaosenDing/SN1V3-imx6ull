@@ -170,8 +170,8 @@ int set_gain_expose(int fd, int gain, int expose)
 	get_one_frame(fd);
 	get_one_frame(fd);
 #endif
+	return 0;
 }
-
 
 
 

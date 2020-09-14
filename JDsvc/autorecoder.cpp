@@ -19,7 +19,7 @@ void auto_recoder_main(MDC_INFO * pjif)
 
 		char recoderbuff[128];
 
-		int len = snprintf(recoderbuff, 128, "time test %4d-%02d-%02d %02d:%02d:%02d status %d time %d\n"
+		__attribute__((unused)) int len = snprintf(recoderbuff, 128, "time test %4d-%02d-%02d %02d:%02d:%02d status %d time %d\n"
 			, now_time.tm_year + 1900, now_time.tm_mon + 1, now_time.tm_mday
 			, now_time.tm_hour, now_time.tm_min, now_time.tm_sec
 			, pjif->psn1->last_error_code, pjif->psn1->error_count

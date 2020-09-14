@@ -44,7 +44,7 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 			*SpdSig_At = 1; //俯仰转速信号
 			*SpdSig_Az = 1; //方位转速信号
 			*Slpflg = 0;
-		} else if (nt >= 5 & nt < 10) {
+		} else if (nt >= 5 && nt < 10) {
 			if (x_pos_2 > 0) {
 				*Az = atan2(q * del_x, fy) * r1 * 180 / 3.1415926; //At:俯仰增量角度
 				//*Az = -atan2(del_y, del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度

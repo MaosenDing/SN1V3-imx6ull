@@ -208,7 +208,7 @@ static void clean_other_tag(IMAGEDATA & inImage, int SaveTag)
 		}
 	}
 #else
-	for (size_t i = 0; i < (inImage.size() & (~3)); i++) {
+	for (size_t i = 0; i < ((size_t)inImage.size() & (~3)); i++) {
 		unsigned char & testPos = inImage.Image_data[i];
 		if (testPos == SaveTag) {
 			testPos = 255;
@@ -306,7 +306,7 @@ static shared_ptr<vector<PixPos> > getLineament(IMAGEDATA &inImage)
 
 	shared_ptr<vector<PixPos> > retVect = make_shared<vector<PixPos>>();
 
-	for (size_t index = 0; index < inImage.size(); index++)
+	for (size_t index = 0; index < (size_t)inImage.size(); index++)
 	{
 		unsigned char & testPoint = inImage.at(index);
 
@@ -337,7 +337,7 @@ static shared_ptr<vector<PixPos> > getLineament(IMAGEDATA &inImage)
 		}
 	}
 	//消除内部点
-	for (size_t index = 0; index < (inImage.size() &(~3)); index++)
+	for (size_t index = 0; index < ((size_t)inImage.size() &(~3)); index++)
 	{
 		unsigned char testPoint = inImage.at(index);
 		if (testPoint != 255)
@@ -457,7 +457,7 @@ float CirDeg(vector<PixPos> & RangePixPos, int diff_center_x, int diff_center_y)
 	return quality;
 }
 
-int saveCir(char * SavePath, vector<PixPos> & RangePixPos, int img_start_x, int img_start_y)
+int saveCir(const char * SavePath, vector<PixPos> & RangePixPos, int img_start_x, int img_start_y)
 {
 	vector<unsigned char> tmpwrite;
 

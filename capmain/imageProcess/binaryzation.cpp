@@ -341,7 +341,7 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 
 
 #ifndef CORTEX
-int getMaxVal(unsigned char * src,size_t sz)
+unsigned int getMaxVal(unsigned char * src,size_t sz)
 {
 	unsigned char * max;
 	{
@@ -356,7 +356,7 @@ int getMaxVal(unsigned char * src,size_t sz)
 
 
 #else
-int getMaxVal(unsigned char * src, size_t num)
+unsigned int getMaxVal(unsigned char * src, size_t num)
 {
 	TIME_INTERVAL_SCOPE("get max :");
 
@@ -416,7 +416,7 @@ int getMaxVal(unsigned char * src, size_t num)
 	return max;
 }
 #endif
-int getMaxVal(vector<uint8_t> &testArray)
+unsigned int getMaxVal(vector<uint8_t> &testArray)
 {
 	return getMaxVal(&testArray[0], testArray.size());
 }
@@ -469,7 +469,7 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 
 	const int16x8_t const_128 = vdupq_n_s16(128);
 
-	const uint8x8_t const_8 = vdup_n_u8(8);
+	// const uint8x8_t const_8 = vdup_n_u8(8);
 
 	int16_t dat[4] = { 88,198,103,183 };
 
@@ -534,7 +534,7 @@ void YUV422ToRGB888(const void* inbuf, void* outbuf, int width, int height)
 
 	const int16x8_t const_128 = vdupq_n_s16(128);
 
-	const uint8x8_t const_8 = vdup_n_u8(8);
+	// const uint8x8_t const_8 = vdup_n_u8(8);
 
 	int16_t dat[4] = { 88,198,103,183 };
 
@@ -609,12 +609,6 @@ void YUV422ToGray_B(const void* inbuf, void* outbuf, int width, int height)
 
 	const int16x8_t const_128 = vdupq_n_s16(128);
 
-	const uint8x8_t const_8 = vdup_n_u8(8);
-
-	int16_t dat[4] = { 88,198,103,183 };
-
-	int16x4_t const_dat = vld1_s16(dat);
-
 	for (int pos = 0; pos < ((height * width / 2 / 8) &(~127)); pos++) {
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
@@ -622,7 +616,7 @@ void YUV422ToGray_B(const void* inbuf, void* outbuf, int width, int height)
 		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
 
 		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
-		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
+		// int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
 
 		int16x8_t bcfg = vshrq_n_s16(vmulq_n_s16(u, 198), 8);
 		bcfg = vaddq_s16(bcfg, u);
@@ -654,7 +648,7 @@ void YUV422ToGray_G(const void* inbuf, void* outbuf, int width, int height)
 
 	const int16x8_t const_128 = vdupq_n_s16(128);
 
-	const uint8x8_t const_8 = vdup_n_u8(8);
+	// const uint8x8_t const_8 = vdup_n_u8(8);
 
 	int16_t dat[4] = { 88,198,103,183 };
 
@@ -701,7 +695,7 @@ void YUV422ToGray_R(const void* inbuf, void* outbuf, int width, int height)
 
 	const int16x8_t const_128 = vdupq_n_s16(128);
 
-	const uint8x8_t const_8 = vdup_n_u8(8);
+	// const uint8x8_t const_8 = vdup_n_u8(8);
 
 	int16_t dat[4] = { 88,198,103,183 };
 
@@ -713,7 +707,7 @@ void YUV422ToGray_R(const void* inbuf, void* outbuf, int width, int height)
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
 		int16x8_t y1 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[2]));
 
-		int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
+		// int16x8_t u = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[1])), const_128);
 		int16x8_t v = vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(yuv.val[3])), const_128);
 
 		int16x8_t rcfg = vshrq_n_s16(vmulq_lane_s16(v, const_dat, 2), 8);
