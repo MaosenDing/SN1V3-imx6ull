@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "a53",
             "includePath": [
                 "${workspaceFolder}/**"
             ],

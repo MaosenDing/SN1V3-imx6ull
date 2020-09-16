@@ -1,8 +1,7 @@
 #! /bin/bash
 
 build="tmp"
-workPath="/a53root"
-
+workPath="/nucroot"
 
 
 ver=`date +%Y-%m-%d`
@@ -25,7 +24,7 @@ done
 
 mkdir ${build}
 cd ${build}
-cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.a53.cmake -DCPU=A53
+cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.arm9.cmake -DCPU=arm9
 cpunum=$(cat /proc/cpuinfo | grep processor | wc -l)
 make -j${cpunum}
 make $installword
@@ -33,7 +32,7 @@ make $installword
 cd ../update
 make clean
 ./cp.sh
-make VERSION=_${ver}
+make VERSION=_${ver} $2 
 cp aim/*.bin ../
 make clean
 

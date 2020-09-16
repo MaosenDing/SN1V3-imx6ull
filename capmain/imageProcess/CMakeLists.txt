@@ -17,7 +17,6 @@ binaryzation.cpp
 )
 
 
-target_include_directories(imageProcess PUBLIC "jpeg")
-target_link_directories(imageProcess PUBLIC "jpeg")
+
 target_link_libraries(imageProcess PUBLIC -ljpeg)
 

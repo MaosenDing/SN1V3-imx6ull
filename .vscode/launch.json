@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "a53 (gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "tmp/capmain/aim.exe",

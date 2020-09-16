@@ -1,7 +1,7 @@
 #include <iostream>
 #include "SN1V2_com.h"
 #include <memory>
-#include "jpgInc/jpeglib.h"
+#include "jpeglib.h"
 #include "errHandle/errHandle.h"
 using namespace std;
 
@@ -45,8 +45,8 @@ ERR_STA SaveGRAYJpg(char * fName, IMAGEDATA & regImg)
 		jcs.in_color_space = JCS_GRAYSCALE;
 
 		jpeg_set_defaults(&jcs);
-		jpeg_set_quality(&jcs, 80, boolean::TRUE);
-		jpeg_start_compress(&jcs, boolean::TRUE);
+		jpeg_set_quality(&jcs, 80, TRUE);
+		jpeg_start_compress(&jcs, TRUE);
 #if 1
 		for (int i = 0; i < heigth; i++)
 		{
@@ -92,8 +92,8 @@ ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg,int width,int heigth)
 		jcs.in_color_space = JCS_GRAYSCALE;
 
 		jpeg_set_defaults(&jcs);
-		jpeg_set_quality(&jcs, 80, boolean::TRUE);
-		jpeg_start_compress(&jcs, boolean::TRUE);
+		jpeg_set_quality(&jcs, 80, TRUE);
+		jpeg_start_compress(&jcs, TRUE);
 #if 1
 		for (int i = 0; i < heigth; i++) {
 			row_point[0] = &regImg[width * i];
@@ -157,8 +157,8 @@ ERR_STA SaveRGB565Jpg(char * fName, unsigned char * rgb565, int width, int heigt
 		jcs.in_color_space = JCS_RGB;
 
 		jpeg_set_defaults(&jcs);
-		jpeg_set_quality(&jcs, 80, boolean::TRUE);
-		jpeg_start_compress(&jcs, boolean::TRUE);
+		jpeg_set_quality(&jcs, 80, TRUE);
+		jpeg_start_compress(&jcs, TRUE);
 #if 1
 		for (int i = 0; i < heigth; i++)
 		{
@@ -215,8 +215,8 @@ ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth)
 		jcs.in_color_space = JCS_RGB;
 
 		jpeg_set_defaults(&jcs);
-		jpeg_set_quality(&jcs, 80, boolean::TRUE);
-		jpeg_start_compress(&jcs, boolean::TRUE);
+		jpeg_set_quality(&jcs, 80, TRUE);
+		jpeg_start_compress(&jcs, TRUE);
 #if 1
 		for (int i = 0; i < heigth; i++) {
 			//row_point[0] = &regImg.at(0, i);

@@ -32,7 +32,7 @@ int saveSunTable(shared_ptr <vector <SUNPOS >> &tab ,const char * savePath)
 		filout.write(buff, size);
 	}
 
-
+	return 0;
 }
 
 
