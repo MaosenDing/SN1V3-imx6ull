@@ -25,7 +25,7 @@ done
 
 mkdir ${build}
 cd ${build}
-cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.a53.cmake -DCPU=A53
+cmake .. -DCMAKE_INSTALL_PREFIX=${workPath} -Dver=${ver} -DCMAKE_TOOLCHAIN_FILE=../compiler.a53.cmake
 cpunum=$(cat /proc/cpuinfo | grep processor | wc -l)
 make -j${cpunum}
 make $installword

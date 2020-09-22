@@ -12,3 +12,5 @@ add_definitions(-mno-unaligned-access -fno-aggressive-loop-optimizations -fno-om
 add_definitions("-O2")
 add_definitions("-g3")
 add_definitions(-Wall)
+
+set(GLOG_DIR "/share/nuc/gloginstall/lib/cmake/glog")

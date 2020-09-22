@@ -42,17 +42,6 @@ sunpos
 "-Wl,--no-whole-archive"
 )
 
-IF (CPU STREQUAL "A7")
-set(GLOG_DIR "/share/imx/gloginstall/lib/cmake/glog")
-ENDIF()
-
-IF (CPU STREQUAL "A53")
-set(GLOG_DIR "/share/a53/gloginstall/lib/cmake/glog")
-ENDIF()
-
-IF (CPU STREQUAL "arm9")
-set(GLOG_DIR "/share/nuc/gloginstall/lib/cmake/glog")
-ENDIF()
 
 find_package(GLOG)
 target_link_libraries(comlib PUBLIC glog::glog)
