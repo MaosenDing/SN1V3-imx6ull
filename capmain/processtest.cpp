@@ -188,9 +188,27 @@ shared_ptr< JD_FRAME> JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO &
 	}
 	return shared_ptr< JD_FRAME>();
 }
-static volatile float ctrl_deg1 = 0 , ctrl_deg2 = 0;
+static volatile float diff_ctrl_deg1 = 0 , diff_ctrl_deg2 = 0;
+static volatile float abs_ctrl_deg_1 = 0, abs_ctrl_deg_2 = 0;
+static volatile int abs_ctrl_flag = 0;
 static std::condition_variable_any enable_ctrl;
 static std::timed_mutex mutex_ctrl;
+
+
+void set_deg(int flg,float deg1,float deg2)
+{
+	abs_ctrl_flag = flg;
+	if (flg) {
+		abs_ctrl_deg_1 = deg1;
+		abs_ctrl_deg_2 = deg2;
+	} else {
+		diff_ctrl_deg1 = deg1;
+		diff_ctrl_deg2 = deg2;
+	}
+	enable_ctrl.notify_all();
+}
+
+
 void ctrl_thread(void)
 {
 	char namebuff[64];
@@ -236,19 +254,29 @@ void ctrl_thread(void)
 		//	continue;
 		//}
 
-		float aimf1 = deg1 + ctrl_deg1;
-		float aimf2 = deg2 + ctrl_deg2;
-		printf("using deg %f,%f,%f,%f\n",deg1,deg2 , ctrl_deg1, ctrl_deg2);
+		if (abs_ctrl_flag) {
+			float aimf1 = abs_ctrl_deg_1;
+			float aimf2 = abs_ctrl_deg_2;
+			printf("using abs deg ctrl %f,%f,%f,%f\n", deg1, deg2, abs_ctrl_deg_1,
+			       abs_ctrl_deg_2);
+			Angle_Convert_UShort(aimf1, sndbuf + 0);
+			Angle_Convert_UShort(aimf2, sndbuf + 3);
+		} else {
+			float aimf1 = deg1 + diff_ctrl_deg1;
+			float aimf2 = deg2 + diff_ctrl_deg2;
+			printf("using diff deg %f,%f,%f,%f\n", deg1, deg2, diff_ctrl_deg1,
+			       diff_ctrl_deg2);
+			Angle_Convert_UShort(aimf1, sndbuf + 0);
+			Angle_Convert_UShort(aimf2, sndbuf + 3);
+		}
 
-		Angle_Convert_UShort(aimf1, sndbuf + 0);
-		Angle_Convert_UShort(aimf2, sndbuf + 3);
 		jfr.jd_send_buff = sndbuf;
 		jfr.jd_data_len = 6;
 		JD_send(jif, jfr);
 
 		rdsz = read(fd, buff, 1024);
-		ctrl_deg1 = 0;
-		ctrl_deg2 = 0;
+		diff_ctrl_deg1 = 0;
+		diff_ctrl_deg2 = 0;
 		if (rdsz) {
 
 			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
@@ -269,7 +297,7 @@ int tableGenerate3(int argc, char * argv[])
 
 	logInit("aim", "./aim", google::GLOG_ERROR);
 	int gain = 50;
-	int expose = 100;
+	int expose = 200;
 
 
 	my_cap_init(gain, expose, 0, 0);
@@ -327,7 +355,7 @@ int tableGenerate3(int argc, char * argv[])
 			}
 
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 200, 0.8, true, false, 50, gain, expose, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 180, 0.8, true, false, 15, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
 				x_diff = res.diff_x + 1920 / 2;
@@ -359,12 +387,11 @@ int tableGenerate3(int argc, char * argv[])
 				       tg_table.T6.SN1_P4_y, x_pos_2, y_pos_2, &zrat, &zraz,
 				       &speedat, &speedaz, &sleepflg);
 
-				ctrl_deg1 = zrat;
-				ctrl_deg2 = zraz;
+				set_deg(0, zrat, zraz);
 
 				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf", x_diff, y_diff, x_diff - tabsun.ZR_u, y_diff - tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az);
 				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
-				enable_ctrl.notify_all();
+				
 			} else {
 				printf("find fail\n");
 			}
