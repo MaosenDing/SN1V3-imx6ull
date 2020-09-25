@@ -572,7 +572,8 @@ static ERR_STA BinProcess(IMAGEDATA & inImage, PROCESS_RESULT & res, unsigned in
 			err = RegImg(*processImage, pixCnt, MinCntGrp);
 			if (err != err_ok) {
 				//cout << "reg Img error = " << (int)err << endl;
-				SN1V2_WARN_MWSSAGE_WITH("reg img", err);
+				ERR_STA no_reg_img = err;
+				SN1V2_WARN_MWSSAGE_WITH("reg img", no_reg_img);
 				return err;
 			}
 			//计算相对中心点

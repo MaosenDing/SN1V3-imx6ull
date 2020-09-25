@@ -27,7 +27,6 @@
 #include "timeTableV2.h"
 #include <fstream>
 
-
 #include "SunPosTable.h"
 #include "sn1v3cfg.h"
 #include "tableWork.h"
@@ -37,11 +36,9 @@
 #include "SN1V2_error.h"
 #include "errHandle.h"
 
-
 using namespace std;
 
-
-static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
+static void make_rec_pack(unsigned char *rxbuf, int num, JD_FRAME &jfr)
 {
 	//recoder the head
 	jfr.jd_frame_head = rxbuf;
@@ -63,7 +60,7 @@ static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
 	}
 }
 
-shared_ptr< JD_FRAME> JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
+shared_ptr<JD_FRAME> JD_pro_bare_buff(unsigned char *rxbuf, int num, JD_INFO &jif)
 {
 	for (int i = 0; i < num; i++) {
 		int remainLen = num - i;
@@ -72,27 +69,28 @@ shared_ptr< JD_FRAME> JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO &
 				int recpackLen = rxbuf[i + 7];
 
 				if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF) == 1) {
-					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc ok\n");
-					auto jfr = make_shared< JD_FRAME>();
+					if (jif.dbg_pri_chk_flag && jif.dbg_fp)
+						fprintf(jif.dbg_fp, "crc ok\n");
+					auto jfr = make_shared<JD_FRAME>();
 					make_rec_pack(rxbuf + i, num - i, *jfr);
 
 					return jfr;
 				} else {
-					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc error\n");
+					if (jif.dbg_pri_chk_flag && jif.dbg_fp)
+						fprintf(jif.dbg_fp, "crc error\n");
 				}
 			}
 		}
 	}
-	return shared_ptr< JD_FRAME>();
+	return shared_ptr<JD_FRAME>();
 }
-static volatile float diff_ctrl_deg1 = 0 , diff_ctrl_deg2 = 0;
+static volatile float diff_ctrl_deg1 = 0, diff_ctrl_deg2 = 0;
 static volatile float abs_ctrl_deg_1 = 0, abs_ctrl_deg_2 = 0;
 static volatile int abs_ctrl_flag = 0;
 static std::condition_variable_any enable_ctrl;
 static std::timed_mutex mutex_ctrl;
 
-
-void set_deg(int flg,float deg1,float deg2)
+void set_deg(int flg, float deg1, float deg2)
 {
 	abs_ctrl_flag = flg;
 	if (flg) {
@@ -105,14 +103,13 @@ void set_deg(int flg,float deg1,float deg2)
 	enable_ctrl.notify_all();
 }
 
-
 void ctrl_thread(void)
 {
 	char namebuff[64];
 	unsigned char buff[1024];
 	strcpy(namebuff, "/dev/ttyUSB0");
 
-	int fd = UARTX_Init(namebuff, 115200, 0, 8, 1, 0);	
+	int fd = UARTX_Init(namebuff, 115200, 0, 8, 1, 0);
 
 	JD_INFO jif;
 	jif.fd = fd;
@@ -130,7 +127,6 @@ void ctrl_thread(void)
 		JD_send(jif, jfr);
 		int rdsz = read(fd, buff, 1024);
 		if (rdsz) {
-
 			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
 			if (dat && dat->jd_data_len >= 6) {
 				unsigned char tmpbuff[16];
@@ -145,7 +141,7 @@ void ctrl_thread(void)
 		jfr.jd_aim.byte_value.mlow_byte = 0xff;
 		jfr.jd_aim.byte_value.mhigh_byte = 0xff;
 		jfr.jd_command = 0x0B;
-		
+
 		unsigned char sndbuf[20];
 		//if ((fabs(ctrl_deg1) < 0.00001f) || (fabs(ctrl_deg2) < 0.00001f)) {
 		//	continue;
@@ -175,7 +171,6 @@ void ctrl_thread(void)
 		diff_ctrl_deg1 = 0;
 		diff_ctrl_deg2 = 0;
 		if (rdsz) {
-
 			auto dat = JD_pro_bare_buff(buff, rdsz, jif);
 			if (dat) {
 				printf("sendok\n");
@@ -187,5 +182,5 @@ void ctrl_thread(void)
 void init_ctrl_thread(void)
 {
 	thread t_ctrl(ctrl_thread);
-    t_ctrl.detach();
+	t_ctrl.detach();
 }

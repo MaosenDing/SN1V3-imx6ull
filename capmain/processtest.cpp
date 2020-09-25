@@ -28,20 +28,16 @@
 #include <fstream>
 using namespace std;
 
-
-void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
-int getJPEGfromFile(const char * file, vector<unsigned char> &outData, int & w, int &h, int & imgType);
-ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT & res, int thres, float thresPer, bool BINjpgSaveFlag = true, unsigned int MinCntGrp = 50);
-int processTest(int argc, char * argv[])
+void RGB888_2_565(uint8_t *srcdata, uint8_t *dst, size_t pixCount);
+int getJPEGfromFile(const char *file, vector<unsigned char> &outData, int &w, int &h, int &imgType);
+ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT &res, int thres, float thresPer, bool BINjpgSaveFlag = true, unsigned int MinCntGrp = 50);
+int processTest(int argc, char *argv[])
 {
-
-
-	PROCESS_RESULT  res;
+	PROCESS_RESULT res;
 	int thres = 200;
 	float thresPer = 0.8;
 	int BINjpgSaveFlag = 0;
 	int MinCntGrp = 50;
-
 
 	vector<uint8_t> dat;
 	int getwidth = 0;
@@ -49,31 +45,25 @@ int processTest(int argc, char * argv[])
 	int imgtype = 0;
 	int ret = getJPEGfromFile("1.jpeg", dat, getwidth, getheigth, imgtype);
 
-	printf("ret = %d , w = %d , h = %d , type = %d ,len = %d\n"
-		, ret, getwidth, getheigth, imgtype, dat.size());
+	printf("ret = %d , w = %d , h = %d , type = %d ,len = %d\n", ret, getwidth, getheigth, imgtype, dat.size());
 
 	int imgSize = getwidth * getheigth * 2;
-	shared_ptr<unsigned char >basemem(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
+	shared_ptr<unsigned char> basemem(new unsigned char[imgSize], [](unsigned char *p) { delete[] p; });
 	RGB888_2_565(&dat[0], &*basemem, getwidth * getheigth);
 
 	ofstream logout("/timlog.txt");
 	for (int i = 0; i < 10000000; i++) {
 		auto start = std::chrono::system_clock::now();
-		shared_ptr<unsigned char >ppp(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
+		shared_ptr<unsigned char> ppp(new unsigned char[imgSize], [](unsigned char *p) { delete[] p; });
 		memcpy(&*ppp, &*basemem, imgSize);
 		//TimeInterval ppp2("test:");
-		ImageProcessRGB("tp/test.jpg"
-			, std::move(ppp)
-			, imgSize, getwidth, getheigth
-			, res, thres, thresPer
-			, BINjpgSaveFlag, MinCntGrp);
+		ImageProcessRGB("tp/test.jpg", std::move(ppp), imgSize, getwidth, getheigth, res, thres, thresPer, BINjpgSaveFlag, MinCntGrp);
 		auto end = std::chrono::system_clock::now();
-		logout << std::chrono::duration_cast<std::chrono::duration<float>>(end - start).count() << endl;
+		logout << std::chrono::duration_cast<std::chrono::duration<float> >(end - start).count() << endl;
 	}
 	return 0;
 }
-void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
-
+void neon_test(uint8_t *srcdata, uint8_t *dst, size_t pixCount);
 
 struct tesppp {
 	int i;
@@ -86,15 +76,13 @@ struct tesppp {
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
 
-void testthread(shared_ptr<tesppp> p ,int index)
+void testthread(shared_ptr<tesppp> p, int index)
 {
 	p->i = index;
 	printf("get index = %d\n", index);
 }
 
-
-
-int processTest2(int argc, char * argv[])
+int processTest2(int argc, char *argv[])
 {
 #define NUM (32)
 	uint8_t test[NUM];
@@ -104,19 +92,18 @@ int processTest2(int argc, char * argv[])
 		test[in] = in;
 	}
 
-
-	void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount);
-	neon_test((uint8_t*)test, out, 1);
+	void neon_test(uint8_t * srcdata, uint8_t * dst, size_t pixCount);
+	neon_test((uint8_t *)test, out, 1);
 
 	for (size_t i = 0; i < NUM; i++) {
-		printf("index %d = %d\n",i,out[i]);
+		printf("index %d = %d\n", i, out[i]);
 	}
 	boost::asio::thread_pool pool(10);
-	
-	for (size_t i = 0; i < 10; i++) {		
+
+	for (size_t i = 0; i < 10; i++) {
 		auto p = make_shared<tesppp>();
 		boost::asio::post(pool, bind(testthread, p, i));
-		boost::asio::post(pool, bind(testthread, p, i+100));
+		boost::asio::post(pool, bind(testthread, p, i + 100));
 		sleep(1);
 	}
 
@@ -134,19 +121,15 @@ int processTest2(int argc, char * argv[])
 #include "SN1V2_error.h"
 #include "errHandle.h"
 
+ERR_STA ImageCap(const char *dstPath, int width, int height, PROCESS_RESULT &res, int thres, float thresPer, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo, const int horflip, const int verFlip);
 
-ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
-	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
-	, const int horflip, const int verFlip
-);
-
-int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> & tab, SUNPOS & retcfg);
-int createTable(int argc, char* argv[]);
+int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> &tab, SUNPOS &retcfg);
+int createTable(int argc, char *argv[]);
 
 void init_ctrl_thread(void);
 void set_deg(int flg, float deg1, float deg2);
 
-int tableGenerate3(int argc, char * argv[])
+int tableGenerate3(int argc, char *argv[])
 {
 	cout << "table generate3" << endl;
 
@@ -156,7 +139,6 @@ int tableGenerate3(int argc, char * argv[])
 	logInit("aim", "./aim", google::GLOG_ERROR);
 	int gain = 50;
 	int expose = 200;
-
 
 	my_cap_init(gain, expose, 0, 0);
 	time_t now = time(0);
@@ -191,7 +173,7 @@ int tableGenerate3(int argc, char * argv[])
 	auto tab = createTable(tg_table, year, mon, day);
 	char tableName[36];
 	snprintf(tableName, 36, "%d-%d-%d-table.txt", year, mon, day);
-	saveSunTable(tab,tableName);
+	saveSunTable(tab, tableName);
 
 	int workflg = 1;
 
@@ -205,9 +187,7 @@ int tableGenerate3(int argc, char * argv[])
 		while (workflg) {
 			if (sleepflg == 1) {
 				sleep(10);
-			}
-			else if(sleepflg == 2)
-			{
+			} else if (sleepflg == 2) {
 				sleep(5); //与轨迹表周期一样长
 			}
 
@@ -248,7 +228,7 @@ int tableGenerate3(int argc, char * argv[])
 
 				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf", x_diff, y_diff, x_diff - tabsun.ZR_u, y_diff - tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az);
 				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
-				
+
 			} else {
 				printf("find fail\n");
 			}
@@ -256,5 +236,3 @@ int tableGenerate3(int argc, char * argv[])
 	}
 	return 0;
 }
-
-
