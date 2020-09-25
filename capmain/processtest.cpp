@@ -137,7 +137,7 @@ int tableGenerate3(int argc, char *argv[])
 	scanfAllTable(tg_table, Mask_All);
 
 	logInit("aim", "./aim", google::GLOG_ERROR);
-	int gain = 50;
+	int gain = 100;
 	int expose = 200;
 
 	my_cap_init(gain, expose, 0, 0);
@@ -192,7 +192,7 @@ int tableGenerate3(int argc, char *argv[])
 			}
 
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 180, 0.8, true, false, 15, gain, expose, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 100, 0.8, true, false, 15, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
 				x_diff = res.diff_x + 1920 / 2;
