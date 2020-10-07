@@ -15,6 +15,9 @@
 
 using namespace std;
 
+DECLARE_bool(timestamp_in_logfile_name);
+
+
 const char * FileFailOut = "Log dump.txt";
 static int FileFailOutfd = -1;
 static int errorFlag = 0;
@@ -40,7 +43,6 @@ static void myerrorInit(void)
 		perror("111");
 	}
 }
-
 
 
 

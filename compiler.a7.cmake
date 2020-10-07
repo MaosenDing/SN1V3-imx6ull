@@ -14,4 +14,3 @@ add_definitions(-Wall)
 add_definitions(-DCORTEX=1)
 
 
-set(GLOG_DIR "/share/imx/gloginstall/lib/cmake/glog")

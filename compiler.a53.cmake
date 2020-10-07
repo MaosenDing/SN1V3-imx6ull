@@ -32,5 +32,5 @@ add_definitions("-g3 -DDEBUG")
 add_definitions(-Wall)
 add_definitions(-DCORTEX=1)
 
-set(GLOG_DIR "/share/a53/gloginstall/lib/cmake/glog")
+
 
