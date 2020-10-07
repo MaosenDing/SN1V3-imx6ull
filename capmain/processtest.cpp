@@ -123,7 +123,7 @@ int processTest2(int argc, char *argv[])
 
 ERR_STA ImageCap(const char *dstPath, int width, int height, PROCESS_RESULT &res, int thres, float thresPer, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo, const int horflip, const int verFlip);
 
-int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> &tab, SUNPOS &retcfg);
+
 int createTable(int argc, char *argv[]);
 
 void init_ctrl_thread(void);
@@ -189,6 +189,8 @@ int tableGenerate3(int argc, char *argv[])
 				sleep(10);
 			} else if (sleepflg == 2) {
 				sleep(5); //与轨迹表周期一样长
+			} else {
+				sleep(1);
 			}
 
 			PROCESS_RESULT res;
@@ -226,7 +228,7 @@ int tableGenerate3(int argc, char *argv[])
 
 				set_deg(0, zrat, zraz);
 
-				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf", x_diff, y_diff, x_diff - tabsun.ZR_u, y_diff - tabsun.ZR_v, tabsun.ZR_At, tabsun.ZR_Az);
+				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf,%lf,%lf", y_diff, x_diff, y_diff - tabsun.ZR_v, x_diff - tabsun.ZR_u, tabsun.ZR_v,tabsun.ZR_u,tabsun.ZR_At, tabsun.ZR_Az);
 				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
 
 			} else {

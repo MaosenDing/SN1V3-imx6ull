@@ -89,12 +89,13 @@ static int compare_sec(const void * a, const void * b)
 	SUNPOS * suna = (SUNPOS *)a;
 	SUNPOS * sunb = (SUNPOS *)b;
 
-	return suna->tt / 5 - sunb->tt / 5;
+	return (suna->tt - sunb->tt) / TABLE_POS_INTERVAL_SECONDS;
 }
 
-int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> & tab, SUNPOS & retcfg)
+int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> &tab, SUNPOS &retcfg)
 {
-	int using_sec = hour * 3600 + min * 60 + sec;
+	int using_sec = hour * 3600 + min * 60 ;
+	using_sec += (sec / TABLE_POS_INTERVAL_SECONDS + 1) * TABLE_POS_INTERVAL_SECONDS;
 
 	SUNPOS tmppos;
 	tmppos.tt = using_sec;
@@ -107,7 +108,3 @@ int find_useful_pos(int hour, int min, int sec, vector<SUNPOS> & tab, SUNPOS & r
 	}
 	return -1;
 }
-
-
-
-

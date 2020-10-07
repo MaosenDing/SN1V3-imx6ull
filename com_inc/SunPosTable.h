@@ -45,5 +45,7 @@ GenerateSunTable(int year, int mon, int day, int startHour, int endHour, double 
 		 int viewAnglev, int viewAngleh, //行列
 		 double cam_viewAngle_h, double cam_viewAngle_v, float centerU, float centerV);
 
+int find_useful_pos(int hour, int min, int sec, std::vector<SUNPOS> &tab, SUNPOS &retcfg);
+#define TABLE_POS_INTERVAL_SECONDS (5)
 #endif
 
