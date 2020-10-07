@@ -18,13 +18,13 @@
 %Temperature,7.8
 %Pressure,847.2
 %DeltaT,70
-%HeliostatPointX,-100
-%HeliostatPointY,100
+%HeliostatPointX,-568.15
+%HeliostatPointY,401.38
 %HeliostatPointZ,3
 
 %AimPointX1,0
 %AimPointY1,0
-%AimPointZ1,98
+%AimPointZ1,103.16
 
 %AimPointX2,0
 %AimPointY2,0

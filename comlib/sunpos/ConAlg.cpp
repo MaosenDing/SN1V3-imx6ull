@@ -16,17 +16,24 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 	int *SpdSig_At = 0;//转速：1表示实际速度转动，0表示最大速度转动，2表示正常速度转动(0.03),3来云时转速)
 	int *SpdSig_Az = 0;
 #endif
-	if (ut > 2999 || vt > 2999) {
+	if ((ut > 2999 || vt > 2999) & (ZR_v != 3001 || ZR_u != 3001)) {
 		*At = ZR_At; //At:俯仰增量角度
 		*Az = ZR_Az; // Az:方位增量角度
 		*SpdSig_At = 3; //俯仰转速信号
 		*SpdSig_Az = 3; //方位转速信号
 		*Slpflg = 2;
-	} else {
+	} 
+	else if (ZR_v==3001 || ZR_u==3001){
+		*At = ZR_At; //At:俯仰增量角度
+		*Az = ZR_Az; // Az:方位增量角度
+		*SpdSig_At = 3; //俯仰转速信号
+		*SpdSig_Az = 3; //方位转速信号
+		*Slpflg = 2;
+	}else {
 		float del_x = vt - ZR_v; //当前俯仰方向/v方向像素差
 		float del_y = ut - ZR_u; //当前方位方向/u方向像素差
 		float nt = sqrt(del_x * del_x + del_y * del_y);
-		if (nt < 5) //判断像素差是否大于阈值K
+		if (nt < 1.5) //判断像素差是否大于阈值K
 		{
 			float JJ11 = -(fx * q * ut) /
 				     (vt * (fx * fx + q * q * ut * ut + q * q * vt * vt));
@@ -34,9 +41,9 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 			float JJ21 = (fy * fy + q * q * vt * vt) /
 				     (vt * (fy * fy + q * q * ut * ut + q * q * vt * vt));
 			float JJ22 = -(q * q * ut) / (fy * fy + q * q * ut * ut + q * q * vt * vt);
-			*At = -(JJ11 * del_y + JJ12 * del_x) * r1 * 180 /
+			*At = -(JJ11 * (del_y) + JJ12 * (del_x)) * r1 * 1000 * 180 /
 			      3.1415926; //At:俯仰增量角度
-			*Az = -(JJ21 * del_y + JJ22 * del_x) * r2 * 180 /
+			*Az = -(JJ21 * (del_y) + JJ22 * (del_x)) * r2 * 0.1/3 * 180 /
 			      3.1415926; // Az:方位增量角度
 			//*At = atan2(q*del_x, fy)*r1 * 180 / 3.1415926;//At:俯仰增量角度
 			//*Az = -atan2(del_y, del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度
@@ -44,7 +51,7 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 			*SpdSig_At = 1; //俯仰转速信号
 			*SpdSig_Az = 1; //方位转速信号
 			*Slpflg = 0;
-		} else if (nt >= 5 && nt < 10) {
+		} else if (nt >= 1.5 && nt < 10) {
 			if (x_pos_2 > 0) {
 				*Az = atan2(q * del_x, fy) * r1 * 180 / 3.1415926; //At:俯仰增量角度
 				//*Az = -atan2(del_y, del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度
@@ -59,7 +66,7 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 			*Slpflg = 0;
 			*At = *At > 0 ? 0.03 : -0.03;
 			*Az = *Az > 0 ? 0.03 : -0.03;
-		} else if (nt < 50) {
+		} else if (nt < 25 && nt >= 10) {
 			if (x_pos_2 > 0) {
 				*Az = atan2(q * del_x, fy) * r1 * 180 / 3.1415926; //At:俯仰增量角度
 				//*Az = -atan2(del_y, del_x)*r2 * 180 / 3.1415926;// Az:方位增量角度
@@ -71,7 +78,7 @@ int ConAlg(float ut, float vt, float ZR_u, float ZR_v, float ZR_At, float ZR_Az,
 			}
 			*SpdSig_At = 0; //俯仰转速信号
 			*SpdSig_Az = 0; //方位转速信号 最大速度
-			*Slpflg = 0;
+			*Slpflg = 2;
 			*At = *At > 0 ? 1 : -1;
 			*Az = *Az > 0 ? 1 : -1;
 		}
