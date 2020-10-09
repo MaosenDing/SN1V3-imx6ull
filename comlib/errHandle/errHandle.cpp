@@ -15,7 +15,7 @@
 
 using namespace std;
 
-DECLARE_bool(timestamp_in_logfile_name);
+//DECLARE_bool(timestamp_in_logfile_name);
 
 
 const char * FileFailOut = "Log dump.txt";

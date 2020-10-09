@@ -1,8 +1,8 @@
-#SET(MYSYSROOT /share/a53/buildroot-2020.02.3/output/host/arm-buildroot-linux-gnueabihf/sysroot)
-#SET(CMAKE_SYSROOT ${MYSYSROOT})
+SET(BUILDROOT_PATH /share/a53/buildroot-2020.02.3/output/host)
+SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueabihf/sysroot)
+SET(CMAKE_SYSROOT ${MYSYSROOT})
 #SET(CMAKE_FIND_ROOT_PATH /opt/fsl-imx-xwayland/4.14-sumo)
-
-SET(toolpathprefix /share/a53/buildroot-2020.02.3/output/host/bin/arm-buildroot-linux-gnueabihf-)
+SET(toolpathprefix ${BUILDROOT_PATH}/bin/arm-buildroot-linux-gnueabihf-)
 
 
 SET(CMAKE_C_COMPILER ${toolpathprefix}gcc)
