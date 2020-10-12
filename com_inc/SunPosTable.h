@@ -21,6 +21,9 @@ struct SUNPOS {
 	double a1;
 	double a2;
 	double a3;
+
+	double d[2][3];
+	double test[2];
 };
 
 std::shared_ptr<std::vector<SUNPOS> > createTable(Tg_table &tg_table, int year, int mon, int day);

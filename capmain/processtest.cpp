@@ -230,6 +230,7 @@ int tableGenerate3(int argc, char *argv[])
 
 				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf,%lf,%lf", y_diff, x_diff, y_diff - tabsun.ZR_v, x_diff - tabsun.ZR_u, tabsun.ZR_v,tabsun.ZR_u,tabsun.ZR_At, tabsun.ZR_Az);
 				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
+				SN1V2_ERR_LOG("ideal_UV = %f,%f\n", tabsun.ZR_u,tabsun.ZR_v);
 
 			} else {
 				printf("find fail\n");
