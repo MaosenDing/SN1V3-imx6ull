@@ -252,7 +252,15 @@ extern "C" {
 
 		int Sn3gain;//sn3 专用增益 如果不设置  使用默认值
 		int Sn3expo;//sn3 专用曝光 如果不设置  使用默认值
-	}T6_table;
+
+		int gain;
+		int expo;
+
+		int SGT;
+		float SBT;
+
+		int MCP;
+	} T6_table;
 
 #define T1_Set_data(seq,member,typ,def_method)      Set_data(T1_table,member,typ,def_method,seq)
 #define T2_Set_data(seq,member,typ,def_method)      Set_data(T2_table,member,typ,def_method,seq)

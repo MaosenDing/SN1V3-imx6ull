@@ -22,3 +22,12 @@
 %MappingCoefficients2,0.005422
 %MappingCoefficients3,-0.007384
 %MappingCoefficients4,0.002739
+
+
+%gain,10
+%expo,20
+
+%SGT,200
+%SBT,0.8
+
+%MCP,15
