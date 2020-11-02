@@ -140,6 +140,12 @@ int tableGenerate3(int argc, char *argv[])
 	int gain = tg_table.T6.gain;
 	int expose = tg_table.T6.expo;
 
+	int SGT = tg_table.T6.SGT;
+	float SBT = tg_table.T6.SBT;
+	int MCP = tg_table.T6.MCP;
+
+	printf("SGT = %d , SBT = %f , MCP = %d\n", SGT, SBT, MCP);
+
 	my_cap_init(gain, expose, 0, 0);
 	time_t now = time(0);
 	tm t2;
@@ -194,7 +200,7 @@ int tableGenerate3(int argc, char *argv[])
 			}
 
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, tg_table.T6.SGT, tg_table.T6.SBT, true, false, tg_table.T6.MCP, gain, expose, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, SGT, SBT, true, false, MCP, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
 				x_diff = res.diff_x + 1920 / 2;

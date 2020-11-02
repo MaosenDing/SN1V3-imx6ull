@@ -293,7 +293,7 @@ CFG_INFO T6[] = {
 	T6_Set_data(44, expo, dateType::INT32, setDefault(int, 20)),
 
 	T6_Set_data(45, SGT, dateType::INT32, setDefault(int, 200)),
-	T6_Set_data(46, SBT, dateType::INT32, setDefault(float, 0.8)),
+	T6_Set_data(46, SBT, dateType::FLOAT32, setDefault(float, 0.8)),
 
 	T6_Set_data(47, MCP, dateType::INT32, setDefault(int, 15)),
 };
