@@ -137,8 +137,8 @@ int tableGenerate3(int argc, char *argv[])
 	scanfAllTable(tg_table, Mask_All);
 
 	logInit("aim", "./aim", google::GLOG_ERROR);
-	int gain = 100;
-	int expose = 200;
+	int gain = tg_table.T6.gain;
+	int expose = tg_table.T6.expo;
 
 	my_cap_init(gain, expose, 0, 0);
 	time_t now = time(0);
@@ -194,7 +194,7 @@ int tableGenerate3(int argc, char *argv[])
 			}
 
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, 100, 0.8, true, false, 15, gain, expose, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, tg_table.T6.SGT, tg_table.T6.SBT, true, false, tg_table.T6.MCP, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
 				x_diff = res.diff_x + 1920 / 2;
@@ -228,7 +228,7 @@ int tableGenerate3(int argc, char *argv[])
 
 				set_deg(0, zrat, zraz);
 
-				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf,%lf,%lf", y_diff, x_diff, y_diff - tabsun.ZR_v, x_diff - tabsun.ZR_u, tabsun.ZR_v,tabsun.ZR_u,tabsun.ZR_At, tabsun.ZR_Az);
+				SN1V2_ERR_LOG("input = %f,%f,%lf,%lf,%lf,%lf,%lf,%lf", y_diff, x_diff, y_diff - tabsun.ZR_v, x_diff - tabsun.ZR_u, tabsun.test[1],tabsun.test[0],tabsun.ZR_At, tabsun.ZR_Az);
 				SN1V2_ERR_LOG("conalg = %f,%f,%d,%d\n", zrat, zraz, speedat, speedaz);
 				SN1V2_ERR_LOG("ideal_UV = %f,%f\n", tabsun.ZR_u,tabsun.ZR_v);
 
