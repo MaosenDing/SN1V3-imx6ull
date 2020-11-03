@@ -132,6 +132,11 @@ void set_deg(int flg, float deg1, float deg2);
 int tableGenerate3(int argc, char *argv[])
 {
 	cout << "table generate3" << endl;
+	int nomdcflg = ChkifCMD(argc, argv, "-nomdc");
+
+	if (nomdcflg) {
+		printf("no mdc ctrl\n");
+	}
 
 	Tg_table tg_table;
 	scanfAllTable(tg_table, Mask_All);
@@ -183,7 +188,9 @@ int tableGenerate3(int argc, char *argv[])
 
 	int workflg = 1;
 
-	init_ctrl_thread();
+	if (!nomdcflg) {
+		init_ctrl_thread();
+	}
 
 	int sleepflg = 0;
 	float x_pos = 0;
@@ -191,7 +198,9 @@ int tableGenerate3(int argc, char *argv[])
 	if (tab) {
 		printf("size = %d\n", tab->size());
 		while (workflg) {
-			if (sleepflg == 1) {
+			if (nomdcflg) {
+				sleep(1);
+			} else if (sleepflg == 1) {
 				sleep(10);
 			} else if (sleepflg == 2) {
 				sleep(5); //与轨迹表周期一样长
