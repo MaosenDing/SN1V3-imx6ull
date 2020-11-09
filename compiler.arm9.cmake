@@ -1,7 +1,7 @@
 SET(BUILDROOT_PATH /share/nuc/buildroot-2019.02.1/output/host)
-SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueabihf/sysroot)
+SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueab/sysroot)
 SET(CMAKE_SYSROOT ${MYSYSROOT})
-SET(toolpathprefix ${BUILDROOT_PATH}/bin/arm-buildroot-linux-gnueabihf-)
+SET(toolpathprefix ${BUILDROOT_PATH}/bin/arm-buildroot-linux-gnueabi-)
 
 
 
