@@ -12,19 +12,19 @@
 
 
 
-%latitude,40.32957375
-%longtitude,97.27770556
-%elevation,1415.5
-%Temperature,7.8
-%Pressure,847.2
+%latitude,31.105278
+%longtitude,121.500833
+%elevation,0
+%Temperature,10
+%Pressure,1023
 %DeltaT,70
-%HeliostatPointX,-568.15
-%HeliostatPointY,401.38
+%HeliostatPointX,34.73
+%HeliostatPointY,-341.88
 %HeliostatPointZ,3
 
 %AimPointX1,0
 %AimPointY1,0
-%AimPointZ1,103.16
+%AimPointZ1,95.43
 
 %AimPointX2,0
 %AimPointY2,0

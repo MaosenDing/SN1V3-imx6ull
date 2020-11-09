@@ -57,7 +57,7 @@ int createTabletest(int argc, char* argv[])
 	const int day = t2.tm_mday;
 
 
-	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
+	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 6, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
 		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y, tg_table.T6.SN1_P3,
 		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
@@ -75,7 +75,7 @@ int createTabletest(int argc, char* argv[])
 shared_ptr< vector < SUNPOS > > createTable(Tg_table &tg_table,int year,int mon,int day)
 {
 	printf("createTable : year = %d ,mon = %d ,day = %d\n", year, mon, day);
-	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 8, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
+	shared_ptr< vector < SUNPOS > > tab = GenerateSunTable(year, mon, day, 6, 17, tg_table.T1.latitude, tg_table.T1.longtitude,
 		tg_table.T1.Temperature, tg_table.T1.Pressure, tg_table.T1.DeltaT, tg_table.T1.elevation, tg_table.T6.SN1_P4_x, tg_table.T6.SN1_P4_y, tg_table.T6.SN1_P3,
 		tg_table.T6.cam_rotAnglex, tg_table.T6.cam_rotAngley, tg_table.T6.cam_rotAnglez,
 		tg_table.T1.HeliostatPointX, tg_table.T1.HeliostatPointY, tg_table.T1.HeliostatPointZ,
