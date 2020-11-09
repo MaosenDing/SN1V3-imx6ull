@@ -1,4 +1,7 @@
-SET(toolpathprefix /share/imx/buildroot-2020.02.3/output/host/bin/arm-buildroot-linux-gnueabihf-)
+SET(BUILDROOT_PATH /share/imx/buildroot-2020.02.3/output/host)
+SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueabihf/sysroot)
+SET(CMAKE_SYSROOT ${MYSYSROOT})
+SET(toolpathprefix ${BUILDROOT_PATH}/bin/arm-buildroot-linux-gnueabihf-)
 
 SET(CMAKE_C_COMPILER ${toolpathprefix}gcc)
 SET(CMAKE_CXX_COMPILER ${toolpathprefix}g++)
@@ -14,4 +17,3 @@ add_definitions(-Wall)
 add_definitions(-DCORTEX=1)
 
 
-set(GLOG_DIR "/share/imx/gloginstall/lib/cmake/glog")

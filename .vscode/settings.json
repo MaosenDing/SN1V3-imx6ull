@@ -6,7 +6,6 @@
     "cmake.buildDirectory": "${workspaceFolder}/tmp",
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=./compiler.a53.cmake",
-        "-DCPU=A53",
     ],
     "cmake.parallelJobs": 0,
     "cmake.installPrefix": "/a53root",

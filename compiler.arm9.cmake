@@ -1,4 +1,9 @@
-SET(toolpathprefix /share/nuc/buildroot-2019.02.1/output/host/bin/arm-buildroot-linux-gnueabi-)
+SET(BUILDROOT_PATH /share/nuc/buildroot-2019.02.1/output/host)
+SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueabihf/sysroot)
+SET(CMAKE_SYSROOT ${MYSYSROOT})
+SET(toolpathprefix ${BUILDROOT_PATH}/bin/arm-buildroot-linux-gnueabihf-)
+
+
 
 
 SET(CMAKE_C_COMPILER ${toolpathprefix}gcc)
@@ -13,4 +18,4 @@ add_definitions("-O2")
 add_definitions("-g3")
 add_definitions(-Wall)
 
-set(GLOG_DIR "/share/nuc/gloginstall/lib/cmake/glog")
+
