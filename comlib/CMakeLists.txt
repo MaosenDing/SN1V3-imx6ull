@@ -41,6 +41,6 @@ JD
 sunpos
 "-Wl,--no-whole-archive"
 )
-
+find_package (glog 0.4.0 REQUIRED)
 target_link_libraries(comlib PUBLIC glog::glog)
 
