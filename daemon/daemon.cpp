@@ -32,6 +32,7 @@
 #include "sn1v3cfg.h"
 #include "tableWork.h"
 #include "configOperator.h"
+
 using namespace std;
 
 
@@ -111,7 +112,7 @@ struct GUARD_SERVICE {
 	virtual const char * get_name() = 0;
 };
 
-
+#if 0
 struct svc_wifi : public GUARD_SERVICE {
 	svc_wifi(SN1_SHM & sn1) :GUARD_SERVICE(sn1.pid_mdc) {}
 
@@ -190,7 +191,7 @@ struct svc_wifi : public GUARD_SERVICE {
 		return false;
 	}
 };
-
+#endif
 
 
 struct svc_mdc : public GUARD_SERVICE {
@@ -227,6 +228,85 @@ struct svc_mdc : public GUARD_SERVICE {
 		return true;
 	}
 };
+
+
+struct svc_cap : public GUARD_SERVICE {
+	svc_cap(SN1_SHM & sn1) :GUARD_SERVICE(sn1.pid_aim) {}
+
+
+
+	virtual const char * get_name() final
+	{
+		return "cap svc";
+	}
+
+	virtual int init_pid(int argc, char * argv[]) final
+	{
+		if (shared_pid) {
+			SN1V2_WARN_LOG("cap ,kill pid =%d\n", shared_pid);
+			kill(shared_pid, SIGINT);
+			shared_pid = 0;
+		}
+		#if 0
+			pid = fork();
+			pid == 0) {
+			prctl(PR_SET_NAME, "init:cap");
+			while (true) {
+				if (0 > wait_for_mdc(1000)) {
+					SN1V2_WARN_LOG("reboot########################\n");
+					system("reboot");
+					exit(EXIT_FAILURE);
+				}
+				if (true == NeedCapWork()) {
+
+					const char * daycfgFile = "day.cfg";
+
+					auto fil = GetFile(daycfgFile);
+					checkCont(*fil);
+
+					execl("./aim.exe", "./aim.exe", "tableGen2", "SCG.txt", 0);
+				}
+			}
+			exit(0);
+			se if (pid > 0) {
+			return pid;
+			
+		#else
+			int pid = fork();
+			if (pid == 0) {
+				prctl(PR_SET_NAME, "init:cap");
+				int ret = execl("./aim.exe", "./aim.exe", "tableGen2", "SCG.txt", 0);
+				SN1V2_ERR_LOG("mdc finished itself,ret = %d\n", ret);
+				SN1V2_ERR_LOG("errno = %d\n", errno);
+				exit(0);
+			} else if (pid > 0) {
+				return pid;
+			}
+		#endif 
+
+		SN1V2_ERR_LOG("fork error ###################2\n");
+		return -1;
+	}
+	virtual bool need_boot()final
+	{
+		#if 0
+		auto fil = GetFile("/tmp/snsta");
+		if (sn_1 != checkSN_sta(*fil))
+		{
+			return false;
+		}
+		#endif
+		
+		return true;
+	}
+};
+
+
+
+
+
+
+
 #if 0
 enum file_sta{
 	fil_ok = 0,//ok
@@ -254,6 +334,8 @@ static shared_ptr<string> GetFile(const char * fileName)
 	return st;
 }
 #endif
+
+
 int main(int argc, char *argv[])
 {
 	logInit("daemon", "./daemon", google::GLOG_WARNING);
@@ -267,11 +349,13 @@ int main(int argc, char *argv[])
 	checkClear(argc, argv, psn1);
 
 	svc_mdc svc_mdc0(*psn1);
-	svc_wifi svc_wifi0(*psn1);
+	svc_cap svc_cap0(*psn1);
+	//svc_wifi svc_wifi0(*psn1);
 
 	GUARD_SERVICE *group[] = {
-		//&svc_mdc0 ,
-		&svc_wifi0,
+		&svc_mdc0 ,
+		&svc_cap0 ,
+		//&svc_wifi0,
 	};
 
 	for (GUARD_SERVICE * p : group) {

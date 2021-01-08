@@ -1,0 +1,7 @@
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/install/strip.dir
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/install/local.dir
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/daemon.exe.dir
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/edit_cache.dir
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/rebuild_cache.dir
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/install.dir
+/home/dms/linux/IMX6ULL/ALPHA/SN1V2/daemon/CMakeFiles/list_install_components.dir

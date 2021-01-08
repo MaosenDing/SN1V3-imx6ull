@@ -25,6 +25,7 @@
 #include <iostream>
 #include <math.h>
 #include "timeTableV2.h"
+
 using namespace std;
 
 
@@ -141,6 +142,7 @@ static int capOnce(int argc, char * argv[])
 			cfg.FLAG_SAVE_BIN = 1;
 			cfg.FLAG_SAVE_ORG = 1;
 		}
+		
 		capWork dw(capOnce, cfg, nullptr, testCSC, &ImageCap);
 		dw.test_for_cap_once = 1;
 

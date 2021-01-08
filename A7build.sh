@@ -1,7 +1,7 @@
 #! /bin/bash
 
 build="tmp"
-workPath="/imxroot"
+workPath="/home/dms/linux/nfs/imx6ull"
 
 
 ver=`date +%Y-%m-%d`

@@ -19,7 +19,7 @@ static int sizeOfNaN(double(&ppp)[8])
 	int sz = 0;
 	for (auto & p : ppp)
 	{
-		if (isnan(p))
+		if (std::isnan(p))
 			sz++;
 	}
 	return sz;

@@ -1,7 +1,8 @@
-SET(BUILDROOT_PATH /share/a53/buildroot-2020.02.3/output/host)
-SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueabihf/sysroot)
+SET(BUILDROOT_PATH /home/dms/linux/IMX6ULL/ALPHA/buildroot-2020.02.3/output/host)
+#SET(MYSYSROOT ${BUILDROOT_PATH}/arm-buildroot-linux-gnueabihf/sysroot)
+SET(MYSYSROOT ${BUILDROOT_PATH}/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/sysroot)
 SET(CMAKE_SYSROOT ${MYSYSROOT})
-SET(toolpathprefix ${BUILDROOT_PATH}/bin/arm-buildroot-linux-gnueabihf-)
+SET(toolpathprefix ${BUILDROOT_PATH}/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-)
 
 
 SET(CMAKE_C_COMPILER ${toolpathprefix}gcc)
@@ -11,7 +12,7 @@ SET(CMAKE_AR ${toolpathprefix}ar)
 SET(CMAKE_LD ${toolpathprefix}ld)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 --sysroot=/opt/fsl-imx-xwayland/4.14-sumo/sysroots/aarch64-poky-linux" )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -rdynamic -funwind-tables")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -rdynamic -funwind-tables -mfpu=neon")
 #set(ENABLE_EXPORTS on)
 
 set(CMAKE_CROSSCOMPILING TRUE)

@@ -1,5 +1,5 @@
 
-prefix = /share/nuc/buildroot-2019.02.1/output/host/bin/arm-buildroot-linux-gnueabi-
+prefix = /home/dms/linux/IMX6ULL/ALPHA/buildroot-2020.02.3/output/host/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
 OBJCOPY = $(prefix)objcopy
 cxx = $(prefix)c++
 

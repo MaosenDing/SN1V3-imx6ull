@@ -1,5 +1,7 @@
 #include "SN1V2_rtConfig.h"
+
 #include "mdc_ctrl.h"
+
 #include <clockd_def.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -10,20 +12,27 @@
 #include <stdlib.h>
 #include "JDcomhead.h"
 #include <stdio.h>
+#include <thread>
 #include <string.h>
 #include <string>
 #include <fstream>
 #include <regex>
 #include <sys/wait.h>
 #include "errHandle/errHandle.h"
+
+#include "SN1V2_error.h"
+
 #include "mem_share.h"
 #include "versions.h"
 #include "jd_share.h"
 #include "iostream"
 #include "led_ctrl.h"
+
+//#include "mdc_ctrl.h"
+
 using namespace std;
 
-
+//int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
 
 
@@ -32,7 +41,7 @@ static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
 	char * name = ChkCmdVal(argc, argv, "-s");
 	cout << "name " << name << endl;
 	if (!name) {
-		name = (char *)"/dev/ttyS6";
+		name = (char *)"/dev/ttymxc2";
 	}
 
 	int rate = jit.rate ? jit.rate : 115200;
@@ -42,7 +51,10 @@ static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
 
 int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 
+/*************20210108 dms*************/
 
+
+/**************************/
 
 
 
@@ -113,12 +125,18 @@ static void set_bound_rate(JD_INFO_TIM &jif, int argc, char * argv[])
 SN1_SHM * get_shared_cfg()
 {
 	key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
-
 	SN1_SHM * psn1 = (SN1_SHM *)getSHM(key, sizeof(SN1_SHM));
 	psn1->mdc_flag = SN1_SHM::MDC_TIME_FALSE;
 	psn1->max_time_out_second = MDC_MAX_TIME_OUT_SECOND;
 	return psn1;
 }
+
+
+
+
+
+
+
 int register_master_svc(JD_INFO& jif);
 void init_led_svc(JD_INFO& jif);
 
@@ -127,6 +145,7 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	signal(SIGBUS, bus_handle);
 
 	prctl(PR_SET_NAME, "mdc service");
+
 	SN1_SHM *psn1 = get_shared_cfg();
 	if (nullptr == psn1) {
 		exit(EXIT_FAILURE);
@@ -143,15 +162,11 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	} else {
 		printf("mdc init\n");
 	}
-
+	
 	jif.fd = fd;
 	jif.dbg_tim_rec_printf = 1;
-
-
 	jif.timesetFlag = JD_TIME_UNSET;
-
 	jif.fake_check_flag = JD_CRC_FACK_TEST;
-
 	jif.psn1 = psn1;
 
 	if (ChkifCMD(argc, argv, "-dbg")) {
@@ -162,11 +177,16 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	} else {
 		jif_normal_set(jif);
 	}
+	
 	register_master_svc(jif);
-	init_led_svc(jif);
+//	init_led_svc(jif);
 
-	//mdc poll will never return
+//	regist_timer_auto_flush(psn1);	
+	printf("JD_run_poll 00000000\n");
+	//mdc poll will never returnJD运行数据检测
 	int ret = JD_run_poll(jif, -1,PROTOCOL_TYPE::protocol_JD_motor);
+	printf("JD_run_poll 111111111\n");
+	
 	switch (ret) {
 	case JD_TIME_OUT:
 		printf("mdc timeout\n");
@@ -181,7 +201,6 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	}
 	exit(0);
 	printf("mdc com\n");
-
 	return ret;
 }
 

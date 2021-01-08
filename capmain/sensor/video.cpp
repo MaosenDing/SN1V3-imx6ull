@@ -34,15 +34,16 @@ buffer buffers[REQ_BUFF_NUM];
 
 int init_cap(const char * videoName)
 {
+	/********打开设备**********/
 	int fd = open(videoName, O_RDWR);
 	printf("TK------->>>fd is %d\n", fd);
-	//////
+	/********获取驱动信息**********/
 	struct v4l2_capability cap;
 	ioctl(fd, VIDIOC_QUERYCAP, &cap);
 	printf("TK---------->>>>>Driver Name:%s\nCard Name:%s\nBus info:%s\n", cap.driver, cap.card, cap.bus_info);
 
 	printf("Driver Name : %s\nCard Name : %s\nBus info : %s\nDriver Version : %u.%u.%u\n", cap.driver, cap.card, cap.bus_info, (cap.version >> 16) & 0XFF, (cap.version >> 8) & 0XFF, cap.version & 0XFF);
-	//////
+	/********获取当前设备支持的视频格式**********/
 	struct v4l2_fmtdesc fmtdesc;
 	memset(&fmtdesc, 0, sizeof(fmtdesc));
 	fmtdesc.index = 0; 
@@ -53,7 +54,7 @@ int init_cap(const char * videoName)
 			(fmtdesc.pixelformat >> 24) & 0xFF, fmtdesc.description);
 		fmtdesc.index++;
 	}
-	//////
+	/********设置视频/图片格式**********/
 	struct v4l2_format fmt;
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	if(0 == ioctl(fd, VIDIOC_G_FMT, &fmt))
@@ -73,7 +74,7 @@ int init_cap(const char * videoName)
 		printf("VIDIOC_S_FMT set error \n");
 	}
 
-	//////
+	/********请求分配内存**********/
 	struct v4l2_requestbuffers req;
 	req.count = REQ_BUFF_NUM;
 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -86,7 +87,7 @@ int init_cap(const char * videoName)
 	//	printf("Insufficient buffer memory \n");
 	//	exit(EXIT_FAILURE);
 	//}
-
+	/********获取空间，并将其映射到用户空间，然后投放到视频输入队列**********/
 	unsigned int n_buffers = 0;
 	for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
 		struct v4l2_buffer buf;
@@ -107,7 +108,7 @@ int init_cap(const char * videoName)
 			exit(-1);
 		}
 	}
-	////
+	/********投放一个空的视频缓冲区到视频缓冲区输入队列中**********/
 	unsigned int i;
 	enum v4l2_buf_type type;
 	for (i = 0; i < REQ_BUFF_NUM; i++) {
@@ -119,6 +120,7 @@ int init_cap(const char * videoName)
 			printf("VIDIOC_QBUF set error = %d \n", i);
 		}
 	}
+	/********开始录制*********/
 	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 	if (-1 == ioctl(fd, VIDIOC_STREAMON, &type)) {
@@ -187,7 +189,8 @@ void cap_deinit(CAP_FRAME * pcap)
 }
 
 
-
+/***从视频缓冲区的输出队列中取得一个已经保存有一帧视频数据的视频缓冲区***/
+/************控制命令VIDIOC_DQBUF*****************/
 shared_ptr< CAP_FRAME> get_one_frame(int fd)
 {
 	shared_ptr< CAP_FRAME> ret(new CAP_FRAME, cap_deinit);

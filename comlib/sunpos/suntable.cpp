@@ -33,7 +33,7 @@ int saveSunTable(shared_ptr <vector <SUNPOS >> &tab ,const char * savePath)
 			, point.ZR_At, point.ZR_Az, point.SD_At, point.SD_Az
 			,point.d[0][0],point.d[0][1],point.d[0][2]
 			,point.d[1][0],point.d[1][1],point.d[1][2]
-			,point.test[0],point.test[1]
+			,point.a0,point.a1
 		);
 		filout.write(buff, size);
 	}

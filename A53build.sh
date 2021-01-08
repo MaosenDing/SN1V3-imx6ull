@@ -1,7 +1,7 @@
 #! /bin/bash
 
 build="tmp"
-workPath="/a53root"
+workPath="/home/dms/linux/nfs/A7"
 
 
 

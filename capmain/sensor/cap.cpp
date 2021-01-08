@@ -172,7 +172,7 @@ void saveThread(unsigned char * srcbuff, string name)
 	static char savename[64];
 
 	if (0 == strcmp(savename, name.c_str())) {
-		printf("skip %s\n", name);
+		printf("skip %s\n", name.c_str());
 		return;
 	}
 

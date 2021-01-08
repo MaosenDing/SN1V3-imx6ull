@@ -199,8 +199,10 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int &
 					JD_FRAME jfr;
 					make_rec_pack(rxbuf + i, num - i, jfr);
 
-					int ret = JD_command_respon(jif, jfr);
+					int ret = JD_command_respon(jif, jfr);   //如何响应的？
 
+					printf("JD_command_respon test");
+					
 					if (ret == JD_UNKNOWN_COMMAND) {
 						remove_len = i + recpackLen;
 						continue;
@@ -282,7 +284,7 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS , PROTOCOL_TYPE typ)
 			if (jif.dbg_pri_rd_word && jif.dbg_fp)disp_x_buff(jif.dbg_fp, rxbuf, rxlen);
 
 			int removed_Len = 0;
-
+			//解析接收到的MDC的数据包
 			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif, removed_Len);
 
 			if (JD_CLOSE_FRAME == retPro) {

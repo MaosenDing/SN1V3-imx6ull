@@ -16,7 +16,6 @@ message("using VERSION =${ver}")
 PROJECT(PROJECT_ONE)
 
 include_directories(${PROJECT_SOURCE_DIR})
-
 #SN1头文件
 include_directories("com_inc")
 include_directories("comlib/errHandle")
@@ -30,7 +29,7 @@ add_subdirectory(comlib)
 
 add_subdirectory(capmain)
 add_subdirectory(JDsvc)
-add_subdirectory(wifiSVC)
+#add_subdirectory(wifiSVC)
 add_subdirectory(daemon)
 
 #测试用
