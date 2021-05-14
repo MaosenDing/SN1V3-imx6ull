@@ -28,7 +28,7 @@ add_subdirectory(JD)
 #sunpos
 add_subdirectory(sunpos)
 
-
+#target_link_libraries(源文件 <NAME>_LIBRARIES)将源文件以及库文件链接起来
 target_link_libraries(comlib
 PRIVATE
 "-Wl,--whole-archive" 
@@ -42,5 +42,5 @@ sunpos
 "-Wl,--no-whole-archive"
 )
 find_package (glog 0.4.0 REQUIRED)
-target_link_libraries(comlib PUBLIC glog::glog)
+target_link_libraries(comlib PUBLIC glog::glog)    
 

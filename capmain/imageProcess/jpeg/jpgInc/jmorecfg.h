@@ -14,7 +14,7 @@
 
 /*
  * Define BITS_IN_JSAMPLE as either
- *   8   for 8-bit sample values (the usual setting)
+ *   8   for 8-bit sample values (the usual setting)对于8位采集值（通常设置）
  *   9   for 9-bit sample values
  *   10  for 10-bit sample values
  *   11  for 11-bit sample values

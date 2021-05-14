@@ -52,6 +52,7 @@ struct jdtimesvc :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & injif)final
 	{
+		printf("jdsvc_time -----------service_pro\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 
 		int using_index = searchUncoplete(jif);
@@ -100,6 +101,8 @@ struct jdtimesvc :public JDAUTOSEND {
 		MDC_INFO &jif = (MDC_INFO &)injif;
 
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
+		
+		printf("##################getIndex = 0x%x#####################\n", getIndex);
 
 		if (getIndex < 0) {
 			printf("bad addr = 0x%x\n", jfr.jd_aim.value);
@@ -170,11 +173,11 @@ JDAUTOSEND * jdsvc_time()
 }
 
 
-int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
-{
-	__attribute__((unused)) JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
-	jsvc.trig_cpl(jif, jfr);
-	return JD_OK;
-}
 
+//int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr)
+//{
+//	__attribute__((unused)) JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
+//	jsvc.trig_cpl(jif, jfr);
+//	return JD_OK;
+//}
 

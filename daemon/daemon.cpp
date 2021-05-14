@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 {
 	logInit("daemon", "./daemon", google::GLOG_WARNING);
 
-	prctl(PR_SET_NAME, "daemon svc");
+	prctl(PR_SET_NAME, "daemon.exe");
 
 	key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
 

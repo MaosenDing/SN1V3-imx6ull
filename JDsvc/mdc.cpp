@@ -36,12 +36,13 @@ using namespace std;
 
 
 
-static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
+static int mdc_uart_init(MDC_INFO & jit, int argc, char ** argv)
 {
 	char * name = ChkCmdVal(argc, argv, "-s");
 	cout << "name " << name << endl;
 	if (!name) {
 		name = (char *)"/dev/ttymxc2";
+		printf("mdc commit dev name is %s\n", name);
 	}
 
 	int rate = jit.rate ? jit.rate : 115200;
@@ -49,15 +50,7 @@ static int mdc_uart_init(JD_INFO_TIM & jit, int argc, char ** argv)
 	return fd;
 }
 
-int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
-
-/*************20210108 dms*************/
-
-
-/**************************/
-
-
-
+//int JD_time_rec(JD_INFO & jif, JD_FRAME & jfr);
 
 static void bus_handle(int signo)
 {
@@ -66,7 +59,7 @@ static void bus_handle(int signo)
 	exit(-1);
 }
 
-static void jif_dbg_set(JD_INFO_TIM &jif)
+static void jif_dbg_set(MDC_INFO &jif)
 {
 	jif.dbg_pri_snd_len = 1;
 	jif.dbg_pri_snd_word = 1;
@@ -79,7 +72,7 @@ static void jif_dbg_set(JD_INFO_TIM &jif)
 	jif.dbg_pri_error_cmd = 1;
 }
 
-static void jif_dbgtim_set(JD_INFO_TIM &jif)
+static void jif_dbgtim_set(MDC_INFO &jif)
 {
 	jif.dbg_pri_snd_len = 0;
 	jif.dbg_pri_snd_word = 0;
@@ -94,7 +87,7 @@ static void jif_dbgtim_set(JD_INFO_TIM &jif)
 }
 
 
-static void jif_normal_set(JD_INFO_TIM &jif)
+static void jif_normal_set(MDC_INFO &jif)
 {
 	jif.dbg_pri_snd_len = 0;
 	jif.dbg_pri_snd_word = 0;
@@ -108,7 +101,7 @@ static void jif_normal_set(JD_INFO_TIM &jif)
 	jif.dbg_tim_rec_printf = 0;
 }
 
-static void set_bound_rate(JD_INFO_TIM &jif, int argc, char * argv[])
+static void set_bound_rate(MDC_INFO &jif, int argc, char * argv[])
 {
 	char * rateVal = ChkCmdVal(argc, argv, "-r");
 
@@ -132,19 +125,45 @@ SN1_SHM * get_shared_cfg()
 }
 
 
+static int diff_timeval_ms(timeval & a, timeval & b)
+{
+	timeval dif;
+	dif.tv_sec = a.tv_sec - b.tv_sec;
+	dif.tv_usec = a.tv_usec - b.tv_usec;
 
+	return dif.tv_sec * 1000 + dif.tv_usec / 1000;
+}
 
+static void mdc_alive_reflash(SN1_SHM * psn1)
+{
+	while (true) {
+		sleep(1);
 
+		timeval nowtv, rectv;
+		rectv.tv_sec = psn1->last_tv_sec;
+		rectv.tv_usec = psn1->last_tv_usec;
 
+		gettimeofday(&nowtv, nullptr);
+
+		int abs_ms = abs(diff_timeval_ms(nowtv, rectv));
+
+		if (abs_ms / 1000 > psn1->max_time_out_second) {
+			psn1->mdc_flag = SN1_SHM::MDC_TIME_FALSE;
+			psn1->helo_status = SN1_SHM::Helo_not_ready;
+		}
+
+		//printf("thread--------->mdc_alive_reflash\n");
+	}
+}
 
 int register_master_svc(JD_INFO& jif);
 void init_led_svc(JD_INFO& jif);
-
+//int JD_run_poll(JD_INFO& jif, int TimeOutMS);
 int init_mdc_monitor_Service(int argc, char * argv[])
 {
-	signal(SIGBUS, bus_handle);
+	signal(SIGBUS, bus_handle);            //SIGBUS	某种特定的硬件异常，通常由内存访问引起
 
-	prctl(PR_SET_NAME, "mdc service");
+	prctl(PR_SET_NAME, "mdc.exe");     //PR_SET_NAME :把参数arg2作为调用进程的经常名字
 
 	SN1_SHM *psn1 = get_shared_cfg();
 	if (nullptr == psn1) {
@@ -161,10 +180,22 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 		exit(EXIT_FAILURE);
 	} else {
 		printf("mdc init\n");
+
 	}
+
+#if 0
+	//for send test
+//	while (true)
+	{
+		char txtest[] = "11111111111111111111\n";
+
+		write(fd, txtest, sizeof(txtest));
+	}
+#endif
 	
 	jif.fd = fd;
 	jif.dbg_tim_rec_printf = 1;
+	
 	jif.timesetFlag = JD_TIME_UNSET;
 	jif.fake_check_flag = JD_CRC_FACK_TEST;
 	jif.psn1 = psn1;
@@ -180,12 +211,17 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	
 	register_master_svc(jif);
 //	init_led_svc(jif);
+	//printf("register_master_svc-------------------->end \n");
+	thread p(mdc_alive_reflash, psn1);
+	p.detach();
+
 
 //	regist_timer_auto_flush(psn1);	
-	printf("JD_run_poll 00000000\n");
 	//mdc poll will never returnJD运行数据检测
-	int ret = JD_run_poll(jif, -1,PROTOCOL_TYPE::protocol_JD_motor);
-	printf("JD_run_poll 111111111\n");
+	//int ret = JD_run_poll(jif, -1,PROTOCOL_TYPE::protocol_JD_motor);
+	
+	int ret = JD_run_poll(jif, -1);	
+	//printf("JD_run_poll-------------------->end \n");
 	
 	switch (ret) {
 	case JD_TIME_OUT:
@@ -195,12 +231,16 @@ int init_mdc_monitor_Service(int argc, char * argv[])
 	case JD_CLOSE_FRAME:
 		printf("mdc com ok\n");
 		exit(0);
-		break;
+		break;	
+//	case JD_OK:
+//		printf("JD ok\n");
+//		exit(0);
+//		break;
 	default:
 		break;
 	}
 	exit(0);
-	printf("mdc com\n");
+	//printf("mdc com+++++++++++++++++++++++++++++++++++++++++++\n");
 	return ret;
 }
 

@@ -18,7 +18,7 @@ struct stu1{
 struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Second, int Delta_T, double Longitude, double Latitude, int E, int P, int T)
 {
 	// 检测地时区
-	int TimeZoneLocal = ((Longitude > 0 ? 1 : (Longitude == 0 ? 0 : -1))*(floor((abs(Longitude) - 7.5) / 15) + 1));
+	int TimeZoneLocal = ((Longitude > 0 ? 1 : (Longitude == 0 ? 0 : -1))*(floor((fabs(Longitude) - 7.5) / 15) + 1));
 
 	int AA, BB;
 	if (Month <= 2)
@@ -339,7 +339,7 @@ struct stu1 SolarPos(int Year, int Month, int Day, int Hour, int Minute, int Sec
 #include <memory>
 
 ERR_STA SHG(int Year, int Month, int Day, char fdir[], int HelioAdjTime, int HelioPreTime, int StartAngle, \
-	double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double(&PEPs)[8])
+	double Longitude, double Latitude, float E, float P, float T, int Delta_T, double dTHI, double(&PEPs)[8])
 {
 #if 1
 	FILE *sheetfile = fopen(fdir, "wb+");
@@ -427,7 +427,7 @@ ERR_STA SHG(int Year, int Month, int Day, char fdir[], int HelioAdjTime, int Hel
 					ZxAng = ZxAng + M_PI * 2;
 				}
 				YxAng = round(((YxAng*(1 + EP7) - EP4) * 180 / M_PI) * 1000) / 1000;   // 弧度转成角度, 精确到小数点后面三位
-				ZxAng = round(((ZxAng*(1 + EP6) - EP3) * 180 / M_PI) * 1000) / 1000;
+				ZxAng = round(((ZxAng*(1 + (ZxAng>=0? 1:-1)*EP6) - EP3) * 180 / M_PI) * 1000) / 1000;
 
 				Second2 = Second2 + dTHI;
 				if (Second2 >= 60)
@@ -466,7 +466,7 @@ ERR_STA SHG(int Year, int Month, int Day, char fdir[], int HelioAdjTime, int Hel
 #include <fstream>
 using namespace std;
 ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, int StartAngle, \
-	double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double(&PEPs)[8]
+	double Longitude, double Latitude, float E, float P, float T, int Delta_T, double dTHI, double(&PEPs)[8]
 	, vector<timTableSet> & rts
 	)
 {
@@ -507,7 +507,9 @@ ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, in
 
 
 				tempSP = SolarPos(Year, Month, Day, Hour2, Minute2, Second2, Delta_T, Longitude, Latitude, E, P, T);
-
+				
+				//printf("Time:%d:%d:%d, %f, %f, %f, %f, %f\n", Hour, Minute,Second, Longitude, tempSP.SAz,tempSP.RIx,tempSP.RIy,tempSP.RIz);
+				
 				if (tempSP.SAt <= StartAngle)
 				{
 					flag = 0;
@@ -521,13 +523,13 @@ ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, in
 				tempV[0] = 0;
 				tempV[1] = sin(-EP8);
 				tempV[2] = cos(-EP8);
+				//printf("EP: EP1=%f, EP2=%f,EP3=%f,EP4=%f,EP5=%f,EP6=%f,EP7=%f,EP8=%f\n",EP1,EP2,EP3,EP4,EP5,EP6,EP7,EP8);
 
 				tempN[0] = tempSP.RIx*cos(EP2) - tempSP.RIz * cos(EP1)*sin(EP2) + tempSP.RIy * sin(EP1)*sin(EP2);
 				tempN[1] = tempSP.RIy*cos(EP1) + tempSP.RIz * sin(EP1);
 				tempN[2] = tempSP.RIz * cos(EP1)*cos(EP2) - tempSP.RIy*sin(EP1)*cos(EP2) + tempSP.RIx*sin(EP2);
 
 				tempn = (tempN[2] - tempV[1] * sin(EP5)) / cos(EP5);
-
 				sinY = sqrt(pow(2 * tempV[0] * tempn, 2) - 4 * (pow(tempV[0], 2) + pow(tempV[2], 2))*(pow(tempn, 2) - pow(tempV[2], 2)) - 2 * tempV[0] * tempn) / (2 * pow(tempV[0], 2) + 2 * pow(tempV[2], 2));
 				cosY = (tempn + tempV[0] * sinY) / tempV[2];
 				YxAng = asin(sinY);
@@ -545,7 +547,7 @@ ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, in
 				}
 #endif
 				YxAng = round(((YxAng*(1 + EP7) - EP4) * 180 / M_PI) * 1000) / 1000;   // 弧度转成角度, 精确到小数点后面三位
-				ZxAng = round(((ZxAng*(1 + EP6) - EP3) * 180 / M_PI) * 1000) / 1000;
+				ZxAng = round(((ZxAng*(1 + (ZxAng>=0? 1:-1)*EP6) - EP3) * 180 / M_PI) * 1000) / 1000;
 
 				Second2 = Second2 + dTHI;
 				if (Second2 >= 60)
@@ -560,7 +562,6 @@ ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, in
 				}
 				tempSP = SolarPos(Year, Month, Day, Hour2, Minute2, Second2, Delta_T, Longitude, Latitude, E, P, T);
 
-				//
 				try
 				{
 					rts.push_back(timTableSet(Hour, Minute, Second, ZxAng, YxAng

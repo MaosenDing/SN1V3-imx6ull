@@ -18,6 +18,8 @@ struct jdsvc_stop :public JDAUTOSEND {
 	{
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
+		
+		printf("findMdc_addr = 0x%x\n", jfr.jd_aim.value);
 
 		if (getIndex < 0) {
 			printf("bad addr = 0x%x\n", jfr.jd_aim.value);
@@ -58,6 +60,7 @@ struct jdsvc_stop :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & injif)final
 	{
+		printf("jdsvc_stop -----------service_pro\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		int using_index = getUncpl(jif);
 
@@ -76,6 +79,7 @@ struct jdsvc_stop :public JDAUTOSEND {
 
 		aim.retry_num++;
 		JD_send(jif, jfr);
+		printf("JD_send = jdsvc_stops 0000000\n");
 		return;
 	}
 };

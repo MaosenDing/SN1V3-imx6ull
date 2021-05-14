@@ -257,20 +257,24 @@ int timTableWorkWithReserveTime(vector<timTableSet> & table, setWork & test , in
 	while (!table.empty()) {
 		auto & cap = table.back();
 		time_t captime = cap.tt;
+		//printf("captime = cap.tt = %ld \n", captime);
 
 		ERR_STA err = TimDelayUntil(captime);
 
 		if (err == err_ok) {
 			test.work(cap, 0);
+			//printf("cap work ----------------1\n");
 		} else {
 			err = TimDelayUntil(captime + TimeS);
 
 			if (err == err_ok) {
 				SN1V2_WARN_LOG("cap over head tick");
 				test.work(cap, 0);
+				//printf("cap work ----------------2\n");
 			} else {
 				SN1V2_WARN_LOG("cap over tail tick");
 				test.work(cap, 1);
+				//printf("cap work ----------------3\n");
 			}
 		}
 		table.pop_back();

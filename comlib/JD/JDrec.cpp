@@ -136,6 +136,7 @@ void JD_pro_ctl(JD_INFO & jif,int cmd ,JD_INFO::JD_PRO profun, int ctl)
 	if (ctl)
 	{
 		jif.jd_pro_method[cmd] = profun;
+		
 	}
 	else
 	{
@@ -186,6 +187,8 @@ static void make_rec_pack(unsigned char * rxbuf, int num, JD_FRAME & jfr)
 	}
 }
 
+
+/*
 static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int &remove_len)
 {
 	for (int i = 0; i < num; i++) {
@@ -220,14 +223,56 @@ static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif, int &
 	}
 	return JD_CONTINUE;
 }
+*/
 
 
+///*
+static int JD_pro_bare_buff(unsigned char * rxbuf, int num, JD_INFO & jif)
+{
+	for (int i = 0; i < num; i++)
+	{
+		//printf("JD_pro_bare_buff-----------> num = %d  rxbuf[%d] == %x\n", num, i, rxbuf[i] );
+		int remainLen = num - i;
+		if ((rxbuf[i] == 0XAA) && (rxbuf[i + 1] == 0XAA))
+		{
+			//printf("JD_pro_bare_buff-----------> 0xAA AA\n");
+			
+			if (remainLen > 7)
+			{
+				//printf("JD_pro_bare_buff----------->remainLen > 7\n");
+				int recpackLen = rxbuf[i + 7];
 
+				if (crc_check(recpackLen, &(*(rxbuf + i)), 0XFFFF, NULL, jif) == 1)
+				{
+					//printf("JD_pro_bare_buff----------->crc_check = 1\n");
+					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc ok\n");
+					JD_FRAME jfr;
+					make_rec_pack(rxbuf + i, num - i, jfr);
+
+					int ret = JD_command_respon(jif, jfr);
+					if (ret == JD_CLOSE_FRAME)
+					{
+						return JD_CLOSE_FRAME;
+					}
+					return JD_OK;
+					//printf("JD_run_poll ------JD_pro_bare_buff-----------> return JD_OK=0\n");
+				}
+				else{
+					if (jif.dbg_pri_chk_flag && jif.dbg_fp) fprintf(jif.dbg_fp, "crc error\n");
+				}
+			}
+		}
+	}
+	return JD_CONTINUE;
+	
+}
+//*/
+/*
 int JD_run_poll(JD_INFO& jif, int TimeOutMS , PROTOCOL_TYPE typ)
 {
+	printf("JD_run_poll ---------------------->00000000000\n");
 	struct timeval tStart, tEnd;
 	gettimeofday(&tStart, nullptr);
-
 	enum {
 		MAX_RX_BUFF = 1024 * 10,
 		RX_MAX_ONCE = 256,
@@ -239,12 +284,12 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS , PROTOCOL_TYPE typ)
 	unique_ptr<unsigned char[]> ppp(rxbuf, default_delete<unsigned char[]>());
 #endif
 	int rxlen = 0;
-
+	printf("JD_run_poll ---------------------->\n");
 	while (true) {
 		gettimeofday(&tEnd, nullptr);
-
+		printf("JD_run_poll 333333\n");
 		long dms = diffMS(tStart, tEnd);
-
+		printf("JD_run_poll 444444\n");
 		if (TimeOutMS < 0) {//no time out
 		 //do nothing
 		} else if (dms > TimeOutMS) {
@@ -278,15 +323,16 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS , PROTOCOL_TYPE typ)
 			rxlen += newReadLen;
 			timeval tv;
 			gettimeofday(&tv, nullptr);
-
+			printf("JD_run_poll 55555555\n");
 			if (jif.dbg_pri_rd_len && jif.dbg_fp) fprintf(jif.dbg_fp, "rd len = %d time=%ld.%06ld\n", rxlen, tv.tv_sec, tv.tv_usec);
 
 			if (jif.dbg_pri_rd_word && jif.dbg_fp)disp_x_buff(jif.dbg_fp, rxbuf, rxlen);
 
 			int removed_Len = 0;
+			printf("JD_run_poll 666666\n");
 			//解析接收到的MDC的数据包
 			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif, removed_Len);
-
+			printf("JD_run_poll 7777777\n");
 			if (JD_CLOSE_FRAME == retPro) {
 				return JD_CLOSE_FRAME;
 			}
@@ -306,8 +352,80 @@ int JD_run_poll(JD_INFO& jif, int TimeOutMS , PROTOCOL_TYPE typ)
 		}
 	}
 }
+*/
 
+///*
+int JD_run_poll(JD_INFO& jif, int TimeOutMS)
+{
+	struct timeval tStart, tEnd;
+	gettimeofday(&tStart, nullptr);
 
+	enum {
+		MAX_RX_BUFF = 300,
+		RX_MAX_ONCE = 256,
+	};
+	unsigned char rxbuf[MAX_RX_BUFF];
+	int rxlen = 0;
+  
+	while (true) {
+		gettimeofday(&tEnd, nullptr);
+
+		long dms = diffMS(tStart, tEnd);
+
+		if (TimeOutMS < 0) {//no time out
+		 //do nothing
+		 //printf("+++++++++++++++++0001+++++++++++++\n");
+		} else if (dms > TimeOutMS) {
+			cout << "diff ms" << dms << endl;
+			return JD_TIME_OUT;
+		}
+
+		pollfd pfd[1];
+		//receive fd
+		pfd[0].fd = jif.fd;
+		pfd[0].events = POLLIN;
+		int ret;
+		if ((ret = poll(pfd, 1, 20)) > 0) {
+			//printf("++++++++++++++++++0003++++++++++++\n");
+			unsigned char newrxbuf[RX_MAX_ONCE];
+			int newReadLen = read(jif.fd, newrxbuf, RX_MAX_ONCE);
+
+			if (newReadLen + rxlen > MAX_RX_BUFF) {
+				int reduceNum = newReadLen + rxlen - MAX_RX_BUFF;
+				int cpNum = rxlen - reduceNum;
+				memcpy(&rxbuf[0], &rxbuf[reduceNum], cpNum);
+				rxlen = cpNum;
+			}
+			memcpy(&rxbuf[rxlen], &newrxbuf[0], newReadLen);
+			rxlen += newReadLen;
+			timeval tv;
+			gettimeofday(&tv, nullptr);
+
+			if (jif.dbg_pri_rd_len && jif.dbg_fp) fprintf(jif.dbg_fp, "rd len = %d time=%ld.%06ld\n", rxlen, tv.tv_sec, tv.tv_usec);
+
+			if (jif.dbg_pri_rd_word && jif.dbg_fp)disp_x_buff(jif.dbg_fp, rxbuf, rxlen);
+			//解析接收到的MDC的数据包
+			int retPro = JD_pro_bare_buff(rxbuf, rxlen, jif);
+			//printf("JD_run_poll ------------------------------->retPro = %d\n", retPro);
+			
+			if (JD_CLOSE_FRAME == retPro) {
+				return JD_CLOSE_FRAME;
+			}
+
+			if (JD_CONTINUE == retPro) {
+				//return JD_CONTINUE;
+				//printf("JD_run_poll ----JD_pro_bare_buff-----> return JD_CONTINUE=-8  未接受到有效数据\n");
+			}
+
+			if (JD_OK == retPro) {
+				rxlen = 0;
+				//return JD_OK;
+			}
+		}
+	}
+}
+
+//*/
 
 
 

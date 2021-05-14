@@ -5,7 +5,7 @@
 
 
 
-int my_cap_init(unsigned int, unsigned int, int isHorFlip, int isVerFlip);
+int my_cap_init(unsigned int, unsigned int, unsigned int overturn, int isVerFlip);
 
 
 

@@ -31,6 +31,16 @@ using namespace std;
 void RGB888_2_565(uint8_t *srcdata, uint8_t *dst, size_t pixCount);
 int getJPEGfromFile(const char *file, vector<unsigned char> &outData, int &w, int &h, int &imgType);
 ERR_STA ImageProcessRGB(const char *saveName, shared_ptr<unsigned char> LoadImg, int inputSize, int width, int height, PROCESS_RESULT &res, int thres, float thresPer, bool BINjpgSaveFlag = true, unsigned int MinCntGrp = 50);
+//ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+//	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
+//	, const int horFlip, const int VerFlip
+//);
+ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
+	, const int horFlip, const int VerFlip
+);
+
+
 int processTest(int argc, char *argv[])
 {
 	PROCESS_RESULT res;
@@ -121,7 +131,6 @@ int processTest2(int argc, char *argv[])
 #include "SN1V2_error.h"
 #include "errHandle.h"
 
-ERR_STA ImageCap(const char *dstPath, int width, int height, PROCESS_RESULT &res, int thres, float thresPer, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo, const int horflip, const int verFlip);
 
 
 int createTable(int argc, char *argv[]);
@@ -209,11 +218,11 @@ int tableGenerate3(int argc, char *argv[])
 			}
 
 			PROCESS_RESULT res;
-			ERR_STA err = ImageCap(photoPath, 1920, 1080, res, SGT, SBT, true, false, MCP, gain, expose, 0, 0);
+			ERR_STA err = ImageCap(photoPath, 2592, 1944, res, SGT, SBT, true, false, MCP, gain, expose, 0, 0);
 			float x_diff = 0, y_diff = 0;
 			if (err == err_ok) {
-				x_diff = res.diff_x + 1920 / 2;
-				y_diff = res.diff_y + 1080 / 2;
+				x_diff = res.diff_x + 2592 / 2;
+				y_diff = res.diff_y + 1944 / 2;
 				printf("pos = %f,%f\n", x_diff, y_diff);
 			} else {
 				x_diff = 4000;

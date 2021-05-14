@@ -15,9 +15,10 @@ cfgsection = $(patsubst %.txt,%.section,$(cfgs))
 file = main.cpp 
 #flags = -Wl,-Tupdate.lds 
 
-VERSION ?= _5.1
+VERSION ?= ,1.31,-
 SCG := 1
 EXE := 1
+#USR := 0
 
 ifeq ($(EXE),1)
 file += $(sosection) $(exesection) 
@@ -29,8 +30,14 @@ file += $(cfgsection)
 flags += -DSCG
 endif
 
+#ifeq ($(USR),1)
+#file += user.section
+#flags += -DUSR
+#endif
 
-aim = MDC2_SV_1$(VERSION).bin
+
+
+aim = MDC2_SV_1.3$(VERSION).bin
 
 
 $(aim):$(file)
@@ -47,6 +54,8 @@ $(filter %.section , $(exesection)): %.section: %.exe
 
 $(filter %.section , $(cfgsection)): %.section: %.txt
 	$(OBJCOPY) -I binary -O elf32-littlearm -B arm $^ $@
+
+
 
 
 

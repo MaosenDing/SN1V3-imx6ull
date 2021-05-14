@@ -1,5 +1,5 @@
 
-int set_gain_expose(int fd, int gain, int expose)
+int set_gain_expose(int fd, unsigned int gain, unsigned int expose)
 {
 	static int old_gain, old_expose;
 

@@ -11,12 +11,16 @@
 #include <regex>
 using namespace std;
 
+
+#if 0
+
 #define FIX_VERSION_PATH "/etc/version"
-#define SOFT_VERSION "2.42"
+#define SOFT_VERSION "3.0"
 #define CFG_VERSION_PATH "./SCG.txt"
 
 int getFixVersion(char * buff, int maxsz)
 {
+	#if 0
 	ifstream ifs(FIX_VERSION_PATH);
 	string tmpfil;
 	if (ifs) {
@@ -29,6 +33,7 @@ int getFixVersion(char * buff, int maxsz)
 			return snprintf(buff, maxsz, "%s", tmpfil.c_str());
 		}
 	}
+	#endif
 	return snprintf(buff, maxsz, "1.0");
 }
 
@@ -83,3 +88,5 @@ char * getVersion()
 
 	return versionbuff;
 }
+
+#endif

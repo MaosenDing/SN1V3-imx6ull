@@ -15,12 +15,13 @@
 #include "video.h"
 #include <sys/prctl.h>
 #include <fstream>
-
+ #include <sys/mman.h>
 
 
 int init_cap(const char * videoName);
-int set_gain_expose(int fd, int gain, int expose);
-int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFlip);
+int set_gain_expose(int fd, unsigned int gain, unsigned int expose);
+int camera_init(unsigned int gain, unsigned int expo, unsigned int overturn);
+int my_cap_init(unsigned int gain, unsigned int expo, unsigned int overturn, int isVerFlip);
 using namespace std;
 
 
@@ -58,7 +59,8 @@ int rgb565_to_jpeg(unsigned char * rgbst, int pwidth, int pheigth, int fname)
 #include <boost/asio/post.hpp>
 #include <boost/pool/pool.hpp>
 
-boost::pool<> mempl2M(2 * 1920 * 1080);
+//boost::pool<> mempl2M(2 * 1920 * 1080);
+boost::pool<> mempl2M(2 * 2592 * 1944);
 
 ERR_STA SaveyuyvJpg(char * fName, unsigned char * yuyv, int width, int heigth);
 void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height);
@@ -67,7 +69,7 @@ void compress(void * p, int i)
 	//TimeInterval tim("compress:");
 	char name[64];
 	snprintf(name, 64, "/tmp/cap/test%d.jpg", i % 10);
-	SaveyuyvJpg(name, (unsigned char *)p, 1920, 1080);
+	SaveyuyvJpg(name, (unsigned char *)p, 2592, 1944);
 	mempl2M.free(p);
 }
 
@@ -75,25 +77,26 @@ void compress(void * p, int i)
 
 
 ERR_STA loop_cap2JPG(const unsigned int gain, const unsigned int expo
-	, const int horizenFlip, const int VeriFlip
+	, const int overturn, const int VeriFlip
 )
 {
-	my_cap_init(gain, expo, horizenFlip, VeriFlip);
+	my_cap_init(gain, expo, overturn, VeriFlip);
 
 
 	if (video_fd < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_open);
 	}
-	int ret = set_gain_expose(video_fd, gain, expo);
+	//int ret = set_gain_expose(video_fd, gain, expo);
 
-	if (ret < 0) {
-		SN1V2_ERROR_CODE_RET(err_sensor_set);
-	}
+	//if (ret < 0) {
+	//	SN1V2_ERROR_CODE_RET(err_sensor_set);
+	//}
 	boost::asio::thread_pool pool(10);
 
 	for (int i = 0; i < 10000000000; i++) {
 		TimeInterval tim("once:");
 		shared_ptr< CAP_FRAME> fram = get_one_frame(video_fd);
+
 		if (fram && fram->useFlag) {
 			TimeInterval tim("pp:");
 			void *p = mempl2M.malloc();
@@ -128,6 +131,7 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 	}
 
 	shared_ptr< CAP_FRAME> fram;
+
 	{
 		TimeInterval ppp2("CAP_FRAME:");
 		fram = get_one_frame(video_fd);
@@ -136,7 +140,7 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 
 	if (fram && fram->useFlag) {
 		TimeInterval ppp2("yuv:");
-		YUV422ToRGB565(fram->startAddr, rgb565buff, 1920, 1080);
+		YUV422ToRGB565(fram->startAddr, rgb565buff, 2592, 1944);
 		return err_ok;
 	}
 
@@ -146,20 +150,24 @@ ERR_STA cap_once(unsigned char * rgb565buff, int &insize, const unsigned int gai
 
 
 
-int my_cap_init(unsigned int gain, unsigned int expo, int isHorFlip, int isVerFlip)
+int my_cap_init(unsigned int gain, unsigned int expo, unsigned int overturn, int isVerFlip)
 {
-	video_fd = init_cap("/dev/video1");
-
+	//video_fd = init_cap("/dev/video1");
+	video_fd = camera_init(gain, expo, overturn);
+	
+	
 	if (video_fd < 0) {
 		cerr << "set video error" << endl;
 		return -1;
 	}
-	set_gain_expose(video_fd, gain, expo);
+	//set_gain_expose(video_fd, gain, expo);
 
 	if (video_fd >= 0) {
+		printf("++++++++++camera_init ok+++++++++++++\n");
 		return 0;
 	}
 	return -1;
+
 }
 
 void YUV422ToGray(const void* inbuf, void* outbuf, int width, int height, int flg);
@@ -168,7 +176,7 @@ ERR_STA SaveGRAYJpg(char * fName, unsigned char * regImg, int width, int heigth)
 
 void saveThread(unsigned char * srcbuff, string name)
 {
-	static int index = 0;
+	//static int index = 0;
 	static char savename[64];
 
 	if (0 == strcmp(savename, name.c_str())) {
@@ -176,17 +184,19 @@ void saveThread(unsigned char * srcbuff, string name)
 		return;
 	}
 
+	//printf("--------------saveThread 001-----------------\n");
 	unsigned char * buff = (unsigned char *)mempl2M.malloc();
-	YUV422ToRGB565(srcbuff, buff, 1920, 1080);
+	YUV422ToRGB565(srcbuff, buff, 2592, 1944);
+	
 
 	strcpy(savename, name.c_str());
 	printf("save %s\n", savename);
 
-	SaveRGB565Jpg(savename, buff, 1920, 1080);
+	SaveRGB565Jpg(savename, buff, 2592, 1944);
 	mempl2M.free(buff);
 
 	char tmpsavename[64];
-	snprintf(tmpsavename, 64, "cp %s /tmp/cap/%d.jpg", savename, index);
+	//snprintf(tmpsavename, 64, "cp %s /tmp/cap/%d.jpg", savename, index);
 	system(tmpsavename);
 }
 
@@ -202,8 +212,7 @@ static void saveJPG(string savename, void * srcbuff)
 }
 
 
-
-
+extern video_context_t g_video_context;
 ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int gain, const unsigned int expo
 	, const int horizenFlip, const int VeriFlip, char * savename
 )
@@ -211,29 +220,38 @@ ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int 
 	if (video_fd < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_open);
 	}
+/**********
 	int ret = set_gain_expose(video_fd, gain, expo);
 
 	if (ret < 0) {
 		SN1V2_ERROR_CODE_RET(err_sensor_set);
 	}
-
+***********/
 	shared_ptr< CAP_FRAME> fram;
+
 	{
 		TimeInterval ppp2("CAP_FRAME:");
-		fram = get_one_frame(video_fd);
+		// while(1)
+		// {
+			fram = get_one_frame(video_fd);
+		//	printf("-----------g_video_context.frameindex = %d---------------\n", g_video_context.frameindex);
+		// 	if(g_video_context.frameindex == 0)
+		// 		break;
+		// }
+			
 	}
-
-
 	if (fram && fram->useFlag) {
 #if 1
 		TimeInterval ppp2("gray:");
 		if (savename) {
 			saveJPG(savename, fram->startAddr);
+			//printf("------------gray savejpg---------------\n");
 		}
 #endif
 		{
 			TimeInterval ppp2("gray22222:");
-			YUV422ToGray(fram->startAddr, graybuff, 1920, 1080, 3);
+			YUV422ToGray(fram->startAddr, graybuff, 2592, 1944, 3);
+			//printf("------------gray YUV422ToGray---------------\n");
 		}
 		return err_ok;
 	}
@@ -241,3 +259,18 @@ ERR_STA cap_once_gray(unsigned char * graybuff, int &insize, const unsigned int 
 	SN1V2_ERROR_CODE_RET(err_sensor_catch);
 }
 
+//释放
+void camera_free(void)
+{
+	for(int i=0; i<BUFFER_COUNT; i++)
+	{
+		if(g_video_context.framebuf[i].start)
+		{
+			munmap(g_video_context.framebuf[i].start, g_video_context.framebuf[i].length);
+		}
+	}
+
+	free(g_video_context.graybuff);
+	close(g_video_context.fd);
+
+}

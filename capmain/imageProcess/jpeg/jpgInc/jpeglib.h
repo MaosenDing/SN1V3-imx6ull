@@ -701,7 +701,8 @@ struct jpeg_decompress_struct {
 
 struct jpeg_error_mgr {
   /* Error exit handler: does not return to caller */
-  JMETHOD(noreturn_t, error_exit, (j_common_ptr cinfo));
+  //JMETHOD(noreturn_t, error_exit, (j_common_ptr cinfo));
+  JMETHOD(void, error_exit, (j_common_ptr cinfo));
   /* Conditionally emit a trace or warning message */
   JMETHOD(void, emit_message, (j_common_ptr cinfo, int msg_level));
   /* Routine that actually outputs a trace or error message */

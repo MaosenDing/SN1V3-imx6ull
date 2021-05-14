@@ -239,8 +239,8 @@ CFG_INFO T6[] = {
 	T6_Set_data(1, SN1_P1, dateType::INT32, setDefault(int, 1200)),
 	T6_Set_data(2, SN1_P2, dateType::INT32, setDefault(int, 1600)),
 	T6_Set_data(3, SN1_P3, dateType::FLOAT32, setDefault(float, 0)),
-	T6_Set_data(4, SN1_P4_x, dateType::FLOAT32, setDefault(float, 1920 / 2)),
-	T6_Set_data(5, SN1_P4_y, dateType::FLOAT32, setDefault(float, 1080 / 2)),
+	T6_Set_data(4, SN1_P4_x, dateType::FLOAT32, setDefault(float, 2592 / 2)),
+	T6_Set_data(5, SN1_P4_y, dateType::FLOAT32, setDefault(float, 1944 / 2)),
 	T6_Set_data(6, SN1_P5, dateType::INT32, setDefault(int, 20)), //增益
 	T6_Set_data(7, SN1_P6, dateType::INT32, setDefault(int, 100)), //曝光
 	T6_Set_data(8, SN1_P7, dateType::BOOLTYPE, boolDefault), //水平翻转
@@ -271,8 +271,8 @@ CFG_INFO T6[] = {
 	T6_Set_data(30, cam_viewAngleh, dateType::FLOAT32, setDefault(float, 145)),
 	T6_Set_data(31, cam_viewAnglev, dateType::FLOAT32, setDefault(float, 67)),
 
-	T6_Set_data(32, centerU, dateType::FLOAT32, setDefault(float, 1920 / 2)),
-	T6_Set_data(33, centerV, dateType::FLOAT32, setDefault(float, 1080 / 2)),
+	T6_Set_data(32, centerU, dateType::FLOAT32, setDefault(float, 2592 / 2)),
+	T6_Set_data(33, centerV, dateType::FLOAT32, setDefault(float, 1944 / 2)),
 
 	T6_Set_data(34, MappingCoefficients1, dateType::FLOAT32, setDefault(float, 0)),
 	T6_Set_data(35, MappingCoefficients2, dateType::FLOAT32, setDefault(float, 0)),

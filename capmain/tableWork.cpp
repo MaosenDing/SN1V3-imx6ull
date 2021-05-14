@@ -5,7 +5,26 @@
 #include "SN1V2_com.h"
 #include "errHandle/errHandle.h"
 #include <thread>
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <vector>
+#include <string.h>
+#include "timSet.h"
+#include <algorithm>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <chrono>
+#include <regex>
+#include <sys/prctl.h>
+#include "camera.h"
+//#include "communicate.h"
+#include <jd_share.h>
+#include "timeTableV2.h"
+
 using namespace std;
+
 
 static void PROCESS_RESULT_INIT(PROCESS_RESULT  &pro, timTableSet & tts)
 {
@@ -142,14 +161,22 @@ void dummyWork2::work(timTableSet & tts, int flag)
 #endif
 
 
-capWork::capWork(char * aimpp,SN1_CFG & inCfg,SN1_SHM * in_psn1,char * in_res_path, T_ImageCapRGB * incap)
+//capWork::capWork(char * aimpp,SN1_CFG & inCfg,SN1_SHM * in_psn1,char * in_res_path, T_ImageCapRGB * incap)
+//	:aimPath(aimpp) ,res_path(in_res_path), cfg(inCfg), psn1(in_psn1)
+//	, This_ImageCapRGB(incap)
+//	,index(0), lastEnd(chrono::system_clock::now())
+//{}
+
+capWork::capWork(char * aimpp,SN1_CFG & inCfg,SN1_SHM * in_psn1,char * in_res_path) 
 	:aimPath(aimpp) ,res_path(in_res_path), cfg(inCfg), psn1(in_psn1)
-	, This_ImageCapRGB(incap)
 	,index(0), lastEnd(chrono::system_clock::now())
 {}
 
-
-
+ERR_STA ImageCap(const char *dstPath, int width, int height, PROCESS_RESULT &res, int thres, float thresPer, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo, const int horflip, const int verFlip);
+ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	,bool ORGjpgSaveFlag, bool BINjpgSaveFlag,unsigned int MinCntGrp,const unsigned int gain,const unsigned int expo
+	,const int horflip , const int verFlip
+);
 
 
 
@@ -196,7 +223,7 @@ void capWork::cap_miss_process(timTableSet & time)
 
 void capWork::cap_status_error_process(timTableSet & time)
 {
-	LOG(WARNING) << "heli not ready -> cap skip" << endl;
+	LOG(WARNING) << "heli not ready -> cap skip" << endl;     //定日镜没有就绪
 	if (psn1) {
 		psn1->error_count++;
 		psn1->last_error_code = err_Heli_not_ready;
@@ -212,7 +239,7 @@ void capWork::cap_ok()
 
 
 
-
+extern double cap_cnt;
 void capWork::work(timTableSet & timets, int flag)
 {
 	cout << "----------------------------" << endl;
@@ -226,25 +253,30 @@ void capWork::work(timTableSet & timets, int flag)
 		printf("psn1 %#X\n", psn1);
 #endif
 		while (psn1 && (psn1->helo_status != SN1_SHM::Helo_ok) && (time(0) < cap_end))
-			usleep(100 * 1000);
+			{
+				usleep(100 * 1000);
+				//printf("--------psn1->helo_status = %d------------\n", psn1->helo_status);	
+			}
+			
+
 #if 0
 		printf("time 0 %ld ,end %ld ,res %d ,tt = %ld\n", time(0), cap_end , cfg.max_reserve_time , timets.tt);
 #endif
+		
+#if 1    //0时通讯未接入，暂时不检测
 		if (time(0) >= cap_end) {
 			cap_status_error_process(timets);
 			//just skip capture
 			return;
 		}
-
+#endif // 0	
 		auto start = chrono::system_clock::now();
 
 		PROCESS_RESULT pro;
 		PROCESS_RESULT_INIT(pro, timets);
-		ERR_STA err = err_UNKNOWN;
-		if (This_ImageCapRGB) {
-			err = (*This_ImageCapRGB)(aimPath, cfg.IMG_WIDTH, cfg.IMG_HEIGTH, pro, cfg.thres, cfg.thresPer, cfg.FLAG_SAVE_ORG, cfg.FLAG_SAVE_BIN, cfg.MinCntGrp
+		ERR_STA err = ImageCap(aimPath, cfg.IMG_WIDTH, cfg.IMG_HEIGTH, pro, cfg.thres, cfg.thresPer, cfg.FLAG_SAVE_ORG, cfg.FLAG_SAVE_BIN, cfg.MinCntGrp
 				, cfg.gain, cfg.expo, cfg.isHorisFlip, cfg.isVeriFlip);
-		}
+		
 		//this_thread::sleep_for(chrono::milliseconds(3000));
 
 		tm reftime;
@@ -256,6 +288,9 @@ void capWork::work(timTableSet & timets, int flag)
 		if (err == err_ok) {
 			char buff[128];
 
+			cap_cnt++;
+			printf("--------cap_cnt = %f------------\n", cap_cnt);
+
 			sprintf(buff, "%04d-%02d-%02d %02d:%02d:%02d,%f,%f,%d,%.3f,%.3f,%.6f,%.6f,%.6f,quality = %f"
 				, reftime.tm_year + 1900, reftime.tm_mon + 1, reftime.tm_mday
 				, reftime.tm_hour, reftime.tm_min, reftime.tm_sec
@@ -265,7 +300,7 @@ void capWork::work(timTableSet & timets, int flag)
 				, pro.quality
 			);
 			cout << buff << endl;
-			cout << "*****************************" << endl;
+			cout << "*************+++++++++++++++++++++++++++++++****************" << endl;
 
 			if (cfg.qualityThres < pro.quality) {
 #if 0 
@@ -283,9 +318,11 @@ void capWork::work(timTableSet & timets, int flag)
 					, timets.RIx, timets.RIy, timets.RIz
 				);
 #endif
-				if (res_path) {
-					ofstream txtRes(res_path, ofstream::app);
-					txtRes << buff << endl;
+				if(cap_cnt >= 3){
+					if (res_path) {
+						ofstream txtRes(res_path, ofstream::app);
+						txtRes << buff << endl;
+					}
 				}
 			} else {
 				LOG(WARNING) << buff << "bad quality" << endl;
@@ -307,5 +344,3 @@ void capWork::work(timTableSet & timets, int flag)
 		cap_miss_process(timets);
 	}
 }
-
-

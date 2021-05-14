@@ -24,9 +24,9 @@ include_directories("comlib/errHandle")
 include_directories("${PROJECT_SOURCE_DIR}/comlib")
 
 
+
+
 add_subdirectory(comlib)
-
-
 add_subdirectory(capmain)
 add_subdirectory(JDsvc)
 #add_subdirectory(wifiSVC)
@@ -36,8 +36,6 @@ add_subdirectory(daemon)
 IF (DEFINED  TABLE_TEST)
 add_subdirectory(tableTestFile)
 ENDIF()
-
-
 
 #install scripts
 add_subdirectory(workscript)

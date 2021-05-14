@@ -308,7 +308,7 @@ int getidealmain(int argc, char *argv[])
 	//T4参数表获得
 	Vector3f angleXYZ(0.04761203743457128, -0.6556470204718018, -0.17746299323266249 + 90);
 	Vector2f fxfy(684.818893, 681.489169); //焦距
-	Vector2f imgSize(1080, 1920);
+	Vector2f imgSize(1944, 2592);
 	Vector2f viewAngle(170, 95);
 
 	Vector4f MappingCoefficients(-0.014484, -0.136218, 0.478277, -0.657337);

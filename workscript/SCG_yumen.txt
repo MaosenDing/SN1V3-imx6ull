@@ -1,0 +1,46 @@
+#玉门现场使用
+%SGT,200
+%SBT,0.8
+#玉门
+%TLO,97.27770556#经度
+%TLA,40.32957375#纬度
+
+%SRT,0.6
+%SID,1024
+%SSA,10
+%SHT,10
+%SCT,10
+%SPT,0
+%TDT,70
+%SCH,1
+#玉门
+%TEE,1415.5#海拔高度
+%TEP,847.2#年均气压:百帕
+%TET,7.8#年均气温:摄氏度
+
+%SFL,8e-3
+%SPS,1.4e-6
+%SVO,false#保留原始图像
+%SVB,false#保留二值化图像
+%SIH,1944
+%SIW,2592
+%MCP,20
+%STN,3#运行cre迭代上限
+%SFD,false#是否清除数据
+%SHS,true#保留timetable
+%SGV,3#增益
+%SST,3#曝光
+%OVR,1#翻转图片类型
+%BFT,0.4#上午阈值
+%AFT,0.4#下午阈值
+%MRT,5#最长拍摄保留时间
+%SVF,false
+%SHF,false
+%ISC,1#1表示会执行CER 0表示不执行CRE
+%LHB,-1#上午开始小时 -1表示不受限
+%LHA,17#下午结束小时 -1表示不受限
+#FSP,/home/556_bk/testp#保存路径
+%NGV,200#sn3增益
+%NST,3000#sn3曝光
+%VER,2.2
+

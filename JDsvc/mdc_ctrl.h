@@ -223,6 +223,17 @@ struct MDC_INFO :public JD_INFO_TIM {
 	SN1_SHM * psn1;
 	MDC_WORK_MOD work_mod;
 	MDC_CTRL mdcCtrl[2];
+
+	char dbg_shm_ret_printf = 0;
+	char dbg_tim_rec_printf = 0;
+	char dbg_cre_printf = 0;
+	char dbg_file_printf = 1;
+	int rate = 19200;
+	//auto return fixed error num
+	int error_debug_flag = 0;
+	//enable time diff && time set
+	int time_diff_max = 20;
+
 };
 
 
@@ -234,7 +245,6 @@ SCANF_DATA real_scan_file(const char * fil);
 int regist_timer_auto_flush(SN1_SHM * psn1);
 
 #define MDC_MODE_FILE ("/tmp/mdc_mode")
-
 #define MDC_STATUS_FILE ("/tmp/mdc_status")
 
 #endif

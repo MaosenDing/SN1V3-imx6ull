@@ -55,6 +55,11 @@ typedef ERR_STA(T_ImageCapRGB)(const char * dstPath, int width, int height, PROC
 	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
 	, const int horflip, const int verFlip
 	);
+ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntGrp, const unsigned int gain, const unsigned int expo
+	, const int horflip, const int verFlip
+	);
+
 
 
 struct capWork : public setWork
@@ -68,9 +73,10 @@ struct capWork : public setWork
 	
 	int test_for_cap_once = 0;
 	
-	explicit capWork(char * aimP,SN1_CFG & inCfg,SN1_SHM * in_psn1,char *in_res_path , T_ImageCapRGB * incap);
+//	explicit capWork(char * aimP,SN1_CFG & inCfg,SN1_SHM * in_psn1,char *in_res_path , T_ImageCapRGB * incap);
+	explicit capWork(char * aimP,SN1_CFG & inCfg,SN1_SHM * in_psn1,char *in_res_path);
 	virtual void work(timTableSet & time, int flag) override;
-	T_ImageCapRGB * This_ImageCapRGB;
+//	T_ImageCapRGB * This_ImageCapRGB;
 private:
 	int index;
 	capWork(const capWork&);

@@ -107,6 +107,7 @@ struct jdtablesvc :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & injif)final
 	{
+		printf("jdsvc_table -----------service_pro\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		std::unique_lock<std::mutex> lk(tableLock);
 

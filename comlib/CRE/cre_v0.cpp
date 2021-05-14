@@ -128,7 +128,7 @@ extern "C" char *CRE(char ResDir[], double SPS, double SFL, double PEP[8])
 				// 代入运动模型
 				AY = (ResData[i][1] + PEP[3]) / (1 + PEP[6]);
 				AZ = (ResData[i][0] + PEP[2]) /
-				     (1 + (ResData[i][0] > 0 ? 1.0 : -1.0) * PEP[5]);
+				     (1 + ((ResData[i][0] + PEP[2])> 0 ? 1.0 : -1.0) * PEP[5]);
 
 				TMR[0] = sin(PEP[1]) * (cos(AY) * cos(PEP[4]) * cos(PEP[7]) - sin(PEP[4]) * sin(PEP[7])) + cos(PEP[1]) * (cos(AZ) * cos(PEP[7]) * sin(AY) - sin(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7])));
 				TMR[1] = cos(PEP[0]) * (cos(PEP[7]) * sin(AY) * sin(AZ) + cos(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7]))) - sin(PEP[0]) * (cos(PEP[1]) * (cos(AY) * cos(PEP[4]) * cos(PEP[7]) - sin(PEP[4]) * sin(PEP[7])) - sin(PEP[1]) * (cos(AZ) * cos(PEP[7]) * sin(AY) - sin(AZ) * (-cos(AY) * cos(PEP[7]) * sin(PEP[4]) - cos(PEP[4]) * sin(PEP[7]))));

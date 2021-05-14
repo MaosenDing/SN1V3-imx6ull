@@ -4,62 +4,64 @@
 #include "SN1V2_rtConfig.h"
 /*error code*/
 	enum ERR_STA {
-		err_ok = 0,//ÕıÈ·Ö´ĞĞ
-		err_out_of_memory = -1,//ÄÚ´æ²»×ã
-		err_cannot_read_file = -2,//ÎŞ·¨¶ÁÈ¡ÎÄ¼ş
-		err_inval_path = -3,//ÎŞĞ§Â·¾¢
-		err_cannot_open_file = -4,//ÎŞ·¨´ò¿ªÎÄ¼ş
-		err_cannot_write_file = -5,//ÎŞ·¨Ğ´Èë
-		err_inval_para = -6,//²ÎÊı´íÎó
-		err_invaild_memory_access = -7,//ÄÚ´æ·ÃÎÊ´íÎó
-		//ÎÄ±¾Ä£¿é
-		err_txt_part_error = -100,//ÎÄ±¾²¿·ÖÒì³£
-		err_conf_tran_error = -101,//ÅäÖÃÎÄ¼ş²¿·Ö×ª»¯Òì³£
-		err_conf_get_null= -102,//Ã»ÓĞ¸ÃÅäÖÃ²ÎÊı
-		//Í¼ÏñÄ£¿é
-		err_sensor_open = -200,//Æô¶¯Òì³£
-		err_sensor_close = -201,//¹Ø±ÕÒì³£
-		err_sensor_set = -202,//ÉèÖÃÒì³£
-		err_sensor_catch = -203,//ÅÄÉãÒì³£
-		err_JPG_encode = -204,//jpg×ª»»Òì³£
-		err_Inval_image = -205,//ÎŞĞ§µÄÍ¼ÏñÊı¾İ
-		err_binaryzation_aim_null = -206,//¶şÖµ»¯Ä¿±ê¶ªÊ§
-		err_binaryzation_process = -207,//¶şÖµ»¯´¦ÀíÒì³£
-		err_Image_filter = -208,//Í¼ÏñÉ¸Ñ¡Òì³£
-		err_diff_cal = -209,//Æ«²î¼ÆËãÒì³£
-		err_Image_type_undefined = -210,//Í¼ÏñÀàĞÍÎ´¶¨Òå
-		err_Image_type_unsupported = -211,//²»Ö§³ÖµÄÍ¼Ïñ
-		err_Image_bound_beyond_region_err = -212,//Í¼Ïñ±ß½çÎÊÌâ ÁÁµã±ß½ç´óÓÚ×î´óÓÚ¹æ¶¨·¶Î§
-		err_Image_clone_bound_err = -213,//Í¼Ïñ¸´ÖÆ±ß½ç´íÎó
+		err_ok = 0,//æ­£ç¡®æ‰§è¡Œ
+		err_out_of_memory = -1,//å†…å­˜ä¸è¶³
+		err_cannot_read_file = -2,//æ— æ³•è¯»å–æ–‡ä»¶
+		err_inval_path = -3,//æ— æ•ˆè·¯åŠ²
+		err_cannot_open_file = -4,//æ— æ³•æ‰“å¼€æ–‡ä»¶
+		err_cannot_write_file = -5,//æ— æ³•å†™å…¥
+		err_inval_para = -6,//å‚æ•°é”™è¯¯
+		err_invaild_memory_access = -7,//å†…å­˜è®¿é—®é”™è¯¯
+		//æ–‡æœ¬æ¨¡å—
+		err_txt_part_error = -100,//æ–‡æœ¬éƒ¨åˆ†å¼‚å¸¸
+		err_conf_tran_error = -101,//é…ç½®æ–‡ä»¶éƒ¨åˆ†è½¬åŒ–å¼‚å¸¸
+		err_conf_get_null= -102,//æ²¡æœ‰è¯¥é…ç½®å‚æ•°
+		//å›¾åƒæ¨¡å—
+		err_sensor_open = -200,//å¯åŠ¨å¼‚å¸¸
+		err_sensor_close = -201,//å…³é—­å¼‚å¸¸
+		err_sensor_set = -202,//è®¾ç½®å¼‚å¸¸
+		err_sensor_catch = -203,//æ‹æ‘„å¼‚å¸¸
+		err_JPG_encode = -204,//jpgè½¬æ¢å¼‚å¸¸
+		err_Inval_image = -205,//æ— æ•ˆçš„å›¾åƒæ•°æ®
+		err_binaryzation_aim_null = -206,//äºŒå€¼åŒ–ç›®æ ‡ä¸¢å¤±
+		err_binaryzation_process = -207,//äºŒå€¼åŒ–å¤„ç†å¼‚å¸¸
+		err_Image_filter = -208,//å›¾åƒç­›é€‰å¼‚å¸¸
+		err_diff_cal = -209,//åå·®è®¡ç®—å¼‚å¸¸
+		err_Image_type_undefined = -210,//å›¾åƒç±»å‹æœªå®šä¹‰
+		err_Image_type_unsupported = -211,//ä¸æ”¯æŒçš„å›¾åƒ
+		err_Image_bound_beyond_region_err = -212,//å›¾åƒè¾¹ç•Œé—®é¢˜ äº®ç‚¹è¾¹ç•Œå¤§äºæœ€å¤§äºè§„å®šèŒƒå›´
+		err_Image_clone_bound_err = -213,//å›¾åƒå¤åˆ¶è¾¹ç•Œé”™è¯¯
 
-		err_sensor_set_get_conf=-214,//ÎŞ·¨»ñÈ¡ÉèÖÃĞÅÏ¢
-		err_sensor_set_set_conf=-215,//ÎŞ·¨ÉèÖÃÍ¼ÏñĞÅÏ¢
-		err_sensor_set_err_par=-216,//ÉèÖÃ²ÎÊı´íÎó
-		//Êı¾İ´«Êä
-		err_port_send = -300,//·¢ËÍÊı¾İÒì³£
-		err_port_rec = -301,//½ÓÊÕÊı¾İÒì³£
-		//Ê±¼ä
-		err_tim_sync = -400 ,//Ê±¼äÍ¬²½Òì³£
-		err_tim_analysis_error = -401,//Ê±¼ä½âÎöÒì³£
-		err_tim_obt = -402,//Ê±¼ä»ñÈ¡Òì³£
-		err_dly_long = -403,//ÑÓÊ±¹ı³¤
-		err_dly_short = -404,//ÑÓÊ±²»×ã
-		err_tim_analysis_not_support = -405,//¸Ã½âÎö·½Ê½²»Ö§³Ö
-		err_tim_set_outOfRange = -406,//³¬³ö¿ÉÉèÖÃ·¶Î§
-		err_tim_set_error = -407,//Ê±¼äÉèÖÃ³ö´í
-		err_tim_tm_transfer_error=-408,//×Ö·û´®×ªstruct tm´íÎó
-		err_tim_data_error=-409,//²»ÕıÈ·µÄÊ±¼äÊı¾İ
-		err_cre_today_saved=-410,//½ñÈÕµÄCREÊı¾İÒÑ¾­²É¼¯Íê±Ï
-		err_cre_get_NAN=-411,//¼ÆËãµÄcreÊı¾İÖĞº¬ÓĞnanÖµ
-		//ÔËÓª±í
-		err_tab_cal = -500,//ÔËÓª±í¼ÆËãÒì³£
-		//Ğ£Õı
+		err_sensor_set_get_conf=-214,//æ— æ³•è·å–è®¾ç½®ä¿¡æ¯
+		err_sensor_set_set_conf=-215,//æ— æ³•è®¾ç½®å›¾åƒä¿¡æ¯
+		err_sensor_set_err_par=-216,//è®¾ç½®å‚æ•°é”™è¯¯
+		//æ•°æ®ä¼ è¾“
+		err_port_send = -300,//å‘é€æ•°æ®å¼‚å¸¸
+		err_port_rec = -301,//æ¥æ”¶æ•°æ®å¼‚å¸¸
+		//æ—¶é—´
+		err_tim_sync = -400 ,//æ—¶é—´åŒæ­¥å¼‚å¸¸
+		err_tim_analysis_error = -401,//æ—¶é—´è§£æå¼‚å¸¸
+		err_tim_obt = -402,//æ—¶é—´è·å–å¼‚å¸¸
+		err_dly_long = -403,//å»¶æ—¶è¿‡é•¿
+		err_dly_short = -404,//å»¶æ—¶ä¸è¶³
+		err_tim_analysis_not_support = -405,//è¯¥è§£ææ–¹å¼ä¸æ”¯æŒ
+		err_tim_set_outOfRange = -406,//è¶…å‡ºå¯è®¾ç½®èŒƒå›´
+		err_tim_set_error = -407,//æ—¶é—´è®¾ç½®å‡ºé”™
+		err_tim_tm_transfer_error=-408,//å­—ç¬¦ä¸²è½¬struct tmé”™è¯¯
+		err_tim_data_error=-409,//ä¸æ­£ç¡®çš„æ—¶é—´æ•°æ®
+		err_cre_today_saved=-410,//ä»Šæ—¥çš„CREæ•°æ®å·²ç»é‡‡é›†å®Œæ¯•
+		err_cre_get_NAN=-411,//è®¡ç®—çš„creæ•°æ®ä¸­å«æœ‰nanå€¼
+		//è¿è¥è¡¨
+		err_tab_cal = -500,//è¿è¥è¡¨è®¡ç®—å¼‚å¸¸
+		//æ ¡æ­£
 		err_data_filter_day_break = -600,
 		err_data_filter_NULL_RES = -601,
-		//¶¨ÈÕ¾µ
-		err_Heli_not_ready = -700,//¶¨ÈÕ¾µÎ´×¼±¸Íê³É
-		//ÆäËû
-		err_UNKNOWN = -10000,//Î´Öª´íÎó
+		//å®šæ—¥é•œ
+		err_Heli_not_ready = -700,//å®šæ—¥é•œæœªå‡†å¤‡å®Œæˆ
+		//mdc.exeå¯åŠ¨å å°šæœªæ‹æ‘„å›¾åƒ
+		err_No_err_before_cap = -800,	
+		//å…¶ä»–
+		err_UNKNOWN = -10000,//æœªçŸ¥é”™è¯¯
 	};
 
 

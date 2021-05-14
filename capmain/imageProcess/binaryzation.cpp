@@ -55,7 +55,8 @@ void RGB888_2_565(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 }
 
 
-#ifndef CORTEX
+//#ifndef CORTEX
+#if 0
 void RGB565GRAY(uint16_t * srcdata, uint8_t *dst, size_t pixCount)
 {
 	const unsigned int RGB565_RED = 0xf800;
@@ -221,7 +222,8 @@ void neon_test(uint8_t * srcdata, uint8_t *dst, size_t pixCount)
 }
 
 
-#ifndef CORTEX
+//#ifndef CORTEX
+#if 0
 void fastbinaryzation(unsigned char * src, int thres, int insize)
 {
 	if (insize % 4 == 0)
@@ -340,7 +342,8 @@ void fastbinaryzation(unsigned char * src, int thres, int insize)
 #endif
 
 
-#ifndef CORTEX
+//#ifndef CORTEX
+#if 0
 unsigned int getMaxVal(unsigned char * src,size_t sz)
 {
 	unsigned char * max;
@@ -427,7 +430,8 @@ unsigned int getMaxVal(vector<uint8_t> &testArray)
 
 #define RANGE_LIMIT(x) (x > 255 ? 255 : (x < 0 ? 0 : x))
 
-#ifndef CORTEX
+//#ifndef CORTEX
+#if 0
 void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 {
 	int rows, cols;
@@ -463,7 +467,8 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 {
 	unsigned char *yuv_buf;
 	unsigned char *rgb_buf;
-
+	
+	//printf("--------------------in YUV422ToRGB565  1-------------------\n");
 	yuv_buf = (unsigned char *)inbuf;
 	rgb_buf = (unsigned char *)outbuf;
 
@@ -474,8 +479,9 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 	int16_t dat[4] = { 88,198,103,183 };
 
 	int16x4_t const_dat = vld1_s16(dat);
-	
+	//printf("--------------------in YUV422ToRGB565  2-------------------\n");
 	for (int pos = 0; pos < ((height * width / 2 /8) &(~127)); pos++) {
+
 		uint8x8x4_t yuv = vld4_u8(yuv_buf);
 
 		int16x8_t y0 = vreinterpretq_s16_u16(vmovl_u8(yuv.val[0]));
@@ -522,6 +528,8 @@ void YUV422ToRGB565(const void* inbuf, void* outbuf, int width, int height)
 		yuv_buf += 32;
 		rgb_buf += 32;
 	}
+
+	//printf("--------------------out YUV422ToRGB565-------------------\n");
 }
 
 void YUV422ToRGB888(const void* inbuf, void* outbuf, int width, int height)

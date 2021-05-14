@@ -2,6 +2,9 @@
 #define __JDCOMhead__h____
 
 
+
+
+
 #include <mutex>
 #include <sys/time.h>
 #include <vector>
@@ -114,7 +117,7 @@ struct JD_INFO
 };
 
 struct JD_INFO_TIM : public JD_INFO {
-
+	/*
 	char dbg_shm_ret_printf = 0;
 	char dbg_tim_rec_printf = 0;
 	char dbg_cre_printf = 0;
@@ -124,6 +127,7 @@ struct JD_INFO_TIM : public JD_INFO {
 	int error_debug_flag = 0;
 	//enable time diff && time set
 	int time_diff_max = 20;
+	*/
 };
 
 
@@ -138,8 +142,8 @@ int JD_send(JD_INFO & jif, JD_FRAME & jfr);
 
 void disp_x_buff(FILE * fp,unsigned char * buff, int num);
 void disp_x_buff(unsigned char * buff, int num);
-
-int JD_run_poll(JD_INFO& jif, int TimeOutMS, PROTOCOL_TYPE typ);
+//int JD_run_poll(JD_INFO& jif, int TimeOutMS, PROTOCOL_TYPE typ);
+int JD_run_poll(JD_INFO& jif, int TimeOutMS);
 
 //register or unregister method for jd callback
 void JD_pro_ctl(JD_INFO & jif, int cmd, JD_INFO::JD_PRO profun, int ctl);
@@ -147,5 +151,8 @@ void JD_pro_ctl(JD_INFO & jif, int cmd, JD_INFO::JD_PRO profun, int ctl);
 int JD_Name_transfer(const unsigned char * input, char * outbuff,int InMaxSz);
 
 int UARTX_Init(char *, int baudrate, int fctl, int databit, int stopbit, int parity);
+
+
+
 
 #endif

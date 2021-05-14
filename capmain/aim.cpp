@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -19,15 +18,14 @@
 #include <regex>
 #include <sys/prctl.h>
 #include "camera.h"
-//#include "communicate.h"
-#include "errHandle/errHandle.h"
 #include <jd_share.h>
-#include <iostream>
-#include <math.h>
 #include "timeTableV2.h"
+#include <SN1V2_error.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 using namespace std;
-
 
 struct MAIN_CMD {
 	const char * cmd_name;
@@ -90,15 +88,21 @@ static int coredump(int argc, char * argv[])
 	return 0;
 }
 
-ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
-	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
-	, const int horFlip, const int VerFlip
-);
+//ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+//	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
+//	, const int horFlip, const int VerFlip
+//);
 
-ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
-	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
-	, const int horFlip, const int VerFlip
-);
+//ERR_STA ImageCap(const char * dstPath, int width, int height, PROCESS_RESULT & res, int thres, float thresPer
+//	, bool ORGjpgSaveFlag, bool BINjpgSaveFlag, unsigned int MinCntCrp, const unsigned int gain, const unsigned int expo
+//	, const int horFlip, const int VerFlip
+//);
+
+//  cd /mnt/jaffs/user/
+//  ./aim.exe capOnce SCG.txt 100 100
+//  查看/mnt/jaffs/user/capOnce/ 下的图片
+
+extern void camera_free(void);
 static int capOnce(int argc, char * argv[])
 {
 	cout << "table generate" << endl;
@@ -143,8 +147,11 @@ static int capOnce(int argc, char * argv[])
 			cfg.FLAG_SAVE_ORG = 1;
 		}
 		
-		capWork dw(capOnce, cfg, nullptr, testCSC, &ImageCap);
+		//capWork dw(capOnce, cfg, nullptr, testCSC, &ImageCapRGB);
+		capWork dw(capOnce, cfg, nullptr, testCSC);
 		dw.test_for_cap_once = 1;
+
+		
 
 		//sleep(5);
 		int logflg = argc >= 6 ? 1 : 0;
@@ -156,6 +163,7 @@ static int capOnce(int argc, char * argv[])
 			dw.work(ts, 0);
 		} while (logflg);
 	}
+	camera_free();
 	return 0;
 }
 
@@ -238,10 +246,92 @@ bool checkNoMdc(int argc, char * argv[])
 	return false;
 }
 
+void deletesn1File(int days)
+{
+	char deletesn1File_cmd[256] = {0};
+	bool deletesn1Flag = false;
 
+	char *p;
+	char *delims={"_"};
+
+	DIR *pDir = NULL;
+	struct dirent* pEnt = NULL;
+
+	time_t now = time(0);
+	tm tm_now,tm_old; 
+	localtime_r(&now, &tm_now);
+//	int year = tm_now.tm_year + 1900;
+//	int mon = tm_now.tm_mon + 1;
+//	int day = tm_now.tm_mday;
+
+	pDir = opendir("/mnt/jaffs/user/");
+	if(pDir == NULL)
+	{
+		printf("opendir error\n");
+		return;	
+	}
+	
+	while(true)
+	{
+		pEnt = readdir(pDir);
+		if(pEnt != NULL)
+		{
+			memset(deletesn1File_cmd, 0, 256);
+			sprintf(deletesn1File_cmd, "rm -rf ./%s", pEnt->d_name);
+			p = strtok(pEnt->d_name, delims);
+			if(p != NULL && atoi(p)>=2020 && atoi(p)<=2050)
+			{
+				tm_old.tm_year = atoi(p);
+				p = strtok(NULL,delims);
+				if(p != NULL)
+				{
+					tm_old.tm_mon = atoi(p);
+					p = strtok(NULL, delims);
+					if(p != NULL)
+					{
+						tm_old.tm_mday = atoi(p);
+						deletesn1Flag = true;
+					}
+				}
+			}				
+			
+			if(deletesn1Flag){
+				//判断时间是否超过
+				tm_old.tm_year -= 1900;
+				tm_old.tm_mon -= 1;
+				tm_old.tm_hour = 0;
+				tm_old.tm_min = 0;
+				tm_old.tm_sec = 0;
+				time_t old = mktime(&tm_old);
+				//printf("now = %ld, old = %ld, year = %d, mon=%d, day = %d\n",now, old, tm_old.tm_year, tm_old.tm_mon, tm_old.tm_mday);
+				//printf("differ = %ld dayTime = %d, days = %d\n", now-old, days*3600, days);
+				if((now-old) > days*3600*24)// 保留days天内容
+				{
+					printf("---------------------------\n");
+					printf("delete = %s\n", deletesn1File_cmd);
+					system("rm -rf capOnce");
+					system(deletesn1File_cmd);
+					printf("differ = %ld dayTime = %d\n", now-old, days*3600*24);
+					printf("+++++++++++++++++++++++++++\n");
+				}
+				deletesn1Flag = false;
+			}
+		}else
+		{
+			break;
+		}
+	}
+
+	return;
+}
+
+
+double cap_cnt;
 int tableGenerate2(int argc, char * argv[])
 {
 	cout << "table generate" << endl;
+
+	cap_cnt = 0;
 
 	bool NoMdcFlag = checkNoMdc(argc, argv);
 
@@ -260,7 +350,7 @@ int tableGenerate2(int argc, char * argv[])
 		logInit("aim", "./aim", google::GLOG_ERROR);
 
 		my_cap_init(cfg.gain, cfg.expo, cfg.isHorisFlip, cfg.isVeriFlip);
-		time_t now = time(0);
+		time_t now = time(0);    //time(0)返回的是系统的时间（从1970.1.1午夜算起），单位：秒
 		tm t2;
 
 		localtime_r(&now, &t2);
@@ -282,8 +372,10 @@ int tableGenerate2(int argc, char * argv[])
 		snprintf(storPath, sizeof(storPath), "%04d_%02d_%02d", year, mon, day);
 		mkdir(storPath, 0777);
 
+		//删除历史sn1采集图像数据-----dms----20210513
+		deletesn1File(cfg.sn1_store_days);
+				
 		//照片存储目录
-
 		char photoPath[128];
 		if (strlen(cfg.ForceSavePath)) {
 			SN1V2_ERR_LOG("force save jpeg in %s\n", cfg.ForceSavePath);
@@ -295,14 +387,16 @@ int tableGenerate2(int argc, char * argv[])
 			mkdir(photoPath, 0777);
 		} else {
 			strcpy(photoPath, storPath);
+			SN1V2_ERR_LOG("normal save jpeg in %s\n", photoPath);
 		}
 
 		//获取cre
 		const char * crePath = "PES.sn";
+		const char * creBKPath = "bkPES.sn";
 		auto creDataGrp = initCre(crePath);
 		if (false == ChkTodayCre(*creDataGrp)) {
 			CREOBJ  creData = GetNewCre(*creDataGrp);
-
+					
 			vector	<timTableSet> timeset;
 			char TableName[64];
 			sprintf(TableName, "%s/sh.txt", storPath);
@@ -317,6 +411,8 @@ int tableGenerate2(int argc, char * argv[])
 				, cfg.SaveTimeTable
 			)) != err_ok)
 				return ret;
+			printf("GetTableSet = %d\n", ret);
+			
 			//get shard memory
 			key_t key = getKey(SHARE_KEY_PATH, SHARE_KEY_INT);
 
@@ -325,7 +421,7 @@ int tableGenerate2(int argc, char * argv[])
 				psn1 = (SN1_SHM *)getSHM(key, sizeof(SN1_SHM));
 				cfg.SID = psn1->mdc_id_num;
 			}
-			//修剪时间表
+			//修剪时间表(根据当前时间计算需要执行拍照的个数)
 			RmTimeTableForTimeNotSuit(timeset, cfg.limitHourBeforeNoon, cfg.limitHourAfterNoon);
 
 			char resName[64];
@@ -340,7 +436,8 @@ int tableGenerate2(int argc, char * argv[])
 					cfg.af_size++;
 			}
 			//拍摄
-			capWork dw(photoPath, cfg, psn1, resName, &ImageCapRGB);
+			//capWork dw(photoPath, cfg, psn1, resName, &ImageCapRGB);
+			capWork dw(photoPath, cfg, psn1, resName);
 			__attribute__((unused)) int sz = timTableWorkWithReserveTime(timeset, dw, cfg.max_reserve_time);
 
 			//过滤res数据
@@ -356,6 +453,8 @@ int tableGenerate2(int argc, char * argv[])
 					creDataGrp->push_back(creData);
 					//导出文本
 					save_cre(crePath, *creDataGrp, cfg.SID);
+					//CRE数据备份----------dms-----20210513
+					save_cre(creBKPath, *creDataGrp, cfg.SID);
 				} else {
 					SN1V2_WARN_LOG("CalCre ret = %d\n", ret);
 				}
@@ -384,6 +483,189 @@ int tableGenerate2(int argc, char * argv[])
 	}
 	return 0;
 }
+
+void deleteFile(int days,char* sn3Path)
+{
+	char creatFile_cmd[256] = {0};
+	char deleteFile_cmd[256] = {0};
+	bool deleteFlag = false;
+
+	char *p;
+	char *delims={"_"};
+
+	DIR *pDir = NULL;
+	struct dirent* pEnt = NULL;
+
+	time_t now = time(0);
+	tm tm_now,tm_old; 
+	localtime_r(&now, &tm_now);
+	int year = tm_now.tm_year + 1900;
+	int mon = tm_now.tm_mon + 1;
+	int day = tm_now.tm_mday;
+
+	sprintf(sn3Path, "./sn3/%04d_%02d_%02d", year, mon, day);
+	sprintf(creatFile_cmd,"mkdir sn3/%04d_%02d_%02d", year, mon, day);
+	system(creatFile_cmd);
+	logInit("sn3", sn3Path, google::GLOG_INFO);
+	system("rm /home/root/user/sn3/*"); //历史遗留问题，删除不必要的文件
+	pDir = opendir("/home/root/user/sn3");
+	if(pDir == NULL)
+	{
+		printf("opendir error\n");
+		return;	
+	}
+	
+	while(true)
+	{
+		pEnt = readdir(pDir);
+		if(pEnt != NULL)
+		{
+			memset(deleteFile_cmd, 0, 256);
+			sprintf(deleteFile_cmd, "rm -rf ./sn3/%s", pEnt->d_name);
+			p = strtok(pEnt->d_name, delims);
+			if(p != NULL)
+			{
+				tm_old.tm_year = atoi(p);
+				p = strtok(NULL,delims);
+				if(p != NULL)
+				{
+					tm_old.tm_mon = atoi(p);
+					p = strtok(NULL, delims);
+					if(p != NULL)
+					{
+						tm_old.tm_mday = atoi(p);
+						deleteFlag = true;
+					}
+				}
+			}
+				
+			
+			if(deleteFlag){
+				//判断时间是否超过
+				tm_old.tm_year -= 1900;
+				tm_old.tm_mon -= 1;
+				tm_old.tm_hour = 0;
+				tm_old.tm_min = 0;
+				tm_old.tm_sec = 0;
+				time_t old = mktime(&tm_old);
+				//printf("now = %ld, old = %ld, year = %d, mon=%d, day = %d\n",now, old, tm_old.tm_year, tm_old.tm_mon, tm_old.tm_mday);
+				//printf("differ = %ld dayTime = %d, days = %d\n", now-old, days*3600, days);
+				if((now-old) > days*3600*24)// 保留days天内容
+				{
+					printf("---------------------------\n");
+					printf("delete = %s\n", deleteFile_cmd);
+					system("rm -rf capOnce");
+					system(deleteFile_cmd);
+					printf("differ = %ld dayTime = %d\n", now-old, days*3600*24);
+					printf("+++++++++++++++++++++++++++\n");
+				}
+				deleteFlag = false;
+			}
+		}else
+		{
+			break;
+		}
+	}
+
+	return;
+}
+
+int sn3_process(int argc, char * argv[])
+{
+	cout << "SN3 process" << endl;
+
+	if (argc >= 3) {
+		//init cfg
+		char nowPath[32];
+		getcwd(nowPath, 32);
+
+		ERR_STA err;
+		char * configName = argv[2];
+		cout << "ConfName = " << configName << endl;
+
+		SN1_CFG cfg;
+		if ((err = getConf(configName, &cfg, 0)) != err_ok) {
+			cout << "error config" << endl;
+			return err;
+		}
+
+		cfg.gain = cfg.sn3_gain;
+		cfg.expo = cfg.sn3_expose;
+		
+		printf("gain is %d , expo is %d\n", cfg.gain, cfg.expo);
+
+		if (strlen(cfg.ForceSavePath)) {
+			mkdir(cfg.ForceSavePath, 0777);
+			chdir(cfg.ForceSavePath);
+			cfg.FLAG_SAVE_ORG = 1;
+			cfg.FLAG_SAVE_BIN = 1;
+		} else {
+			chdir("/home/root/user/");
+		}
+
+		//logInit("sn3", "./sn3", google::GLOG_INFO);
+
+		if (ChkifCMD(argc, argv, "-ORG")) {
+			cfg.FLAG_SAVE_ORG = 1;
+		}
+		if (ChkifCMD(argc, argv, "-BIN")) {
+			cfg.FLAG_SAVE_BIN = 1;
+		}
+
+		//system("rm /tmp/sn3 -rf");
+		system("mkdir sn3");
+	//	char  aimPath[] = "./sn3";
+		char aimPath[24];
+		deleteFile(2,aimPath);
+		printf("aimPath = %s\n", aimPath);
+
+		my_cap_init(cfg.gain, cfg.expo, cfg.isHorisFlip, cfg.isVeriFlip);
+		sleep(5);
+		PROCESS_RESULT pro;
+		if (err_ok != (err = ImageCap(aimPath
+			, cfg.IMG_WIDTH, cfg.IMG_HEIGTH, pro
+			, cfg.thres, cfg.thresPer
+			, cfg.FLAG_SAVE_ORG, cfg.FLAG_SAVE_BIN, cfg.MinCntGrp
+			, cfg.gain, cfg.expo
+			, cfg.isHorisFlip, cfg.isVeriFlip
+		))) {
+			SN1V2_ERR_LOG("cap error,error code = %d\n", err);
+			return err;
+		}
+		double ang_x = atan2(pro.diff_x * cfg.SPS, cfg.SFL) * 180.0f / M_PI;
+		double ang_y = atan2(pro.diff_y * cfg.SPS, cfg.SFL) * 180.0f / M_PI;
+
+		SN1V2_WARN_LOG("diff x = %lf,diff y = %lf\n", pro.diff_x + 1920 / 2, pro.diff_y + 1080 / 2);
+		SN1V2_WARN_LOG("diff x = %lf,diff y = %lf\n", ang_x, ang_y);
+
+		char buff[256];
+
+		time_t now = time(0);
+		tm nowtm;
+		localtime_r(&now, &nowtm);
+		//char orgCre[512];
+
+		sprintf(buff, "%d-%d-%d,%f,%f,%d,%.6f,%.6f,0,0,0,0,0,0,0,0,0,SN1_003,0"
+			, nowtm.tm_year + 1900, nowtm.tm_mon + 1, nowtm.tm_mday
+			, pro.diff_y, pro.diff_x, pro.pixCnt
+			, ang_y, ang_x
+		);
+
+		char buff2[256];
+		sprintf(buff2, "echo '%s' > %s/PES.sn", buff, nowPath);
+		cout << "system :" << buff2 << endl;
+		SN1V2_WARN_LOG(buff2);
+		system(buff2);
+	}
+	return 0;
+}
+
+
+
+
+
+
+
 
 int test_converter(int argc, char * argv[])
 {
@@ -546,10 +828,16 @@ int processTest(int argc, char *argv[]);
 int processTest2(int argc, char *argv[]);
 int testsunpos(int argc, char *argv[]);
 int createTabletest(int argc, char *argv[]);
-
+//int tableGenerate2(int argc, char * argv[]);
 int tableGenerate3(int argc, char *argv[]);
 int getidealmain(int argc, char *argv[]);
 int threadtest(int argc, char *argv[]);
+
+//int sn3_process(int argc, char * argv[]);
+//int GenHeliTableMain(int argc, char *argv[]);
+
+//int cameratest(int argc, char *argv[]);
+
 MAIN_CMD cmd_group[] = {
 	{ "RTF", rtf_test },
 	{ "CPPREG", cppReg },
@@ -571,11 +859,14 @@ MAIN_CMD cmd_group[] = {
 	{ "getidealmain", getidealmain },
 	{ "thread", threadtest },
 	{ "crctest", crctest },
+	{ "sn3", sn3_process },
+//	{ "GenHeliTable", GenHeliTableMain },
+//	{ "cameratest", cameratest },
 };
 
 int main(int argc, char *argv[])
 {
-	prctl(PR_SET_NAME, "main service");
+	prctl(PR_SET_NAME, "aim.exe");
 
 	if (argc < 2) {
 		cout << "test par error" << endl;

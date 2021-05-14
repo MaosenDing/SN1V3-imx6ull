@@ -16,6 +16,7 @@ struct jdsvc_par_get :public JDAUTOSEND {
 
 	void trig_cpl(JD_INFO & injif, JD_FRAME & jfr)
 	{
+		printf("jdsvc_par_get -----------trig_cpl\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		int getIndex = findMdc_addr(jif, jfr.jd_aim.value);
 
@@ -73,6 +74,7 @@ struct jdsvc_par_get :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & injif)final
 	{
+		printf("jdsvc_par_get -----------service_pro\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		int using_index = getUncpl(jif);
 
@@ -84,7 +86,7 @@ struct jdsvc_par_get :public JDAUTOSEND {
 		JD_FRAME jfr;
 
 
-		printf("parget using %d ,cnt = %d\n", using_index, aim.retry_num);
+		//printf("parget using %d ,cnt = %d\n", using_index, aim.retry_num);
 
 		jfr.jd_aim.value = jif.mdcCtrl[using_index].addr;
 
@@ -106,6 +108,7 @@ JDAUTOSEND * jdsvc_par_gets()
 }
 int JD_parget_rec(JD_INFO & jif, JD_FRAME & jfr)
 {
+	printf("jdsvc_par_get -----------JD_parget_rec\n");
 	__attribute__((unused)) JD_INFO_TIM & jit = (JD_INFO_TIM &)jif;
 
 	jsvc.trig_cpl(jif, jfr);

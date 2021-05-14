@@ -86,8 +86,10 @@ SCANF_DATA real_scan_file(const char * fil)
 
 void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 {
+	//printf("merge_data 00000000\n");
 	//dat.mod
 	if (GetInfo("mod").dataStatus == dataFromTable) {
+		//printf("merge_data 000111111\n");
 		//手动
 		printf("mod %d\n", dat.mod);
 		if (dat.mod == mdc_mode_manual) {
@@ -117,15 +119,19 @@ void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 		}
 	} else {
 		pjif->work_mod = mdc_mode_table;
+		//printf("work_mod = mdc_mode_table\n");
 	}
 	//校正
 	if (GetInfo("correct0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].correct.trig_set(dat.correct0);
+		printf("correct0 ok\n");
 	}
+	
 	if (GetInfo("correct1").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[1].correct.trig_set(dat.correct1);
+		//printf("correct1 0001444444\n");
 	}
-
+	
 
 	for (auto & aim : pjif->mdcCtrl) {
 		aim.par.setflg = 0;
@@ -133,19 +139,23 @@ void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 			aim.parget.retry_num = 0;
 		}
 	}
-
+	//printf("merge_data 000555555\n");
 	//参数设置
 	if (GetInfo("initspeed0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].correct.trig_set(dat.initspeed0);
+		//printf("initspeed0 0001444444\n");
 	}
 	if (GetInfo("initspeed1").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[1].correct.trig_set(dat.initspeed1);
+		//printf("initspeed1 0001444444\n");
 	}
 	if (GetInfo("maxspeed0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].correct.trig_set(dat.maxspeed0);
+		//printf("maxspeed0 0001444444\n");
 	}
 	if (GetInfo("maxspeed1").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[1].correct.trig_set(dat.maxspeed1);
+		//printf("maxspeed1 0001444444\n");
 	}
 
 	if (GetInfo("phase0").dataStatus == dataFromTable) {
@@ -176,9 +186,11 @@ void merge_data(MDC_INFO * pjif, SCANF_DATA & dat)
 		pjif->mdcCtrl[1].correct.trig_set(dat.ratio1);
 	}
 	//参数查询
-	printf("type = %d\n", GetInfo("getpar0").dataStatus);
+	//printf("type = %d 为0时表示数据未初始化\n", GetInfo("getpar0").dataStatus);
+
 	if (GetInfo("getpar0").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[0].parget.trig_get();
+		//printf("getpar0 0001444444\n");
 	}
 	if (GetInfo("getpar1").dataStatus == dataFromTable) {
 		pjif->mdcCtrl[1].parget.trig_get();

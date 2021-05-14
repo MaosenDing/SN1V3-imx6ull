@@ -13,7 +13,7 @@ using namespace std;
 #define BINEND(bin) _binary_##bin##_end
 
 #define CLEAN_ALL_LOG 1
-#define CLEAN_CRE 0
+#define CLEAN_CRE 1
 
 
 void writebin(const char * filename, const char buff[], int size)
@@ -47,7 +47,7 @@ void cplibjd()
 	copyOBJ(BINSTAET(libcomlib_so),
 		BINEND(libcomlib_so),
 		(int)BINSIZE(libcomlib_so),
-		"/mnt/jaffs/lib/libcomlib.so"
+		"/mnt/jaffs/user/libcomlib.so"
 	);
 }
 ADD_JD_SERVICE(cplibjd);
@@ -92,6 +92,7 @@ void cpaim()
 }
 ADD_JD_SERVICE(cpaim);
 
+/*
 void cpwifictrl()
 {
 	extern char BINEND(wifictrl_exe)[];
@@ -104,7 +105,7 @@ void cpwifictrl()
 	);
 }
 ADD_JD_SERVICE(cpwifictrl);
-
+*/
 #endif
 
 
@@ -112,6 +113,15 @@ ADD_JD_SERVICE(cpwifictrl);
 #ifdef SCG
 void cpscg()
 {
+	extern char BINEND(SCG_txt)[];
+	extern char BINSIZE(SCG_txt)[];
+	extern char BINSTAET(SCG_txt)[];
+	copyOBJ(BINSTAET(SCG_txt),
+		BINEND(SCG_txt),
+		(int)BINSIZE(SCG_txt),
+		"/mnt/jaffs/user/SCG.txt"
+	);
+
 	extern char BINEND(T1_txt)[];
 	extern char BINSIZE(T1_txt)[];
 	extern char BINSTAET(T1_txt)[];
@@ -159,6 +169,7 @@ void cpscg()
 		(int)BINSIZE(T6_txt),
 		"/mnt/jaffs/user/T6.txt"
 	);
+
 }
 ADD_JD_SERVICE(cpscg);
 #endif
@@ -201,6 +212,7 @@ int main()
 	cout << "main ppp " << endl;
 #if CLEAN_CRE > 0
 	//clean pes.sn
+	//system("echo '' > /mnt/jaffs/user/PES.sn");
 	system("echo '' > /mnt/jaffs/user/PES.sn");
 #endif
 
@@ -209,19 +221,27 @@ int main()
 	system("rm /mnt/jaffs/user/aim -rf");
 	system("rm /mnt/jaffs/user/daemon -rf");
 	system("rm /mnt/jaffs/user/mdc -rf");
-	system("rm /mnt/jaffs/user/wifi -rf");
+	//system("rm /mnt/jaffs/user/wifi -rf");
 	system("rm /mnt/jaffs/user/20* -rf\n");
 	system("rm /mnt/jaffs/user/19* -rf\n");
+	#if 0
+	system("rm /home/root/user/aim -rf");
+	system("rm /home/root/user/daemon -rf");
+	system("rm /home/root/user/mdc -rf");
+	//system("rm /home/root/wifi -rf");
+	system("rm /home/root/user/20* -rf\n");
+	system("rm /home/root/user/19* -rf\n");
+	#endif
 #endif
 	for (int i = 0; i < 3; i++) {
 		system("killall daemon.exe");
 		system("killall aim.exe");
-		system("killall wifictrl.exe");
+		//system("killall wifictrl.exe");
 		system("killall mdc.exe");
 
 		system("killall init:cap");
 		system("killall init:mdc");
-		system("killall init:wifi");
+		//system("killall init:wifi");
 		system("killall init:mdc");
 		sleep(1);
 	}
@@ -233,7 +253,7 @@ int main()
 	cpmdc();
 	cpdaemon();
 	cpaim();
-	cpwifictrl();
+//	cpwifictrl();
 #warning "using all .exe file"
 #endif
 
@@ -254,8 +274,8 @@ int main()
 		printf("sync\n");
 		sync();
 	}
-	system("/root/io jd2 0");
-	system("/root/io jd3 0");
+//	system("/root/io jd2 0");
+//	system("/root/io jd3 0");
 
 	printf("umount\n");
 	system("umount /mnt/jaffs/");

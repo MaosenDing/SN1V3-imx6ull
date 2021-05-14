@@ -756,6 +756,8 @@ ERR_STA ImageCapRGB(const char * dstPath, int width, int height, PROCESS_RESULT 
 	ERR_STA err;
 	int imgSize = width * height * 2;
 
+	printf("--------ImageCapRGB start------------\n");
+
 	try {
 		shared_ptr<unsigned char >ppp(new unsigned char[imgSize], [](unsigned char * p) {delete[] p; });
 

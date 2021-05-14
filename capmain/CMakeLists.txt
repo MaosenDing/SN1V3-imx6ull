@@ -1,7 +1,7 @@
 
 
 set(main aim.exe)
-add_executable(${main} aim.cpp processtest.cpp threadtest.cpp tmp_ctrl_method.cpp)
+add_executable(${main} aim.cpp processtest.cpp threadtest.cpp tmp_ctrl_method.cpp tableWork.cpp)
 
 target_link_libraries(${main} PRIVATE boost_thread)
 #sensor

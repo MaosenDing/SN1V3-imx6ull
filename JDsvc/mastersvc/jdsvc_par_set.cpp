@@ -122,6 +122,7 @@ struct jdsvc_par_set :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & injif)final
 	{
+		printf("jdsvc_par_set -----------service_pro\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		int using_index = getUncpl(jif);
 

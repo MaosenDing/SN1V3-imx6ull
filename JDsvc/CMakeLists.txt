@@ -6,6 +6,10 @@ timer_reflush.cpp master_frame.cpp
 mdc_txt.cpp
 autorecoder.cpp
 led_ctrl.cpp
+JD_file_cre.cpp
+JD_file_service.cpp
+JD_file_version.cpp
+JD_TransMit_img.cpp
 )
 
 

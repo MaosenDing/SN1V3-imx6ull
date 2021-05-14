@@ -60,7 +60,7 @@ static shared_ptr<WIFI_BASE_SESSION> exec_wifi_tim(WIFI_INFO & wifi, int maxMS)
 	return shared_ptr<WIFI_BASE_SESSION>();
 }
 
-
+#if 0
 static void tmktime(tm & NowTm, unsigned char *pdata)
 {
 	NowTm.tm_year = (int)pdata[0] + 100;
@@ -71,6 +71,8 @@ static void tmktime(tm & NowTm, unsigned char *pdata)
 	NowTm.tm_min = (int)pdata[4];
 	NowTm.tm_sec = (int)pdata[5];
 }
+#endif // 0
+
 
 int get_wifi_tim(WIFI_INFO & wifi)
 {

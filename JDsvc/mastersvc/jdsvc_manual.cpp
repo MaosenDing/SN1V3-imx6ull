@@ -62,6 +62,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 
 	virtual void service_pro(JD_INFO & injif)final
 	{
+		printf("jdsvc_manual -----------service_pro\n");
 		MDC_INFO& jif = (MDC_INFO &)injif;
 		int using_index = getUncpl(jif);
 
@@ -74,6 +75,7 @@ struct jdsvc_manual :public JDAUTOSEND {
 
 		float aimdeg = aim.manual_deg;
 		unsigned int tmpdeg = Angle_Convert_UShort(aimdeg);
+		
 		printf("manual using %d ,cnt = %d, deg = %f\n", using_index, aim.retry_num, aimdeg);
 
 		char databuff[3];

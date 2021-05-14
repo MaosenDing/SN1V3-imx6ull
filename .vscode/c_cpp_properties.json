@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "a53",
+            "name": "a7",
             "includePath": [
                 "${workspaceFolder}/**"
             ],
@@ -9,7 +9,7 @@
                 "CORTEX",
                 "VERSION_MDC='VERSION_MDC'"
             ],
-            "compilerPath": "/share/a53/buildroot-2020.02.3/output/host/bin/arm-buildroot-linux-gnueabihf-gcc",
+            "compilerPath": "/share/a7/buildroot-2020.02.3/output/host/bin/arm-buildroot-linux-gnueabihf-gcc",
             "cStandard": "gnu18",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "gcc-arm64",

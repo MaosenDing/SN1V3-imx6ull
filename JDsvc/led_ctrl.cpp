@@ -37,8 +37,8 @@ void led_init()
 {
 	//system("/mnt/jaffs/user/io.sh led1 0");
 	//system("/mnt/jaffs/user/io.sh led2 0");
-	system("/home/root/io.sh led1 0");
-	system("/home/root/io.sh led2 0");
+	//system("/home/root/io.sh led1 0");
+	//system("/home/root/io.sh led2 0");
 }
 
 

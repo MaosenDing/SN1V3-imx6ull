@@ -415,8 +415,26 @@ ERR_STA getConf(const char * configName
 
 	if ((err = SDG("SST", cfg->expo)) != err_ok)
 		return err;
-
 	if (showflag) cout << "SST=" << cfg->expo << endl;
+	//图像翻转类型设置
+	if ((err = SDG("OVR", cfg->overturn)) != err_ok)
+		return err;
+	if (showflag) cout << "OVR=" << cfg->overturn << endl;
+
+	//sn1采集数据保存天数----dms--20210513
+	if (SDG("SDN", cfg->sn1_store_days) != err_ok) {
+		cfg->sn1_store_days = 5;
+	}
+//	if (showflag) cout << "SDN=" << cfg->sn1_store_days << endl;
+		
+	//sn3 设备参数
+	if (SDG("NGV", cfg->sn3_gain) != err_ok) {
+		cfg->sn3_gain = cfg->gain;
+	}
+
+	if (SDG("NST", cfg->sn3_expose) != err_ok) {
+		cfg->sn3_expose = cfg->expo;
+	}
 
 	//水平翻转
 	if ((err = SDG("SHF", flag)) != err_ok) {

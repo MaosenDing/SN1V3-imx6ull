@@ -78,6 +78,7 @@ bool timeChk(shared_ptr < vector<RESOBJ>>retlist, const SN1_CFG * const pcfg)
 	if (pcfg) {
 		SN1V2_ERR_LOG("aim thres before,%f,after,%f\n", pcfg->bfnoon_thres, pcfg->afnoon_thres);
 		SN1V2_ERR_LOG("cap size before,%d,after,%d\n", bfnoon, afnoon);
+		//SN1V2_ERR_LOG("aim size before,%d,after,%d\n", 2069, 1996);
 		SN1V2_ERR_LOG("aim size before,%d,after,%d\n", pcfg->bf_size, pcfg->af_size);
 
 		if ((bfnoon == 0) || (afnoon == 0)) {

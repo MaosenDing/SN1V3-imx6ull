@@ -11,16 +11,16 @@ extern "C" {
 		float   Lon;//经度
 		float   lati;//纬度
 		float   qualityThres;//圆度阈值
-		float   SSA;//初始角度
-		float   SHT;//定日镜调节周期
-		float   SPT;//定日镜调节前置时间
+		float   SSA;//开始太阳高度角：度
+		float   SHT;//定日镜调节周期：秒
+		float   SPT;//运营表前置时间：秒
 		float   TDT;//角度
-		float   SCH;//
-		float   TEE;//
-		float   TEP;
-		float   TET;
-		float   SFL;//焦距
-		float   SPS;//像元大小
+		float   SCH;//采集延时：秒
+		float   TEE;//海拔高度：米
+		float   TEP;//年均气压：百帕
+		float   TET;//年均气温：摄氏度
+		float   SFL;//焦距：米
+		float   SPS;//像元大小：米
 		int SID;//设备ID
 		int FLAG_SAVE_ORG;//原始图像是否保存
 		int FLAG_SAVE_BIN;//二进制图像是否保存
@@ -28,6 +28,7 @@ extern "C" {
 		int IMG_HEIGTH;//图像高度
 		unsigned int gain;//增益
 		unsigned int expo;//曝光
+		unsigned int overturn;//曝光
 
 		int isHorisFlip; //水平翻转
 		int isVeriFlip;//竖直翻转
@@ -46,9 +47,15 @@ extern "C" {
 
 		int IsSaveCre;//生成CRE 正式为1 某些测试为0
 
+		int sn1_store_days; //sn1采集数据保存天数
+		
 		//时间表的启示结束小时限制 0~24 -1表示不受限制
 		int limitHourBeforeNoon;
 		int limitHourAfterNoon;
+
+		//sn3 设备参数
+		int sn3_gain;
+		int sn3_expose;
 
 		char ForceSavePath[30];//强制保存路径
 

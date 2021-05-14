@@ -61,6 +61,7 @@ struct WIFI_FUNCTION_DOWNLOAD_UPDATE_FILE :public WIFI_FUNCTION_DOWNLOAD_FILE
 	virtual int data_finish(char * data, int len)final
 	{
 		const char * updatepath = "/tmp/update";
+		//const char * updatepath = "/home/root/";
 		if (writebin(updatepath, data, len)) {
 			signal(SIGCHLD, child_handler);
 			int pid = fork();

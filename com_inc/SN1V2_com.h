@@ -229,12 +229,12 @@
 
 	//运营表计算
 	ERR_STA SHG(int Year, int Month, int Day, int HelioAdjTime, int HelioPreTime, int StartAngle, \
-		double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double (&EPEs)[8]
+		double Longitude, double Latitude, float E, float P, float T, int Delta_T, double dTHI, double (&EPEs)[8]
 		, std::vector<timTableSet> & rts
 		);
 
 	ERR_STA SHG(int Year, int Month, int Day, char fdir[], int HelioAdjTime, int HelioPreTime, int StartAngle, \
-		double Longitude, double Latitude, int E, int P, int T, int Delta_T, double dTHI, double (&EPEs)[8]);
+		double Longitude, double Latitude, float E, float P, float T, int Delta_T, double dTHI, double (&EPEs)[8]);
 
 	//保存运营表
 	ERR_STA save_timTableSet(const char * fdir, int year, int mon, int day, std::vector<timTableSet> & rts);
