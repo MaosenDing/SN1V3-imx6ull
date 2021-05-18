@@ -1,20 +1,20 @@
 {
-    "configurations": [
-        {
-            "name": "a7",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "defines": [
-                "CORTEX",
-                "VERSION_MDC='VERSION_MDC'"
-            ],
-            "compilerPath": "/share/a7/buildroot-2020.02.3/output/host/bin/arm-buildroot-linux-gnueabihf-gcc",
-            "cStandard": "gnu18",
-            "cppStandard": "gnu++14",
-            "intelliSenseMode": "gcc-arm64",
-            "configurationProvider": "ms-vscode.cmake-tools"
-        }
-    ],
-    "version": 4
+  "configurations": [
+    {
+      "name": "linux-gcc-x64",
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "c99",
+      "cppStandard": "c++11",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerArgs": [
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic"
+      ]
+    }
+  ],
+  "version": 4
 }

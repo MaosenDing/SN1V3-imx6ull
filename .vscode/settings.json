@@ -1,12 +1,16 @@
 {
-    "files.associations": {
-        "iostream": "cpp",
-        "vector": "cpp"
-    },
-    "cmake.buildDirectory": "${workspaceFolder}/tmp",
-    "cmake.configureArgs": [
-        "-DCMAKE_TOOLCHAIN_FILE=./compiler.a53.cmake",
-    ],
-    "cmake.parallelJobs": 0,
-    "cmake.installPrefix": "/a53root",
+  "files.associations": {
+    "iostream": "cpp",
+    "vector": "cpp"
+  },
+  "cmake.buildDirectory": "${workspaceFolder}/tmp",
+  "cmake.configureArgs": [
+    "-DCMAKE_TOOLCHAIN_FILE=./compiler.a53.cmake"
+  ],
+  "cmake.parallelJobs": 0,
+  "cmake.installPrefix": "/a53root",
+  "C_Cpp_Runner.cCompilerPath": "/usr/bin/gcc",
+  "C_Cpp_Runner.cppCompilerPath": "/usr/bin/g++",
+  "C_Cpp_Runner.debuggerPath": "/usr/bin/gdb",
+  "C_Cpp_Runner.makePath": "/usr/bin/make"
 }
